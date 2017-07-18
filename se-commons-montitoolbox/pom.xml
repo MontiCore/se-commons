@@ -1,0 +1,99 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <!-- == PROJECT COORDINATES ============================================= -->
+
+  <parent>
+    <groupId>de.se_rwth.commons</groupId>
+    <artifactId>se-commons</artifactId>
+    <version>1.7.8-SNAPSHOT</version>
+  </parent>
+
+  <artifactId>se-commons-montitoolbox</artifactId>
+
+  <!-- == PROJECT METAINFORMATION ========================================= -->
+
+  <name>SE Commons: MontitoolBox</name>
+  <description>SE-Internal Common Libraries</description>
+  <url>http://www.se-rwth.de/</url>
+
+  <organization>
+    <name>Department of Software Engineering, RWTH Aachen University</name>
+    <url>http://www.se-rwth.de/</url>
+  </organization>
+
+  <!-- == PROJECT PROPERTIES ============================================== -->
+
+  <properties>
+    <compiler.plugin>3.2</compiler.plugin>
+    <java.version>1.8</java.version>
+    <se-commons.version>1.7.7</se-commons.version>
+  </properties>
+
+  <!-- == PROJECT PLUGINS ============================================== -->
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>${compiler.plugin}</version>
+        <configuration>
+          <source>${java.version}</source>
+          <target>${java.version}</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+  <!-- == PROJECT PROFILES ============================================== -->
+
+  <profiles>
+    <profile>
+      <id>default-tools.jar</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+        <property>
+          <name>java.vendor</name>
+          <value>Sun Microsystems Inc.</value>
+        </property>
+      </activation>
+      <dependencies>
+        <dependency>
+          <groupId>com.sun</groupId>
+          <artifactId>tools</artifactId>
+          <version>1.4.2</version>
+          <scope>system</scope>
+          <systemPath>${env.JAVA_HOME}/lib/tools.jar</systemPath>
+        </dependency>
+      </dependencies>
+    </profile>
+  </profiles>
+
+  <!-- == PROJECT DEPENDENCIES ============================================== -->
+
+  <dependencies>
+    <dependency>
+      <groupId>de.se_rwth.commons</groupId>
+      <artifactId>se-commons-logging</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-plugin-api</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-core</artifactId>
+    </dependency>
+  </dependencies>
+
+</project>
