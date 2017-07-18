@@ -13,7 +13,6 @@
 
   <modules>
     <module>se-commons-utilities</module>
-    <module>se-commons-reflection</module>
     <module>se-commons-groovy</module>
     <module>se-commons-logging</module>
     <module>se-commons-montitoolbox</module>
