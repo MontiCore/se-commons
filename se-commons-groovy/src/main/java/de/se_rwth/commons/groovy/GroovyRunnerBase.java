@@ -25,8 +25,6 @@ import de.se_rwth.commons.logging.Log;
  * Base implementation for Groovy runners which (also) handles unchecked
  * exceptions (e.g. NPEs) properly.
  *
- * @author (last commit) $Author$
- * @version $Revision$, $Date$
  */
 public abstract class GroovyRunnerBase implements GroovyRunner {
   
@@ -46,7 +44,7 @@ public abstract class GroovyRunnerBase implements GroovyRunner {
   
   /**
    * Performs the actual execution of the given Groovy script.
-   * 
+   *
    * @param script to execute
    * @param configuration optional
    */

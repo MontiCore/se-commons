@@ -23,9 +23,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Builds chain of responsibilities with {@link ConfigurationContributor}s as
  * chain elements.
- * 
- * @author (last commit) $Author$
- * @version $Revision$, $Date$
+ *
  */
 public final class ConfigurationContributorChainBuilder {
   

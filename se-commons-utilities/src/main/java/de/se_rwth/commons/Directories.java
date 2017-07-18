@@ -30,17 +30,15 @@ import com.google.common.io.Files;
 
 /**
  * Utility class with static methods to work with directories.
- * 
- * @author (last commit) $Author: nazari $
- * @version $Revision: 381 $, $Date: 2015-09-04 14:18:19 +0200 (Fr, 04 Sep 2015) $
- * 
+ *
+ *
  */
 public final class Directories {
   
   /**
    * Copys one file or directory into another. In case of directories, contents
    * are merged.
-   * 
+   *
    * @param source
    * @param destination
    * @throws IOException

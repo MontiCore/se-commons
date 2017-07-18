@@ -30,10 +30,8 @@ import org.junit.Test;
 
 /**
  * Unit tests for {@link Files}
- * 
- * @author (last commit) $Author$
- * @version $Revision$, $Date$
- * 
+ *
+ *
  */
 public class FilesTest {
   

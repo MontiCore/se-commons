@@ -25,8 +25,6 @@ import java.util.Optional;
 /**
  * Provides configuration values of various types for given configuration keys.
  *
- * @author (last commit) $Author$
- * @version $Revision$, $Date$
  */
 public interface Configuration {
   

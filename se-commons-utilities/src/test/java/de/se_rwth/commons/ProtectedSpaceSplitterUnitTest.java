@@ -27,10 +27,8 @@ import com.google.common.collect.Iterables;
 
 /**
  * Unit test for {@link ProtectedSpaceSplitter}.
- * 
- * @author (last commit) $Author$
- * @version $Revision$, $Date$
- * 
+ *
+ *
  */
 public class ProtectedSpaceSplitterUnitTest {
   
@@ -239,6 +237,6 @@ public class ProtectedSpaceSplitterUnitTest {
     assertThat(Iterables.get(parts, 2), is("Hello, World!"));
     assertThat(Iterables.get(parts, 3), is("."));
 
-  }  
+  }
 
 }

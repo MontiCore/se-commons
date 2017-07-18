@@ -32,8 +32,6 @@ import com.google.common.collect.ImmutableSet;
 /**
  * Provides {@link Collectors} for immutable collections.
  *
- * @author (last commit) $Author$
- * @version $Revision$, $Date$
  */
 public class ImmutableCollectors {
   

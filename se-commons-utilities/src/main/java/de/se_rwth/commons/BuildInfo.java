@@ -38,8 +38,6 @@ import com.google.common.io.Files;
 /**
  * Provides build information about the running software containing this class..
  *
- * @author (last commit) $Author$
- * @version $Revision$, $Date$
  */
 public final class BuildInfo {
 

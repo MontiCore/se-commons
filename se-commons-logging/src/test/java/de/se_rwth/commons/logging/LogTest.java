@@ -33,9 +33,7 @@ import ch.qos.logback.core.joran.spi.JoranException;
  * This is a very basic test of the new centralized logging mechanism. The main
  * purpose is to demonstrate the API (it is rather pointless to test either
  * logback or the used test configuration).
- * 
- * @author (last commit) $Author$
- * @version $Revision$, $Date: 2015-09-04 14:18:19 +0200 (Fr, 04 Sep 2015) $
+ *
  */
 public class LogTest {
   

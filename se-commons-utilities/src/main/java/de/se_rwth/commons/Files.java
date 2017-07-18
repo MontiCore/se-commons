@@ -45,10 +45,7 @@ import java.util.zip.ZipOutputStream;
 /**
  * A helper class that enables some file operations <br>
  * <br>
- * 
- * @author (last commit) $Author$
- * @version $Date$<br>
- * $Revision$
+ *
  */
 public class Files {
   
@@ -58,7 +55,7 @@ public class Files {
   
   /**
    * Creates a temporary directory.
-   * 
+   *
    * @return the temporary directory
    */
   public static File createTempDir() {
@@ -68,7 +65,7 @@ public class Files {
   /**
    * Creates a temporary directory with the given name as prefix and a number as
    * suffix.
-   * 
+   *
    * @param dirName the prefix of the directory name
    * @return the temporary directory
    */
@@ -133,7 +130,7 @@ public class Files {
   
   /**
    * Deletes the file and all its children.
-   * 
+   *
    * @param fileOrDir the file or directory to delete
    */
   public static void deleteFiles(File fileOrDir) {
@@ -147,7 +144,7 @@ public class Files {
   
   /**
    * Zips the input files in the output file.
-   * 
+   *
    * @param inputFiles the input files
    * @param pathPrefixToIgnore path prefix that should be ignored while zipping
    * the input files
@@ -199,7 +196,7 @@ public class Files {
   
   /**
    * Zips the input files in the output file but ignores ALL pathPrefixes
-   * 
+   *
    * @param inputFiles the input files
    * @param outputFile the output file
    * @return the output file
@@ -255,7 +252,7 @@ public class Files {
   
   /**
    * Unzips the input file to the output directory.
-   * 
+   *
    * @param inputFile the input file
    * @param outputDir the output directory
    * @return the list of unzipped files
@@ -317,7 +314,7 @@ public class Files {
   /**
    * unzips and returns all files from the given zip file (by creating a tmp
    * file!)
-   * 
+   *
    * @param inputZipBytes
    * @return
    * @throws IOException
@@ -353,7 +350,7 @@ public class Files {
   
   /**
    * Helper function for transforming a file into a byte array.
-   * 
+   *
    * @param file : given file
    * @return byte array
    * @throws IOException
@@ -370,7 +367,7 @@ public class Files {
   /**
    * Helper function for creating an ArrayList of a file: file is read line by
    * line
-   * 
+   *
    * @param file : input file to transform into a collection
    * @return string collection of file
    * @throws Exception
@@ -400,7 +397,7 @@ public class Files {
   
   /**
    * Reads a file an returns a list of lines.
-   * 
+   *
    * @param Inputfile f
    * @return List<String> with lines.
    */
@@ -457,7 +454,7 @@ public class Files {
   
   /**
    * Transforms a Line-List to a List of Tokens.
-   * 
+   *
    * @param List <String> LineList as input
    * @return List<String> TokenList
    */

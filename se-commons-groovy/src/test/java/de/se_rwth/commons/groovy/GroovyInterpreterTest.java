@@ -28,9 +28,7 @@ import org.junit.Test;
 
 /**
  * Test for {@link GroovyInterpreter}.
- * 
- * @author (last commit) $Author$
- * @version $Revision$, $Date$
+ *
  */
 public class GroovyInterpreterTest {
   

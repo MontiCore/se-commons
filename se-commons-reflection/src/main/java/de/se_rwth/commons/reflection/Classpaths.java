@@ -39,9 +39,6 @@ import de.se_rwth.commons.StringMatchers;
 /**
  * Static helper functions to work with the Java classpath.
  *
- * @author (last commit) $Author: antonio $
- * @version $Revision: 13097 $, $Date: 2012-08-16 06:56:24 +0200 (Do, 16 Aug
- * 2012) $
  */
 public final class Classpaths {
 

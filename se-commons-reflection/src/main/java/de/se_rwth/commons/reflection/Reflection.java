@@ -45,9 +45,6 @@ import com.google.common.collect.ImmutableSet;
  * Favor the methods that access only public methods/fields over methods that
  * access declared/all fields.
  *
- * @author (last commit) $Author: nazari $
- * @version $Revision: 381 $, $Date: 2013-05-06 15:58:51 +0200 (Mo, 06 Mai 2013)
- * $
  */
 public class Reflection {
 

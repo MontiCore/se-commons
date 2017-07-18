@@ -34,9 +34,6 @@ import com.google.common.io.Files;
 /**
  * TODO: Write me!
  *
- * @author  (last commit) $Author$
- * @version $Revision$,
- *          $Date$
  *
  */
 public class DeltaFileSetTest {

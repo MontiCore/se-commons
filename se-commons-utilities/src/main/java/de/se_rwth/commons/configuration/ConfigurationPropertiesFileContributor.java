@@ -35,9 +35,7 @@ import de.se_rwth.commons.Splitters;
 /**
  * A {@link ConfigurationContributor} that returns values from a properties
  * file.
- * 
- * @author (last commit) $Author$
- * @version $Revision$, $Date$
+ *
  */
 public final class ConfigurationPropertiesFileContributor extends
     ConfigurationPropertiesMapContributor {

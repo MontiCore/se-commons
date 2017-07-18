@@ -28,10 +28,8 @@ import org.junit.Test;
 
 /**
  * Unit test for {@link Reflection}.
- * 
- * @author (last commit) $Author: nazari $
- * @version $Revision: 381 $, $Date: 2015-09-04 14:18:19 +0200 (Fr, 04 Sep 2015) $
- * 
+ *
+ *
  */
 public class ReflectionUnitTest {
   

@@ -27,10 +27,8 @@ import com.google.common.base.Objects;
 /**
  * A symbol represents a name. Symbols can be used as markers in collections
  * where names based on Strings might collide with other values.
- * 
- * @author (last commit) $Author$
- * @version $Revision$, $Date$
- * 
+ *
+ *
  */
 public final class Symbol {
   

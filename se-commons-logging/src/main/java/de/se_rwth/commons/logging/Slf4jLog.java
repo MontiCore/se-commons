@@ -29,8 +29,6 @@ import de.se_rwth.commons.SourcePosition;
  * The slf4j variant of {@link Log}. Use {@link Slf4jLog#init()} to enable
  * usage.
  *
- * @author (last commit) $Author$
- * @version $Revision$, $Date: 2015-09-04 14:18:19 +0200 (Fr, 04 Sep 2015) $
  */
 public class Slf4jLog extends Log {
   

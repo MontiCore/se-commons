@@ -40,9 +40,7 @@ import de.se_rwth.commons.Values;
 
 /**
  * A {@link ConfigurationContributor} that returns values from CLI arguments.
- * 
- * @author (last commit) $Author$
- * @version $Revision$, $Date$
+ *
  */
 public class ConfigurationPropertiesMapContributor extends ConfigurationContributor {
   

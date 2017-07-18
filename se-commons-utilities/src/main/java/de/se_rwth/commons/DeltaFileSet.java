@@ -38,10 +38,8 @@ import com.google.common.io.Files;
 
 /**
  * Traces file updates using SHA-1 hash codes.
- * 
- * @author (last commit) $Author$
- * @version $Revision$, $Date$
- * 
+ *
+ *
  */
 public final class DeltaFileSet {
   
@@ -122,7 +120,7 @@ public final class DeltaFileSet {
   
   /**
    * Private constructor permitting manual instantiation.
- * @throws IOException 
+ * @throws IOException
    */
   private DeltaFileSet(File traceLogFile, Collection<File> fileSet) throws IOException {
     
@@ -180,7 +178,7 @@ public final class DeltaFileSet {
   
   /**
    * Loads properties from the given property file.
-   * 
+   *
    * @throws IOException
    */
   private Properties loadProperties(File propertiesFile) throws IOException {
@@ -212,7 +210,7 @@ public final class DeltaFileSet {
   
   /**
    * Stores the given properties file to the given file.
-   * 
+   *
    * @throws IOException
    */
   private void storeProperties(Properties properties, File propertiesFile) throws IOException {

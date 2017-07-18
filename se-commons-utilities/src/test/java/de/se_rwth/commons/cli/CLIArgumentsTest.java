@@ -32,9 +32,6 @@ import com.google.common.collect.Iterables;
 /**
  * Couple of basic unit tests for {@link CLIArguments}.
  *
- * @author (last commit) $Author$
- * @version $Revision$, $Date: 2015-09-04 14:18:19 +0200 (Fr, 04 Sep 2015) $
- * @since 4.0.0
  */
 public class CLIArgumentsTest {
   

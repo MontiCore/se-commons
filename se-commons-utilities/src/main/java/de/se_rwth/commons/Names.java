@@ -35,10 +35,7 @@ import com.google.common.collect.Iterables;
 
 /**
  * Functions dealing with the composition and decomposition of names in models.
- * 
- * @author (last commit) $Author: nazari $
- * @version $Revision: 381 $, $Date: 2012-11-01 14:26:18 +0100 (Do, 01 Nov 2012)
- * $
+ *
  */
 public final class Names {
   
@@ -119,7 +116,7 @@ public final class Names {
   
   /**
    * Constructs a qualified name based on the given qualifier and simple name.
-   * 
+   *
    * @param qualifier a {@link String} of the form "a.b.c". Leading or trailing
    * dots are removed.
    * @param simpleName a {@link String}. Leading or trailing dots are removed.
@@ -236,7 +233,7 @@ public final class Names {
    * Returns the path of a package for a full qualified name e.g. a.b.C -> a/b<br>
    * Note: This function is based on <b>File.separator</b> and leading and
    * trailing dots are ignored.
-   * 
+   *
    * @param in String to transform
    * @return
    */
@@ -250,7 +247,7 @@ public final class Names {
    * .a.b.c -> /a/b/c<br>
    * a.b.c. -> a/b/c/<br>
    * Note: This function is based on <b>File.separator</b>.
-   * 
+   *
    * @param in String to transform
    * @return
    */
@@ -262,7 +259,7 @@ public final class Names {
    * Returns the path of the given filename, e.g. my/path/to/filename.ext ->
    * my/path/to<br>
    * Note: This function is based on <b>File.separator</b>.
-   * 
+   *
    * @param in filename
    * @return
    * @see #getPathFromFilename(String, String)
@@ -274,7 +271,7 @@ public final class Names {
   /**
    * Returns the path of the given filename, e.g. my/path/to/filename.ext ->
    * my/path/to<br>
-   * 
+   *
    * @param in filename
    * @param separator used separator, e.g. "/" or File.separator
    * @see #getPathFromFilename(String)
@@ -296,7 +293,7 @@ public final class Names {
    * my/path/ -> my.path.<br>
    * my/path -> my.path<br>
    * Note: This function is based on <b>File.separator</b>.
-   * 
+   *
    * @param path
    * @return
    * @see #getPackageFromPath(String, String)
@@ -310,7 +307,7 @@ public final class Names {
    * my/path/ -> my.path.<br>
    * my/path -> my.path<br>
    * /my/path -> .my.path<br>
-   * 
+   *
    * @param path
    * @param separator used separator, e.g. "/" or File.separator
    * @see #getPackageFromPath(String)

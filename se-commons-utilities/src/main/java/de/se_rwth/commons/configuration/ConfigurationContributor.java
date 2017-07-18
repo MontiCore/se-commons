@@ -23,9 +23,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 /**
  * A part of a chain of {@link Configuration}s.
- * 
- * @author (last commit) $Author$
- * @version $Revision$, $Date$
+ *
  */
 public abstract class ConfigurationContributor implements Configuration {
   

@@ -32,10 +32,8 @@ import org.junit.rules.TemporaryFolder;
 
 /**
  * Unit tests for {@link Directories}
- * 
- * @author (last commit) $Author$
- * @version $Revision$, $Date$
- * 
+ *
+ *
  */
 public class DirectoriesTest {
   

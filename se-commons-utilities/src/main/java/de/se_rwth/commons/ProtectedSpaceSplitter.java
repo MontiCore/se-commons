@@ -25,10 +25,8 @@ import com.google.common.collect.ImmutableList;
 /**
  * An alternative to {@link Splitter} that supports the definition of protected
  * space demarked by delimiters, e.g., "Do not split here"
- * 
- * @author (last commit) $Author$
- * @version $Revision$, $Date$
- * 
+ *
+ *
  */
 public class ProtectedSpaceSplitter {
   

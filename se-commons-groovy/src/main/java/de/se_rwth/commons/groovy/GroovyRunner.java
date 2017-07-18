@@ -25,8 +25,6 @@ import de.se_rwth.commons.configuration.Configuration;
  * optionally supplied {@link Configuration} instance to pull parameters/options
  * from to be passed to the script.
  *
- * @author (last commit) $Author$
- * @version $Revision$, $Date$
  * @since 1.7.0
  */
 public interface GroovyRunner {
@@ -35,7 +33,7 @@ public interface GroovyRunner {
    * Executes the specified/supplied Groovy script and makes all
    * options/parameters supplied by the optional {@link Configuration} instance
    * available to the script.
-   * 
+   *
    * @param configuration - an optional instance of {@link Configuration}
    * containing configuration options/parameter to supply to the script to
    * execute

@@ -20,11 +20,8 @@ package de.se_rwth.commons.reflection;
 
 /**
  * Encapsulates exceptions that have been thrown during reflective operations.
- * 
- * @author (last commit) $Author: nazari $
- * @version $Revision: 381 $, $Date: 2012-10-18 16:55:10 +0200 (Do, 18 Okt 2012)
- *          $
- * 
+ *
+ *
  */
 public class ReflectionException extends Exception {
   

@@ -29,11 +29,8 @@ import com.google.common.collect.ImmutableList;
 
 /**
  * Unit test for {@link Names}.
- * 
- * @author (last commit) $Author: nazari $
- * @version $Revision: 381 $, $Date: 2012-11-08 12:12:12 +0100 (Do, 08 Nov 2012)
- *          $
- * 
+ *
+ *
  */
 public class NamesUnitTest {
   

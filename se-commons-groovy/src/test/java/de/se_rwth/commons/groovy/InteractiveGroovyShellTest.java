@@ -21,9 +21,7 @@ package de.se_rwth.commons.groovy;
 
 /**
  * Test for {@link InteractiveGroovyShell}.
- * 
- * @author (last commit) $Author$
- * @version $Revision$, $Date$
+ *
  */
 public class InteractiveGroovyShellTest {
 

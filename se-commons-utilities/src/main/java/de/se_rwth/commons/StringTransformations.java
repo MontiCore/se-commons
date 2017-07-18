@@ -30,9 +30,7 @@ import com.google.common.escape.Escapers;
 
 /**
  * {@link Function}s that transform {@link String}s.
- * 
- * @author (last commit) $Author$
- * @version $Revision$, $Date$
+ *
  */
 public final class StringTransformations {
   

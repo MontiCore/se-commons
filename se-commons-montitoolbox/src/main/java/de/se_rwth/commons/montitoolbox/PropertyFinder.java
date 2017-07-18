@@ -30,8 +30,8 @@ import java.util.List;
 public class PropertyFinder {
 
   public static List<String> propertyToString(File pomfile) {
-    Model model = null;
-    FileReader reader = null;
+    Model model;
+    FileReader reader;
     MavenXpp3Reader mavenreader = new MavenXpp3Reader();
 
     try {

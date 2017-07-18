@@ -26,8 +26,6 @@ import com.google.common.collect.ImmutableList;
 /**
  * Helper functions for working with values.
  *
- * @author (last commit) $Author$
- * @version $Revision$, $Date$
  */
 public final class Values {
 

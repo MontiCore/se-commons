@@ -27,10 +27,8 @@ import org.junit.Test;
 
 /**
  * Unit test for {@link StringMatchers}
- * 
- * @author (last commit) $Author$
- * @version $Revision$, $Date$
- * 
+ *
+ *
  */
 public class StringMatchersUnitTest {
   

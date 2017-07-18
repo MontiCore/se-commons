@@ -208,31 +208,6 @@ public class MarkdownDoclet {
     }
   }
 
-//  private static void printConstructor(ConstructorDoc constructor) {
-//    pw.print("**_" + constructor.modifiers() + "_ " + constructor.name() + "(");
-//    for(int i = 0; i < constructor.parameters().length; i++) {
-//      Parameter param = constructor.parameters()[i];
-//      pw.print("_" + param.typeName() + "_ " + param.name());
-//      pw.print((i != (constructor.parameters().length - 1) ? ", " : ""));
-//    }
-//    pw.println(")**  ");
-//    pw.println((!constructor.commentText().isEmpty()? "_" + constructor.commentText() + "_" : "") + "\n");
-//    initializeTagMap(constructor.tags());
-//    printTags();
-//  }
-//
-//  private static void printMethods(MethodDoc method) {
-//    pw.print("**_" + method.modifiers() + " " + t.returnType().simpleTypeName() + "_ " + method.name() + "(");
-//    for(int i = 0; i < method.parameters().length; i++) {
-//      Parameter param = method.parameters()[i];
-//      pw.print("_" + param.typeName() + "_ " + param.name());
-//      pw.print((i != (method.parameters().length - 1) ? ", " : ""));
-//    }
-//    pw.println(")**  ");
-//    pw.println((!method.commentText().isEmpty() ? "_" + method.commentText() + "_" : "") + "\n");
-//    initializeTagMap(method.tags());
-//    printTags();
-//  }
 
   /**
    * Prints the Body. (methods and constructors)

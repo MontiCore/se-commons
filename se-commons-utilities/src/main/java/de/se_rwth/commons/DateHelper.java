@@ -30,8 +30,6 @@ import com.google.common.collect.Lists;
 /**
  * Provides helper infrastructure to work with java date representation.
  *
- * @author (last commit) $Author$
- * @version $Revision$, $Date$
  */
 public class DateHelper {
   
@@ -70,7 +68,7 @@ public class DateHelper {
   /**
    * Converts the data based on the default formatter. Default local: GERMAN, Default pattern:
    * "dd.MM.yyyy hh:mm"
-   * 
+   *
    * @return date as a string or null if the {@code date} argument is null
    */
   public String format(Date date) {
@@ -87,7 +85,7 @@ public class DateHelper {
   
   /**
    * Tries to parse date with several formats: ."dd.MM.yyyy hh:mm", "dd.MM.yyyy"
-   * 
+   *
    * @param date
    * @return Date object or null, if the string doesn't conform the format.
    */

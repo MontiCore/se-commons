@@ -27,9 +27,7 @@ import org.codehaus.groovy.GroovyException;
 
 /**
  * An interactive shell that delegates commands to a {@link GroovyInterpreter}.
- * 
- * @author (last commit) $Author$
- * @version $Revision$, $Date$
+ *
  */
 public class InteractiveGroovyShell {
   

@@ -29,9 +29,7 @@ import com.google.common.collect.ImmutableMap;
 /**
  * A {@link ConfigurationContributor} that only returns absent values and can be
  * used as the end of a configuration chain.
- * 
- * @author (last commit) $Author$
- * @version $Revision$, $Date$
+ *
  */
 @Singleton
 public final class EmptyConfigurationContributor extends ConfigurationContributor {

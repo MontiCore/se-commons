@@ -24,10 +24,8 @@ import com.google.common.base.Splitter;
 
 /**
  * Common precomputed {@link Splitter}s.
- * 
- * @author (last commit) $Author: nazari $
- * @version $Revision: 381 $, $Date: 2015-09-04 14:18:19 +0200 (Fr, 04 Sep 2015) $
- * 
+ *
+ *
  */
 public final class Splitters {
   

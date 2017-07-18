@@ -38,9 +38,7 @@ import com.google.common.io.Files;
 
 /**
  * An interpreter for Groovy scripts.
- * 
- * @author (last commit) $Author$
- * @version $Revision$, $Date$
+ *
  */
 public class GroovyInterpreter {
   
@@ -144,7 +142,7 @@ public class GroovyInterpreter {
   
   /**
    * Runs the given script.
-   * 
+   *
    * @throws GroovyException
    */
   public void tryEvaluate(CharSource scriptSource) throws GroovyException {
@@ -158,7 +156,7 @@ public class GroovyInterpreter {
   
   /**
    * Runs the given script.
-   * 
+   *
    * @throws GroovyException
    */
   public void tryEvaluate(File scriptSource) throws GroovyException {
@@ -167,7 +165,7 @@ public class GroovyInterpreter {
   
   /**
    * Runs the given script.
-   * 
+   *
    * @throws GroovyException
    */
   public void tryEvaluate(String scriptSource) throws GroovyException {

@@ -23,10 +23,8 @@ import java.util.Optional;
 /**
  * Represents the truth values of a ternary logic value, that is, true, false
  * and undefined.
- * 
- * @author (last commit) $Author$
- * @version $Revision$, $Date$
- * 
+ *
+ *
  */
 public enum TernaryLogicValue {
   

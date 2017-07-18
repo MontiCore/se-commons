@@ -27,8 +27,6 @@ import java.util.Optional;
  * configuration instance. Useful for reusing already existing configurations in
  * configuration chains.
  *
- * @author (last commit) $Author$
- * @version $Revision$, $Date$
  * @since 1.7.0
  */
 public final class DelegatingConfigurationContributor extends ConfigurationContributor {
@@ -45,7 +43,7 @@ public final class DelegatingConfigurationContributor extends ConfigurationContr
   /**
    * Creates a new delegating configuration contributor with the supplied
    * delegate target configuration.
-   * 
+   *
    * @param delegate to delegate to - must not be null
    * @return
    */

@@ -25,10 +25,8 @@ import org.junit.Test;
 
 /**
  * Unit test for {@link StringTransformations}.
- * 
- * @author (last commit) $Author$
- * @version $Revision$, $Date$
- * 
+ *
+ *
  */
 public class StringTransformationsUnitTest {
   
