@@ -1,2 +1,7 @@
 .idea/
 *.iml
+se-commons-groovy/target/
+se-commons-logging/target/
+se-commons-montitoolbox/target/
+se-commons-reflection/target/
+se-commons-utilities/target/
