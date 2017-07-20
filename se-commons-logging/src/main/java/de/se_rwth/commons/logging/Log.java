@@ -475,7 +475,6 @@ public class Log {
    */
   protected void doEnableNonZeroExit(boolean enable) {
     this.isNonZeroExit = enable;
-    terminateWithNonZeroCodeIfErrors();
   }
   
   /**
@@ -538,27 +537,8 @@ public class Log {
    * are enabled enabled and error count greater than zero.
    */
   protected void terminateIfErrors() {
-    if (getErrorCount() > 0) {
-      // FIXME: replace with runtime exception and appropriate catch block at
-      // top level; System.exit() is a smell/bad depending on the context
-      if (isNonZeroExitEnabled()) {
-        System.exit(1);
-      }
-      if (isFailQuickEnabled()) {
-        System.exit(0);
-      }
-    }
-  }
-  
-  /**
-   * Check and terminate with exit code 1 if required; i.e. if non-zero exit is enabled and error
-   * count greater than zero.
-   */
-  protected void terminateWithNonZeroCodeIfErrors() {
-    // FIXME: replace with runtime exception and appropriate catch block at top
-    // level; System.exit() is a smell/bad depending on the context
-    if (isNonZeroExitEnabled() && getErrorCount() > 0) {
-      System.exit(1);
+    if (isFailQuickEnabled() && getErrorCount() > 0) {
+      System.exit(isNonZeroExitEnabled() ? 1 : 0);
     }
   }
   
