@@ -437,7 +437,7 @@ public class Log {
    */
   public static final <T> T errorIfNull(T reference) {
     return errorIfNull(reference,
-        "Internal error: a null reference occured (see/enable debug output).");
+        "Internal error: a null reference occurred (see/enable debug output).");
   }
   
   /**
