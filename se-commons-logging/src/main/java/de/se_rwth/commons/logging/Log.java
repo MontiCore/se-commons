@@ -48,18 +48,19 @@ public class Log {
 
   /**
    * Initialize the Log directly as Log (INFo, WARN, ERRORs)
-   * (an do not use Slf4jLog)
+   * (and do not use Slf4jLog)
    */
   public static void init() {
     Log l = new Log();
     l.isTRACE = false;
     l.isDEBUG = false;
+    l.isNonZeroExit = true;
     Log.setLog(l);
   }
 
   /**
    * Initialize the Log directly as Log (incl. DEBUG and TRACE infos)
-   * (an do not use Slf4jLog)
+   * (and do not use Slf4jLog)
    */
   public static void initDEBUG() {
     Log.setLog(new Log());
@@ -67,13 +68,14 @@ public class Log {
 
   /**
    * Initialize the Log directly as Log (only WARN and ERROR)
-   * (an do not use Slf4jLog)
+   * (and do not use Slf4jLog)
    */
   public static void initWARN() {
     Log l = new Log();
     l.isTRACE = false;
     l.isDEBUG = false;
     l.isINFO  = false;
+    l.isNonZeroExit = true;
     Log.setLog(l);
   }
 
