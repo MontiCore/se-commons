@@ -110,7 +110,7 @@ public class Log {
   boolean failQuick = true;
   
   // terminate with an non-zero exit code
-  boolean isNonZeroExit = false;
+  boolean isNonZeroExit = true;
 
   // show debugging and tracing info?
   boolean isDEBUG = true;
