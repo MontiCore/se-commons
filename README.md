@@ -11,7 +11,8 @@ SE Commons comprises the following components:
 * **se-commons-groovy** 
   * helpers to interpret Groovy scripts such as the GroovyRunner and GroovyInterpreter.
 * **se-commons-montitoolbox**
-  * Java Doc doclet that produces Wiki pages in Markdown format that can be uploaded to
+  * Java Doc doclet that produces Wiki pages in Markdown format
+  that can be uploaded to
     the [MontiToolBox Wiki](https://git.rwth-aachen.de/monticore/MontiToolBox/wikis/home).
     Further information on MontiToolBox can be found [here](https://git.rwth-aachen.de/monticore/MontiToolBox/wikis/home).  
 
