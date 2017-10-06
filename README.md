@@ -5,7 +5,8 @@ However, these libraries can be used independently from MontiCore.
 SE Commons comprises the following components:
 
 * **se-commons-utilities**
-  * utility classes such as SourceCodePosition, CLIArguments, and helpers for handling (qualified or lists of) names or Strings.
+  * utility classes such as SourceCodePosition, CLIArguments, and helpers
+  for handling (qualified or lists of) names or Strings.
 * **se-commons-logging**
   * Logging utilities used by MontiCore and its derivates
 * **se-commons-groovy** 
