@@ -540,7 +540,7 @@ public class Log {
    */
   protected void terminateIfErrors() {
     if (isFailQuickEnabled() && getErrorCount() > 0) {
-      System.exit(isNonZeroExitEnabled() ? 1 : 0);
+      System.exit(isNonZeroExitEnabled() ? -1 : 0);
     }
   }
   
