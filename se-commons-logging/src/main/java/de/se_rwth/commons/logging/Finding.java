@@ -53,6 +53,7 @@ public class Finding {
     this.type = type;
     this.msg = msg;
     this.sourcePosition = Optional.ofNullable(sourcePosition);
+    this.sourcePositionEnd = Optional.empty();
   }
 
   /**
@@ -80,6 +81,7 @@ public class Finding {
     this.type = type;
     this.msg = msg;
     this.sourcePosition = Optional.empty();
+    this.sourcePosition = Optional.empty();
   }
   
   /**
@@ -102,7 +104,14 @@ public class Finding {
   public Optional<SourcePosition> getSourcePosition() {
     return this.sourcePosition;
   }
-  
+
+  /**
+   * @return sourcePositionEnd
+   */
+  public Optional<SourcePosition> getSourcePositionEnd() {
+    return this.sourcePositionEnd;
+  }
+
   /**
    * @param sourcePosition the sourcePosition to set
    */
