@@ -334,7 +334,28 @@ public class Log {
     addFinding(warn);
     doPrint("[WARN]  " + warn.toString());
   }
-  
+
+  /**
+   * Log with level WARN and source position.
+   *
+   * @param msg the error message
+   * @param start the start position in a model file which caused the warning
+   * @param end the end position in a model file which caused the warning
+   */
+  public static final void warn(String msg, SourcePosition start, SourcePosition end) {
+    getLog().doWarn(msg, start, end);
+  }
+
+  /**
+   * Log with level ERROR and source position for start and end.
+   */
+  protected void doWarn(String msg, SourcePosition start, SourcePosition end) {
+    Finding warn = Finding.warning(msg, start, end);
+    addFinding(warn);
+    doErrPrint("[WARN] " + warn.toString());
+    terminateIfErrors();
+  }
+
   /**
    * Log with level WARN.
    * 
@@ -389,6 +410,27 @@ public class Log {
    */
   protected void doError(String msg, SourcePosition pos) {
     Finding error = Finding.error(msg, pos);
+    addFinding(error);
+    doErrPrint("[ERROR] " + error.toString());
+    terminateIfErrors();
+  }
+
+  /**
+   * Log with level ERROR and source position.
+   *
+   * @param msg the error message
+   * @param start the start position in a model file which caused the error
+   * @param end the end position in a model file which caused the error
+   */
+  public static final void error(String msg, SourcePosition start, SourcePosition end) {
+    getLog().doError(msg, start, end);
+  }
+
+  /**
+   * Log with level ERROR and source position for start and end.
+   */
+  protected void doError(String msg, SourcePosition start, SourcePosition end) {
+    Finding error = Finding.error(msg, start, end);
     addFinding(error);
     doErrPrint("[ERROR] " + error.toString());
     terminateIfErrors();

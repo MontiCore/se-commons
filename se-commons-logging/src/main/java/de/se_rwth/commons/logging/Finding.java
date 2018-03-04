@@ -40,7 +40,8 @@ public class Finding {
   private String msg;
   
   private Optional<SourcePosition> sourcePosition;
-  
+  private Optional<SourcePosition> sourcePositionEnd;
+
   /**
    * Constructor for de.se_rwth.commons.logging.Finding
    * 
@@ -52,6 +53,21 @@ public class Finding {
     this.type = type;
     this.msg = msg;
     this.sourcePosition = Optional.ofNullable(sourcePosition);
+  }
+
+  /**
+   * Constructor for de.se_rwth.commons.logging.Finding
+   *
+   * @param type
+   * @param msg
+   * @param start
+   * @param end
+   */
+  public Finding(Finding.Type type, String msg, SourcePosition start, SourcePosition end) {
+    this.type = type;
+    this.msg = msg;
+    this.sourcePosition = Optional.ofNullable(start);
+    this.sourcePositionEnd = Optional.ofNullable(end);
   }
   
   /**
@@ -174,6 +190,10 @@ public class Finding {
   public static Finding error(String message, SourcePosition sourcePosition) {
     return new Finding(Type.ERROR, message, sourcePosition);
   }
+
+  public static Finding error(String message, SourcePosition start, SourcePosition end) {
+    return new Finding(Type.ERROR, message, start, end);
+  }
   
   public static Finding warning(String message) {
     return new Finding(Type.WARNING, message);
@@ -181,6 +201,10 @@ public class Finding {
   
   public static Finding warning(String message, SourcePosition sourcePosition) {
     return new Finding(Type.WARNING, message, sourcePosition);
+  }
+
+  public static Finding warning(String message, SourcePosition start, SourcePosition end) {
+    return new Finding(Type.WARNING, message, start, end);
   }
   
 }
