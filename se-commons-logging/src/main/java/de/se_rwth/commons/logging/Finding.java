@@ -81,7 +81,7 @@ public class Finding {
     this.type = type;
     this.msg = msg;
     this.sourcePosition = Optional.empty();
-    this.sourcePosition = Optional.empty();
+    this.sourcePositionEnd = Optional.empty();
   }
   
   /**
