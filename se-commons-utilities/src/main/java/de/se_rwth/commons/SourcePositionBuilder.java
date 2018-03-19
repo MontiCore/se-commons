@@ -39,8 +39,9 @@ public class SourcePositionBuilder {
    *
    * @param line
    */
-  void setLine(int line) {
+  public SourcePositionBuilder setLine(int line) {
     this.line = line;
+    return this;
   }
   
   /**
@@ -57,8 +58,9 @@ public class SourcePositionBuilder {
    *
    * @param column
    */
-  void setColumn(int column) {
+  public SourcePositionBuilder setColumn(int column) {
     this.column = column;
+    return this;
   }
   
   /**
@@ -71,7 +73,8 @@ public class SourcePositionBuilder {
   /**
    * @param fileName the fileName to set
    */
-  public void setFileName(String fileName) {
+  public SourcePositionBuilder setFileName(String fileName) {
     this.fileName = Optional.ofNullable(fileName);
+    return this;
   }
 }
