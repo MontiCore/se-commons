@@ -20,7 +20,7 @@ public class SourcePositionBuilder {
       res = new SourcePosition(line, column, fileName.get());
     }
     else {
-      return new SourcePosition(line, column);
+      res = new SourcePosition(line, column);
     }
     return res;
   }
