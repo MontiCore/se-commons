@@ -1,8 +1,6 @@
 /* (c) https://github.com/MontiCore/monticore */
 package de.se_rwth.commons;
 
-import jdk.internal.jline.internal.Log;
-
 import java.util.Optional;
 
 public class SourcePositionBuilder {
@@ -76,7 +74,8 @@ public class SourcePositionBuilder {
     if(isPresentFileName()) {
       return this.fileName.get();
     }
-    Log.error("0xB9250 get_SourcePositionStartOpt can't return a value. It is empty.");
+    // TODO: Log is not avaialble
+    // Log.error("0xB9250 get_SourcePositionStartOpt can't return a value. It is empty.");
     // Normally this statement is not reachable
     throw new IllegalStateException();
   }
