@@ -54,7 +54,7 @@ public final class Names {
   /**
    * @return a string composed of the given parts (after trimming dots) and the
    * given simple name separated by dots.
-   * @deprecated As of version 1.7.9, replaced by {@link #constructQualifiedName}
+   * @deprecated As of version 1.7.10, replaced by {@link #constructQualifiedName}
    */
   @Deprecated
   public static final String getQualifiedName(Iterable<String> qualifierParts, String simpleName) {
@@ -64,7 +64,7 @@ public final class Names {
   /**
    * @return a string composed of the given parts (after trimming dots) and the
    *         given simple name separated by dots.
-   * @since 1.7.9
+   * @since 1.7.10
    */
   public static final String constructQualifiedName(Iterable<String> qualifierParts, String simpleName) {
     return getQualifiedName(constructQualifiedName(qualifierParts), simpleName);
@@ -73,7 +73,7 @@ public final class Names {
   /**
    * @return a string composed of the given parts (after trimming dots)
    * separated by dots.
-   * @deprecated As of version 1.7.9, replaced by {@link #constructQualifiedName}
+   * @deprecated As of version 1.7.10, replaced by {@link #constructQualifiedName}
    */
   @Deprecated
   public static final String getQualifiedName(Iterable<String> parts) {
@@ -86,7 +86,7 @@ public final class Names {
   /**
    * @return a string composed of the given parts (after trimming dots)
    * separated by dots.
-   * @since 1.7.9
+   * @since 1.7.10
    */
   public static final String constructQualifiedName(Iterable<String> parts) {
     return Joiners.DOT.join(
