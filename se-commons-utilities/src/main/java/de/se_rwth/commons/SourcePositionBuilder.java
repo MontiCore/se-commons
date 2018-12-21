@@ -16,7 +16,7 @@ public class SourcePositionBuilder {
   
   public SourcePosition build() {
     SourcePosition res;
-    if(fileName.isPresent()) {
+    if(isPresentFileName()) {
       res = new SourcePosition(line, column, fileName.get());
     }
     else {
@@ -66,8 +66,22 @@ public class SourcePositionBuilder {
   /**
    * @return fileName
    */
-  public Optional<String> getFileName() {
+  public Optional<String> getFileNameOpt() {
     return this.fileName;
+  }
+  
+  public String getFileName() {
+    if(isPresentFileName()) {
+      return this.fileName.get();
+    }
+    // TODO: Log is not avaialble
+    // Log.error("0xB9250 get_SourcePositionStartOpt can't return a value. It is empty.");
+    // Normally this statement is not reachable
+    throw new IllegalStateException();
+  }
+  
+  public boolean isPresentFileName() {
+    return this.fileName.isPresent();
   }
   
   /**
@@ -75,6 +89,16 @@ public class SourcePositionBuilder {
    */
   public SourcePositionBuilder setFileName(String fileName) {
     this.fileName = Optional.ofNullable(fileName);
+    return this;
+  }
+  
+  public SourcePositionBuilder setFileNameOpt(Optional<String> fileName) {
+    this.fileName = fileName;
+    return this;
+  }
+  
+  public SourcePositionBuilder setFileNameAbsent() {
+    this.fileName = Optional.empty();
     return this;
   }
 }
