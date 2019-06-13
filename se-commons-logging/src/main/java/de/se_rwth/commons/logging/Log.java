@@ -24,7 +24,6 @@ public class Log {
   protected static Log getLog() {
     if (log == null) {
       Slf4jLog.init();
-
     }
     return log;
   }
