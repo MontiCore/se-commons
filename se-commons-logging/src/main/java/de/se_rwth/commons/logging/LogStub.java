@@ -27,7 +27,12 @@ public class LogStub extends Log {
    */
   // Initialize the LogStub as Log
   public static void init() {
-    Log.setLog(new LogStub());
+    Log l = new LogStub();
+    l.isTRACE = false;
+    l.isDEBUG = false;
+    l.isINFO  = false;    
+    l.isNonZeroExit = false;
+    Log.setLog(l);
   }
   
   /**
