@@ -520,6 +520,22 @@ public class Log {
   }
   
   /**
+   * Return the amount of Findings which occurred.
+   * 
+   * @return No. of Findings (errors and warnings)
+   */
+  public static final long getFindingsCount() {
+    return getLog().doGetFindingsCount();
+  }
+  
+  /**
+   * Return the amount of Findings which occurred.
+   */
+  protected long doGetFindingsCount() {
+    return this.findings.count();
+  }
+  
+  /**
    * Is fail quick enabled?
    * 
    * @return whether fail quick is enabled
@@ -583,6 +599,23 @@ public class Log {
   protected List<Finding> doGetFindings() {
     return this.findings;
   }
+
+  /**
+   * Clear the list of all previously occurred findings 
+   * (e.g. after each test).
+   * 
+   */
+  public static void clearFindings() {
+    return getLog().doClearFindings();
+  }
+  
+  /**
+   * Clear the findings.
+   */
+  protected void doClearFindings() {
+    findings.clear();
+  }
+  
   
   /**
    * Print something
