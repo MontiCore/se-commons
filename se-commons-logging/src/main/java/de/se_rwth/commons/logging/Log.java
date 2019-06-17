@@ -1,10 +1,10 @@
 /* (c) https://github.com/MontiCore/monticore */
 package de.se_rwth.commons.logging;
 
+import de.se_rwth.commons.SourcePosition;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import de.se_rwth.commons.SourcePosition;
 
 /**
  * Provides a centralized logging component. Subclasses may provide customized
@@ -532,7 +532,7 @@ public class Log {
    * Return the amount of Findings which occurred.
    */
   protected long doGetFindingsCount() {
-    return this.findings.count();
+    return this.findings.size();
   }
   
   /**
@@ -606,7 +606,7 @@ public class Log {
    * 
    */
   public static void clearFindings() {
-    return getLog().doClearFindings();
+    getLog().doClearFindings();
   }
   
   /**
