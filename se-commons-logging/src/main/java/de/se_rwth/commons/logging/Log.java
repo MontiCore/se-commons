@@ -13,7 +13,6 @@ import java.util.List;
  * If no other initialization is performed {@link Slf4jLog} will be used by
  * default.<br>
  * <br>
- * <b>Please note:</b> hands-on usage is demonstrated in {@link LogTest}.
  */
 public class Log {
   
