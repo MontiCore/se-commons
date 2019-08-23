@@ -1,3 +1,4 @@
+<!-- (c) https://github.com/MontiCore/monticore -->
 # SE Commons
 SE Commons is a collection of utilities and tools. It is among others used 
 development of [MontiCore](http://www.monticore.de). 
