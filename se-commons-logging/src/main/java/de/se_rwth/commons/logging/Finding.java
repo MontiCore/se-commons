@@ -9,7 +9,6 @@ import de.se_rwth.commons.SourcePosition;
  * Represents an error or warning finding and defines a default log format for
  * the finding.
  *
- * @author Robert Heim
  */
 public class Finding {
   private static final String FORMAT_WITH_SOURCEPOSITION = "%s: %s";

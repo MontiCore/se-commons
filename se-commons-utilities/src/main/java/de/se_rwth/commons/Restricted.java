@@ -9,7 +9,6 @@ import java.lang.annotation.Target;
  * Annotated types may not be referenced except by those classes explicitly specified as friends.
  * Contact the author of the type if you wish to reference the type regardless.
  * 
- * @author Sebastian Oberhoff
  */
 @Target(ElementType.TYPE)
 public @interface Restricted {

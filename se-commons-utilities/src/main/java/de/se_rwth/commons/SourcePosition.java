@@ -9,7 +9,6 @@ import org.apache.commons.io.FilenameUtils;
  * Represents a textual source code position, i.e., consisting of line and
  * column integer values.
  *
- * @author krahn, ahorst
  */
 public final class SourcePosition implements Comparable<SourcePosition>, Cloneable {
   

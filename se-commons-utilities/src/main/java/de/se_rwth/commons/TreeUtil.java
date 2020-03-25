@@ -9,7 +9,6 @@ import com.google.common.collect.TreeTraverser;
 /**
  * Wrapper for Guava's {@link TreeTraverser} turning common operations into one-liners.
  * 
- * @author Sebastian Oberhoff
  */
 @Deprecated
 // "use the Util class instead"

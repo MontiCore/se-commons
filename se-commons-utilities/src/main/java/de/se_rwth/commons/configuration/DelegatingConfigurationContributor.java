@@ -10,7 +10,6 @@ import java.util.Optional;
  * configuration instance. Useful for reusing already existing configurations in
  * configuration chains.
  *
- * @since 1.7.0
  */
 public final class DelegatingConfigurationContributor extends ConfigurationContributor {
   

@@ -8,7 +8,6 @@ import java.util.Set;
 /**
  * Functions dealing with java names.
  *
- * @author Robert Heim
  */
 public class JavaNamesHelper {
   
@@ -37,7 +36,6 @@ public class JavaNamesHelper {
    * Class generates non-reserved alternative words for reserved words in Java
    * and makes all returned words intern (so == for Strings is possible!)
    * 
-   * @author krahn
    */
   private static class JavaReservedWordReplacer {
     

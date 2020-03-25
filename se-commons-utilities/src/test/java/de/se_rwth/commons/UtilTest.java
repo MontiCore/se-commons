@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 import static org.junit.Assert.assertEquals;
 
 /**
- * @author Sebastian Oberhoff
  */
 public final class UtilTest {
 

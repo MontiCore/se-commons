@@ -8,7 +8,6 @@ import de.se_rwth.commons.configuration.Configuration;
  * optionally supplied {@link Configuration} instance to pull parameters/options
  * from to be passed to the script.
  *
- * @since 1.7.0
  */
 public interface GroovyRunner {
   

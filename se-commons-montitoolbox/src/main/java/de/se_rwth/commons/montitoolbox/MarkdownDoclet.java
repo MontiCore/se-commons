@@ -12,7 +12,6 @@ import java.util.*;
 /**
  * The Javadoc2Markdown doclet.
  *
- * @author BS
  */
 public class MarkdownDoclet {
 
