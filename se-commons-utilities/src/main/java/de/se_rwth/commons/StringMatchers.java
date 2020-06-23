@@ -1,13 +1,14 @@
 /* (c) https://github.com/MontiCore/monticore */
 package de.se_rwth.commons;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.common.base.CharMatcher;
+import com.google.common.collect.ImmutableList;
 
 import java.util.Collection;
 
-import com.google.common.base.CharMatcher;
-import com.google.common.collect.ImmutableList;
+import static com.google.common.base.CharMatcher.javaLetter;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Utilities for matching substrings in strings.
@@ -44,13 +45,13 @@ public final class StringMatchers {
   /**
    * Matches a java letter or a dot.
    */
-  public static final CharMatcher JAVA_LETTER_OR_DOT = CharMatcher.JAVA_LETTER.or(DOT);
+  public static final CharMatcher JAVA_LETTER_OR_DOT = javaLetter().or(DOT);
   
   /**
    * Matches a java identifier.
    */
   public static final CharMatcher JAVA_IDENTIFIER = CharMatcher
-      .JAVA_LETTER_OR_DIGIT.or(DOT).or(UNDERSCORE);
+      .javaLetterOrDigit().or(DOT).or(UNDERSCORE);
   
   /**
    * Compares two Strings representing qualified Name by comparing only the
@@ -83,8 +84,8 @@ public final class StringMatchers {
   public static final boolean isValidQualifier(String qualifier) {
     return qualifier != null
         && qualifier.length() > 0
-        && CharMatcher.JAVA_LETTER.matches(qualifier.charAt(0))
-        && CharMatcher.JAVA_LETTER_OR_DIGIT.matches(qualifier.charAt(qualifier.length() - 1))
+        && CharMatcher.javaLetter().matches(qualifier.charAt(0))
+        && CharMatcher.javaLetterOrDigit().matches(qualifier.charAt(qualifier.length() - 1))
         && JAVA_IDENTIFIER.matchesAllOf(qualifier);
   }
   

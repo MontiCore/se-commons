@@ -1,11 +1,12 @@
 /* (c) https://github.com/MontiCore/monticore */
 package de.se_rwth.commons;
 
+import com.google.common.base.Objects;
+
+import static com.google.common.base.CharMatcher.javaLetter;
+import static com.google.common.base.CharMatcher.javaLetterOrDigit;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.base.CharMatcher;
-import com.google.common.base.Objects;
 
 /**
  * A symbol represents a name. Symbols can be used as markers in collections
@@ -30,8 +31,8 @@ public final class Symbol {
   private Symbol(String name) {
     checkNotNull(name);
     checkArgument(name.length() > 0
-        && CharMatcher.JAVA_LETTER.matches(name.charAt(0))
-        && CharMatcher.JAVA_LETTER_OR_DIGIT.matchesAllOf(name));
+        && javaLetter().matches(name.charAt(0))
+        && javaLetterOrDigit().matchesAllOf(name));
     this.name = checkNotNull(name);
   }
   

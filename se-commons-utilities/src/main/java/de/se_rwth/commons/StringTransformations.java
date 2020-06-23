@@ -1,15 +1,15 @@
 /* (c) https://github.com/MontiCore/monticore */
 package de.se_rwth.commons;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import javax.annotation.Nullable;
-
-import com.google.common.base.CharMatcher;
 import com.google.common.base.Function;
 import com.google.common.escape.Escaper;
 import com.google.common.escape.Escapers;
+
+import javax.annotation.Nullable;
+
+import static com.google.common.base.CharMatcher.whitespace;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * {@link Function}s that transform {@link String}s.
@@ -85,7 +85,7 @@ public final class StringTransformations {
     @Override
     @Nullable
     public String apply(@Nullable String string) {
-      return CharMatcher.WHITESPACE.trimFrom(string);
+      return whitespace().trimFrom(string);
     }
   };
   
