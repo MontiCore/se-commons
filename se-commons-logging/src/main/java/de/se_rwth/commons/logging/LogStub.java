@@ -23,9 +23,18 @@ public class LogStub extends Log {
   protected LogStub() { }
   
   /**
+   * Initialize the Log directly as Log (INFo, WARN, ERRORs)
+   * (and do not use a subclass like Slf4jLog)
+   */
+  public static void ensureInitalization() {
+    if (log == null) {
+      LogStub.init();
+    }
+  }
+  
+  /**
    * Initialize the LogStub as Log
    */
-  // Initialize the LogStub as Log
   public static void init() {
     Log l = new LogStub();
     l.isTRACE = false;

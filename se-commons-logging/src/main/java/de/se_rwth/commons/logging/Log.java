@@ -26,11 +26,21 @@ public class Log {
     }
     return log;
   }
-
+  
   /**
    * Initialize the Log directly as Log (INFo, WARN, ERRORs)
-   * (and do not use Slf4jLog)
+   * (and do not use a subclass like Slf4jLog)
    */
+  public static void ensureInitalization() {
+    if (log == null) {
+      Log.init();
+    }
+  }
+
+    /**
+     * Initialize the Log directly as Log (INFo, WARN, ERRORs)
+     * (and do not use a subclass like Slf4jLog)
+     */
   public static void init() {
     Log l = new Log();
     l.isTRACE = false;
