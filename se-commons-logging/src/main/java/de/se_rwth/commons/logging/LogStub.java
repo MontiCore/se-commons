@@ -61,6 +61,13 @@ public class LogStub extends Log {
   }
 
   /**
+   * Print something
+   */
+  protected void doPrintln(String msg) {
+    // do nothing
+  }
+
+  /**
    * Print something on error channel
    */
   protected void doErrPrint(String msg) {

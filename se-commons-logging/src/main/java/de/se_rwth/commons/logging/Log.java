@@ -147,7 +147,7 @@ public class Log {
    */
   protected void doTrace(String msg, String logName) {
     if(doIsTraceEnabled(logName)) {
-      doPrint("[TRACE] " + logName + " " + msg);
+      doPrintln("[TRACE] " + logName + " " + msg);
     }
   }
   
@@ -205,7 +205,7 @@ public class Log {
    */
   protected void doDebug(String msg, String logName) {
     if(doIsDebugEnabled(logName)) {
-      doPrint("[DEBUG] " + logName + " " + msg);
+      doPrintln("[DEBUG] " + logName + " " + msg);
     }
   }
   
@@ -263,7 +263,7 @@ public class Log {
    */
   protected void doInfo(String msg, String logName) {
     if(doIsInfoEnabled(logName)) {
-      doPrint("[INFO]  " + logName + " " + msg);
+      doPrintln("[INFO]  " + logName + " " + msg);
     }
 
   }
@@ -304,7 +304,7 @@ public class Log {
   protected void doWarn(String msg) {
     Finding warn = Finding.warning(msg);
     addFinding(warn);
-    doPrint("[WARN]  " + warn.toString());
+    doPrintln("[WARN]  " + warn.toString());
   }
   
   /**
@@ -323,7 +323,7 @@ public class Log {
   protected void doWarn(String msg, SourcePosition pos) {
     Finding warn = Finding.warning(msg, pos);
     addFinding(warn);
-    doPrint("[WARN]  " + warn.toString());
+    doPrintln("[WARN]  " + warn.toString());
   }
 
   /**
@@ -363,7 +363,7 @@ public class Log {
   protected void doWarn(String msg, Throwable t) {
     Finding warn = Finding.warning(msg);
     addFinding(warn);
-    doPrint("[WARN]  " + warn.toString());
+    doPrintln("[WARN]  " + warn.toString());
     doPrintStackTrace(t);
   }
   
@@ -625,15 +625,38 @@ public class Log {
     findings.clear();
   }
   
+  // ------------  print to stdout
+  /**
+   * Print something on System.out
+   */
+  public static void print(String msg) {
+    getLog().doPrint(msg);
+  }
   
   /**
    * Print something
    * (to be adapted in subclasses)
    */
   protected void doPrint(String msg) {
-    System.out.println(msg);
+    System.out.print(msg);
   }
   
+  /**
+   * Print something on System.out
+   */
+  public static void println(String msg) {
+    getLog().doPrintln(msg);
+  }
+
+  /**
+   * Print something
+   * (to be adapted in subclasses)
+   */
+  protected void doPrintln(String msg) {
+    doPrint(msg+"\n");
+  }
+  
+  // ------------  print to errout
   /**
    * Print something on error channel
    * (to be adapted in subclasses)
