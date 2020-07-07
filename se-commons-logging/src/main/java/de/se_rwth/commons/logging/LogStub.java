@@ -40,7 +40,7 @@ public class LogStub extends Log {
    * (WARN, ERRORs are internally memorized as findings)
    * (INFO and prints are memorized in the prints'List
    */
-  public static LogStub init() {
+  public static void init() {
     LogStub l = new LogStub();
     l.isTRACE = false;
     l.isDEBUG = false;
@@ -48,17 +48,20 @@ public class LogStub extends Log {
     l.isNonZeroExit = false;
     l.alsoBehavesLikeLog = false;
     Log.setLog(l);
-    return l;
   }
   
   /**
    * Initialize the LogStub as Log + original Log-Behavior
    * (like init(), but adds behavior as normal log)
    */
-  public static LogStub initPlusLog() {
-    LogStub l = LogStub.init();
-    l.alsoBehavesLikeLog = false;
-    return l;
+  public static void initPlusLog() {
+    LogStub l = new LogStub();
+    l.isTRACE = false;
+    l.isDEBUG = false;
+    l.isINFO  = true;
+    l.isNonZeroExit = false;
+    l.alsoBehavesLikeLog = true;
+    Log.setLog(l);
   }
   
   /**
@@ -104,7 +107,9 @@ public class LogStub extends Log {
   /**
    * Print something
    */
+  @Override
   protected void doPrint(String msg) {
+    if(alsoBehavesLikeLog) super.doPrint(msg);
     prints.add(msg);
   }
 
@@ -112,6 +117,7 @@ public class LogStub extends Log {
    * Print something
    */
   protected void doPrintln(String msg) {
+    if(alsoBehavesLikeLog) super.doPrintln(msg);
     prints.add(msg+"\n");
   }
 
@@ -119,6 +125,7 @@ public class LogStub extends Log {
    * Print something on error channel
    */
   protected void doErrPrint(String msg) {
+    if(alsoBehavesLikeLog) super.doErrPrint(msg);
     prints.add("Error: "+msg);
   }
 
@@ -126,6 +133,7 @@ public class LogStub extends Log {
    * Print stacktrace of a throwable
    */
   protected void doPrintStackTrace(Throwable t) {
+    if(alsoBehavesLikeLog) super.doPrintStackTrace(t);
     prints.add("Stacktrace of "+t.getClass()+" object");
   }
 
@@ -133,6 +141,7 @@ public class LogStub extends Log {
    * Print stacktrace of a throwable to error out
    */
   protected void doErrPrintStackTrace(Throwable t) {
+    if(alsoBehavesLikeLog) super.doErrPrintStackTrace(t);
     prints.add("Error: Stacktrace of "+t.getClass()+" object");
   }
 
