@@ -42,12 +42,13 @@ public class Log {
      * Initialize the Log directly as Log (INFO, WARN, ERRORs)
      * (and do not use a subclass like Slf4jLog)
      */
-  public static void init() {
+  public static Log init() {
     Log l = new Log();
     l.isTRACE = false;
     l.isDEBUG = false;
     l.isNonZeroExit = true;
     Log.setLog(l);
+    return l;
   }
 
   /**

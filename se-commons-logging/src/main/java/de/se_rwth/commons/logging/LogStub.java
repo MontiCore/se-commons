@@ -22,6 +22,9 @@ public class LogStub extends Log {
   
   protected LogStub() { }
   
+  // LogStub can in addition behave like Log (and.e.g output results)
+  boolean alsoBehavesLikeLog = false;
+  
   /**
    * Initialize the Log directly as Log (INFO, WARN, ERRORs)
    * (and do not use a subclass like Slf4jLog)
@@ -37,13 +40,25 @@ public class LogStub extends Log {
    * (WARN, ERRORs are internally memorized as findings)
    * (INFO and prints are memorized in the prints'List
    */
-  public static void init() {
-    Log l = new LogStub();
+  public static LogStub init() {
+    LogStub l = new LogStub();
     l.isTRACE = false;
     l.isDEBUG = false;
     l.isINFO  = true;
     l.isNonZeroExit = false;
+    l.alsoBehavesLikeLog = false;
     Log.setLog(l);
+    return l;
+  }
+  
+  /**
+   * Initialize the LogStub as Log + original Log-Behavior
+   * (like init(), but adds behavior as normal log)
+   */
+  public static LogStub initPlusLog() {
+    LogStub l = LogStub.init();
+    l.alsoBehavesLikeLog = false;
+    return l;
   }
   
   /**
