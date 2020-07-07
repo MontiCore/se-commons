@@ -5,7 +5,7 @@ import ch.qos.logback.core.ConsoleAppender
 import ch.qos.logback.core.FileAppender
 
 // this is a user friendly console appender
-// which only outputs level >= INFO
+// which only prints level >= INFO
 appender("CONSOLE", ConsoleAppender) {
   filter(ch.qos.logback.classic.filter.ThresholdFilter) { level = INFO }
   encoder(PatternLayoutEncoder) { pattern = "%-7([%level]) Custom Config %message%n%exception{0}" }

@@ -1,6 +1,7 @@
 /* (c) https://github.com/MontiCore/monticore */
 package de.se_rwth.commons.logging;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
@@ -12,6 +13,8 @@ import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
 
+import java.util.List;
+
 /**
  * This is a very basic test of the new centralized logging mechanism. The main
  * purpose is to demonstrate the API (it is rather pointless to test either
@@ -20,14 +23,11 @@ import ch.qos.logback.core.joran.spi.JoranException;
  */
 public class LogTest {
   
-  @BeforeClass
-  public static void initLogging() {
-    // disable fail quick for unit testing
-    Log.enableFailQuick(false);
-  }
-  
   @Test
   public void demonstrateLogging() {
+    LogStub.init();
+    Log.enableFailQuick(false);
+
     // using the centralized logging to explicitly log messages for the USER(!);
     // these messages are logged to the console with level >= INFO (see
     // configuration)
@@ -50,6 +50,7 @@ public class LogTest {
     
     demonstrateLogbackConfigurationForDeveloper();
   }
+  
   
   public void demonstrateLogbackConfigurationForUser() {
     LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
@@ -102,4 +103,25 @@ public class LogTest {
     Log.warn("Something went wrong.");
   }
   
+  @Test
+  public void testAndDemonstrateLogStubForDeveloper() {
+    // use stub (that stores the prints and the errors/warnings)
+    LogStub.init();
+    
+    Log.print("line 1");
+    Log.println("line 2");
+    Log.print("line 3\n");
+    List<String> r1 = LogStub.getPrints();
+    assertEquals(r1.size(),3);
+    assertEquals(r1.get(0),"line 1");
+    assertEquals(r1.get(1),"line 2\n");
+    assertEquals(r1.get(2),"line 3\n");
+    
+    LogStub.clearPrints();
+    Log.print("line 4");
+    Log.println("line 5");
+    List<String> r2 = LogStub.getPrints();
+    assertEquals(r2.size(),2);
+    assertEquals(r2.get(0),"line 4");
+  }
 }

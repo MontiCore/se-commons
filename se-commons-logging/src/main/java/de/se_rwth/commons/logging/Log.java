@@ -28,7 +28,8 @@ public class Log {
   }
   
   /**
-   * Initialize the Log directly as Log (INFo, WARN, ERRORs)
+   * Ensure Log is initialized, if not make a local default initialization:
+   * Initialize the Log directly as Log (INFO, WARN, ERRORs)
    * (and do not use a subclass like Slf4jLog)
    */
   public static void ensureInitalization() {
@@ -38,7 +39,7 @@ public class Log {
   }
 
     /**
-     * Initialize the Log directly as Log (INFo, WARN, ERRORs)
+     * Initialize the Log directly as Log (INFO, WARN, ERRORs)
      * (and do not use a subclass like Slf4jLog)
      */
   public static void init() {
@@ -50,7 +51,7 @@ public class Log {
   }
 
   /**
-   * Initialize the Log directly as Log (incl. DEBUG and TRACE infos)
+   * Initialize the Log directly as Log (also incl. DEBUG and TRACE infos)
    * (and do not use Slf4jLog)
    */
   public static void initDEBUG() {
@@ -265,7 +266,6 @@ public class Log {
     if(doIsInfoEnabled(logName)) {
       doPrintln("[INFO]  " + logName + " " + msg);
     }
-
   }
   
   /**
@@ -623,6 +623,15 @@ public class Log {
    */
   protected void doClearFindings() {
     findings.clear();
+  }
+  
+  /**
+   * Reset List of prints
+   */
+  public static void printFindings() {
+    for(int i = 0; i < getFindings().size(); i++) {
+      System.out.printf("#%d : %s\n", i, getFindings().get(i));
+    }
   }
   
   // ------------  print to stdout

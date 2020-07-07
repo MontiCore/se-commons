@@ -2,9 +2,9 @@
 package de.se_rwth.commons.logging;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-import de.se_rwth.commons.SourcePosition;
 
 /**
  * This class is a stub for the centralized logging component.
@@ -15,7 +15,7 @@ import de.se_rwth.commons.SourcePosition;
  * To initialize it, run LogStub.init();
  *
  * The Log superclass already stores findings, so there is no need
- * to manage them here. We only need to remove the output
+ * to manage them here. We only need to keep the output locally
  *
  */
 public class LogStub extends Log {
@@ -23,7 +23,7 @@ public class LogStub extends Log {
   protected LogStub() { }
   
   /**
-   * Initialize the Log directly as Log (INFo, WARN, ERRORs)
+   * Initialize the Log directly as Log (INFO, WARN, ERRORs)
    * (and do not use a subclass like Slf4jLog)
    */
   public static void ensureInitalization() {
@@ -34,12 +34,14 @@ public class LogStub extends Log {
   
   /**
    * Initialize the LogStub as Log
+   * (WARN, ERRORs are internally memorized as findings)
+   * (INFO and prints are memorized in the prints'List
    */
   public static void init() {
     Log l = new LogStub();
     l.isTRACE = false;
     l.isDEBUG = false;
-    l.isINFO  = false;    
+    l.isINFO  = true;
     l.isNonZeroExit = false;
     Log.setLog(l);
   }
@@ -53,49 +55,75 @@ public class LogStub extends Log {
     // does not terminate
   }
   
+  // ---------------------------------------------------
+  // Handle the output
+  
+  /**
+   * List of prints
+   */
+  protected static List<String> prints = new ArrayList<>();
+  
+  /**
+   * Reset List of prints
+   */
+  public static void clearPrints() {
+    prints = new ArrayList<>();
+  }
+  
+  /**
+   * Get List of prints
+   */
+  public static List<String> getPrints() {
+    return prints;
+  }
+  
+  /**
+   * Reset List of prints
+   */
+  public static void printPrints() {
+    for(int i = 0; i < prints.size(); i++) {
+      System.out.printf("#%d : %s\n", i, prints.get(i));
+    }
+  }
+  
   /**
    * Print something
    */
   protected void doPrint(String msg) {
-    // do nothing
+    prints.add(msg);
   }
 
   /**
    * Print something
    */
   protected void doPrintln(String msg) {
-    // do nothing
+    prints.add(msg+"\n");
   }
 
   /**
    * Print something on error channel
    */
   protected void doErrPrint(String msg) {
-    // do nothing
+    prints.add("Error: "+msg);
   }
 
   /**
    * Print stacktrace of a throwable
    */
   protected void doPrintStackTrace(Throwable t) {
-    // do nothing
+    prints.add("Stacktrace of "+t.getClass()+" object");
   }
 
   /**
    * Print stacktrace of a throwable to error out
    */
   protected void doErrPrintStackTrace(Throwable t) {
-    // do nothing
+    prints.add("Error: Stacktrace of "+t.getClass()+" object");
   }
 
 /*
- * Please note: Methods like 
-  
-  // The customized behaviour 
-  protected void doInfo(String msg, String logName) {   
-    
-  }
-
+ * Please note: Methods like
+  protected void doInfo(String msg, String logName) {  ...  }
  * need not be changed, because they call the print methods
  * and it is sufficient to adapt these methods
  */
