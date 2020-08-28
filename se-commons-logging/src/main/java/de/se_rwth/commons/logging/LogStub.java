@@ -154,7 +154,9 @@ public class LogStub extends Log {
   /**
    * Log to the specified log with level INFO.
    */
+  // The customized behaviour
   protected void doInfo(String msg, String logName) {
+    // adapted implementation
     super.doInfo(msg,logName);
   }
 
