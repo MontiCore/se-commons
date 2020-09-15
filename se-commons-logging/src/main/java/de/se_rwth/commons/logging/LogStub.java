@@ -151,5 +151,13 @@ public class LogStub extends Log {
  * need not be changed, because they call the print methods
  * and it is sufficient to adapt these methods
  */
+  /**
+   * Log to the specified log with level INFO.
+   */
+  // The customized behaviour
+  protected void doInfo(String msg, String logName) {
+    // adapted implementation
+    super.doInfo(msg,logName);
+  }
 
 }
