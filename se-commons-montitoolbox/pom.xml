@@ -7,7 +7,7 @@
   <parent>
     <groupId>de.se_rwth.commons</groupId>
     <artifactId>se-commons</artifactId>
-    <version>1.7.11</version>
+    <version>1.7.12-SNAPSHOT</version>
   </parent>
 
   <artifactId>se-commons-montitoolbox</artifactId>
