@@ -19,7 +19,7 @@ public class Log {
   // the single static delegator target
   protected static Log log;
 
-  // Getter for the underlying Log. By default Slf4jLog
+  // Getter for the underlying Log. 
   protected static Log getLog() {
     if (log == null) {
       Slf4jLog.init();
@@ -74,7 +74,7 @@ public class Log {
   /**
    * Initialize the Log as Slf4jLog
    * (which happens also if no explicit initialization is there)
-   * TODO: rem Slf4j from dependencies and move this initialisation 
+   * TODO: remove Slf4j from dependencies and move this initialisation 
    * into a subclass
    */
   public static void initSlf4j() {
