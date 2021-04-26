@@ -56,7 +56,7 @@
 
     <reflections.version>0.9.9</reflections.version>
     <jline.version>2.12</jline.version>
-    <commons.io.version>2.4</commons.io.version>
+    <commons.io.version>2.7</commons.io.version>
     <dependency.plugin>2.10</dependency.plugin>
 
 
