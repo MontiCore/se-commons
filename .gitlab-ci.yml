@@ -1,0 +1,29 @@
+# (c) https://github.com/MontiCore/monticore
+
+image: registry.git.rwth-aachen.de/monticore/container-registry/gradle:6.8.2-jdk8
+
+stages:
+  - build
+  - deploy
+
+before_script:
+  - export GRADLE_USER_HOME=`pwd`/.gradle
+
+
+build:
+  stage: build
+  script:
+    - "gradle build $GRADLE_OPT $ARGS1"
+  artifacts:
+    paths:
+      - "target/"
+      - ".gradle/"
+    expire_in: 1 week
+
+
+deploy:
+  stage: deploy
+  dependencies:
+    - build
+  script:
+    - "gradle publish -PmavenPassword=$pass -PmavenUser=$user $GRADLE_OPT $ARGS2"
