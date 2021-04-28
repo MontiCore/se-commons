@@ -1,0 +1,17 @@
+/* (c) https://github.com/MontiCore/monticore */
+description = 'se-commons: groovy'
+
+dependencies {
+    api project(":se-commons-utilities")
+    api project(":se-commons-logging")
+    implementation "jline:jline:$jline_version"
+    implementation "com.google.guava:guava:$guava_version"
+    implementation "javax.inject:javax.inject:$javax_inject_version"
+    implementation "com.google.code.findbugs:jsr305:$jsr305_version"
+    implementation "org.codehaus.groovy:groovy:$groovy_version"
+    implementation "ch.qos.logback:logback-classic:$logback_version"
+    implementation "ch.qos.logback:logback-core:$logback_version"
+    testImplementation "org.hamcrest:hamcrest-core:$hamcrest_version"
+    testImplementation "org.hamcrest:hamcrest-library:$hamcrest_version"
+    testImplementation "junit:junit:$junit_version"
+}
