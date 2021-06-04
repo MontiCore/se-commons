@@ -15,6 +15,7 @@ import de.se_rwth.commons.Splitters;
  * properties.
  *
  */
+@Deprecated
 public final class ConfigurationSystemPropertiesContributor extends
     ConfigurationPropertiesMapContributor {
   
