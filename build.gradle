@@ -101,4 +101,8 @@ subprojects {
     }
 }
 
+task cleanAll {
+  dependsOn(this.subprojects.collect {it.tasks.withType(Delete)})
+}
+
 defaultTasks 'build'
