@@ -65,8 +65,6 @@ subprojects {
         }
     }
 
-    // Fixes issue with java plugin in projects without resources
-    compileTestJava.doFirst { mkdir sourceSets.main.output.resourcesDir }
 
     tasks.withType(JavaCompile) {
         sourceCompatibility = JavaVersion.VERSION_1_8
