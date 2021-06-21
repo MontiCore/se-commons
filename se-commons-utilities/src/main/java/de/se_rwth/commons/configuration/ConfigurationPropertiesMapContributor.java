@@ -25,6 +25,7 @@ import de.se_rwth.commons.Values;
  * A {@link ConfigurationContributor} that returns values from CLI arguments.
  *
  */
+@Deprecated
 public class ConfigurationPropertiesMapContributor extends ConfigurationContributor {
   
   /**

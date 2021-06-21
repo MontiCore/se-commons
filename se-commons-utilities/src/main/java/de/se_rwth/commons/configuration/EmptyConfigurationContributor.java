@@ -15,6 +15,7 @@ import com.google.common.collect.ImmutableMap;
  *
  */
 @Singleton
+@Deprecated
 public final class EmptyConfigurationContributor extends ConfigurationContributor {
   
   static final EmptyConfigurationContributor SINGLETON = new EmptyConfigurationContributor();

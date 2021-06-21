@@ -8,6 +8,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * chain elements.
  *
  */
+@Deprecated
 public final class ConfigurationContributorChainBuilder {
   
   /**

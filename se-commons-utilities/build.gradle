@@ -12,6 +12,7 @@ dependencies {
     implementation "org.codehaus.groovy:groovy:$groovy_version"
     implementation "ch.qos.logback:logback-classic:$logback_version"
     implementation "ch.qos.logback:logback-core:$logback_version"
+    implementation "commons-cli:commons-cli:$commons_cli_version"
     testImplementation "org.hamcrest:hamcrest-core:$hamcrest_version"
     testImplementation "org.hamcrest:hamcrest-library:$hamcrest_version"
     testImplementation "junit:junit:$junit_version"
