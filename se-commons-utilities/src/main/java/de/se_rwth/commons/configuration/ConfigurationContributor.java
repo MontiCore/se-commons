@@ -8,6 +8,7 @@ import static com.google.common.base.Preconditions.checkState;
  * A part of a chain of {@link Configuration}s.
  *
  */
+@Deprecated
 public abstract class ConfigurationContributor implements Configuration {
   
   private final EmptyConfigurationContributor emptyContributor = EmptyConfigurationContributor.SINGLETON;

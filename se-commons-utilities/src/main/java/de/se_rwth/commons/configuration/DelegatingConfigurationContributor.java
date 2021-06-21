@@ -11,6 +11,7 @@ import java.util.Optional;
  * configuration chains.
  *
  */
+@Deprecated
 public final class DelegatingConfigurationContributor extends ConfigurationContributor {
   
   /* the configuration to delegate to */
