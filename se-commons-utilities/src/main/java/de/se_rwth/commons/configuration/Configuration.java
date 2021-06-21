@@ -3,6 +3,7 @@ package de.se_rwth.commons.configuration;
 
 import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Ints;
+import jline.internal.Log;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
 
@@ -178,8 +179,8 @@ public interface Configuration {
    * @return the command line API object containing the configuration
    */
   default CommandLine getConfig() {
-    throw new UnsupportedOperationException("0xA1010 The getter for the " +
-            "configuration is not implemented. You might want to implement a " +
-            "wrapper class to allow getting this value.");
+    Log.error("0xA1010 The getter for the configuration is not implemented. " +
+            "You might want to implement a wrapper class to allow getting this value.");
+    return null;
   }
 }
