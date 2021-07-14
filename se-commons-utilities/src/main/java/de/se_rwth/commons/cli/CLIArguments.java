@@ -18,8 +18,9 @@ import com.google.common.collect.Iterators;
 
 /**
  * Parses and represents arguments passed on the command line.
- *
+ * @deprecated use Apache commons-cli
  */
+@Deprecated
 public final class CLIArguments {
   
   /**
