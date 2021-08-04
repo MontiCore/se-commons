@@ -1,4 +1,10 @@
 /* (c) https://github.com/MontiCore/monticore */
+
+plugins {
+  id 'groovy'
+  id 'java-gradle-plugin'
+  id 'maven-publish'
+}
 description = 'se-commons: groovy'
 
 dependencies {
@@ -12,4 +18,11 @@ dependencies {
     testImplementation "org.hamcrest:hamcrest-core:$hamcrest_version"
     testImplementation "org.hamcrest:hamcrest-library:$hamcrest_version"
     testImplementation "junit:junit:$junit_version"
+}
+
+gradlePlugin.plugins {
+  segroovy {
+    id = "se-groovy"
+    implementationClass = 'de.monticore.SEGroovyPlugin'
+  }
 }
