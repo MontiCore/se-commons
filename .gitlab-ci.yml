@@ -27,3 +27,7 @@ deploy:
     - build
   script:
     - "gradle publish -PmavenPassword=$pass -PmavenUser=$user $GRADLE_OPT $ARGS2"
+  only:
+    - dev
+  except:
+    - master
