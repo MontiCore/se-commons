@@ -99,17 +99,17 @@ public class Log {
   }
   
   // terminate immediately on errors?
-  boolean failQuick = true;
+  protected boolean failQuick = true;
   
   // terminate with an non-zero exit code
-  boolean isNonZeroExit = true;
+  protected boolean isNonZeroExit = true;
 
   // show debugging and tracing info?
-  boolean isDEBUG = true;
-  boolean isTRACE = true;
-  boolean isINFO  = true;
+  protected boolean isDEBUG = false;
+  protected boolean isTRACE = false;
+  protected boolean isINFO  = false;
   
-  List<Finding> findings = new ArrayList<>();
+  protected List<Finding> findings = new ArrayList<>();
   
   /* Utility class. */
   protected Log() {
