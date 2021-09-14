@@ -4,9 +4,9 @@ package de.monticore
 import com.google.common.collect.ImmutableListMultimap
 import com.google.common.collect.ImmutableMultimap
 import de.se_rwth.commons.configuration.Configuration
-import de.se_rwth.commons.configuration.ConfigurationPropertiesMapContributor
 import de.se_rwth.commons.groovy.GroovyInterpreter
 import de.se_rwth.commons.groovy.GroovyRunner
+import de.se_rwth.commons.groovy.GroovyRunnerMapConfiguration
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.*
 import org.gradle.work.InputChanges
@@ -182,7 +182,7 @@ public class SEGroovyTask extends DefaultTask {
       arguments2.putAll("outputDir", fromBasePath(outputDirectory).getPath())
     }
   
-    configuration = ConfigurationPropertiesMapContributor.fromSplitMap(arguments2.build())
+    configuration = GroovyRunnerMapConfiguration.fromSplitMap(arguments2.build())
   
     // 4th we run the script
     GroovyInterpreter.Builder builder = GroovyInterpreter.newInterpreter()
