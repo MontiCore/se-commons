@@ -46,6 +46,7 @@ public class Log {
     Log l = new Log();
     l.isTRACE = false;
     l.isDEBUG = false;
+    l.isINFO = true;
     l.isNonZeroExit = true;
     Log.setLog(l);
   }
