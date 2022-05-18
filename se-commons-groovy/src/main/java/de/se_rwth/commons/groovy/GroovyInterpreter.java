@@ -1,23 +1,22 @@
 /* (c) https://github.com/MontiCore/monticore */
 package de.se_rwth.commons.groovy;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.common.base.Charsets;
+import com.google.common.base.Throwables;
+import com.google.common.io.CharSource;
+import com.google.common.io.Files;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
+import org.codehaus.groovy.GroovyException;
+import org.codehaus.groovy.control.CompilerConfiguration;
+import org.codehaus.groovy.control.customizers.ImportCustomizer;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
-import org.codehaus.groovy.GroovyException;
-import org.codehaus.groovy.control.CompilerConfiguration;
-import org.codehaus.groovy.control.customizers.ImportCustomizer;
-
-import com.google.common.base.Charsets;
-import com.google.common.base.Throwables;
-import com.google.common.io.CharSource;
-import com.google.common.io.Files;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * An interpreter for Groovy scripts.
@@ -105,7 +104,7 @@ public class GroovyInterpreter {
       evaluate(scriptSource.read());
     }
     catch (IOException e) {
-      Throwables.propagate(e);
+      Throwables.throwIfUnchecked(e);
     }
   }
   
@@ -133,7 +132,7 @@ public class GroovyInterpreter {
       tryEvaluate(scriptSource.read());
     }
     catch (IOException e) {
-      Throwables.propagate(e);
+      Throwables.throwIfUnchecked(e);
     }
   }
   
