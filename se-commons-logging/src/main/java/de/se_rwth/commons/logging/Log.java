@@ -56,7 +56,12 @@ public class Log {
    * (and do not use Slf4jLog)
    */
   public static void initDEBUG() {
-    Log.setLog(new Log());
+    Log l = new Log();
+    l.isDEBUG = true;
+    l.isTRACE = true;
+    l.isINFO = true;
+    l.isNonZeroExit = true;
+    Log.setLog(l);
   }
 
   /**
