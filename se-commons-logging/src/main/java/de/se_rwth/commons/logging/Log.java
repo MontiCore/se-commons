@@ -5,6 +5,7 @@ import de.se_rwth.commons.SourcePosition;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Provides a centralized logging component. Subclasses may provide customized
@@ -108,6 +109,8 @@ public class Log {
   protected boolean failQuick = true;
   
   // terminate with an non-zero exit code
+  @Deprecated
+  // Deprecated. exit-code has no effect.
   protected boolean isNonZeroExit = true;
 
   // show debugging and tracing info?
@@ -498,7 +501,9 @@ public class Log {
   
   /**
    * Enables/disables terminating with non-zero exit code
+   * Deprecated. exit-code has no effect.
    */
+  @Deprecated
   public static final void enableNonZeroExit(boolean enable) {
     getLog().doEnableNonZeroExit(enable);
   }
@@ -513,7 +518,9 @@ public class Log {
   
   /**
    * Enables/disables terminating with non-zero exit code
+   * Deprecated. exit-code has no effect.
    */
+  @Deprecated
   protected void doEnableNonZeroExit(boolean enable) {
     this.isNonZeroExit = enable;
   }
@@ -568,16 +575,20 @@ public class Log {
   
   /**
    * Is exit with non-zero code enabled?
-   * 
+   * Deprecated. exit-code has no effect.
+   *
    * @return whether non-zero exit is enabled
    */
+  @Deprecated
   public static final boolean isNonZeroExitEnabled() {
     return getLog().doIsNonZeroExitEnabled();
   }
   
   /**
    * Is exit with non-zero code enabled?
+   * Deprecated. exit-code has no effect.
    */
+  @Deprecated
   protected boolean doIsNonZeroExitEnabled() {
     return this.isNonZeroExit;
   }
@@ -590,12 +601,15 @@ public class Log {
   }
   
   /**
-   * Check and terminate if required; i.e. if fail quick or non-zero exit code
-   * are enabled enabled and error count greater than zero.
+   * Check and terminate if required; i.e. if fail quick is enabled and error count greater than zero.
    */
   protected void terminateIfErrors() {
     if (isFailQuickEnabled() && getErrorCount() > 0) {
-      System.exit(isNonZeroExitEnabled() ? -1 : 0);
+      String messages = this.findings.stream()
+          .filter(Finding::isError)
+          .map(Finding::toString)
+          .collect(Collectors.joining("\n"));
+      throw new MCFatalError(messages);
     }
   }
   
