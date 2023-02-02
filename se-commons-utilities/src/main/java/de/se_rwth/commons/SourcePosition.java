@@ -1,6 +1,7 @@
 /* (c) https://github.com/MontiCore/monticore */
 package de.se_rwth.commons;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import org.apache.commons.io.FilenameUtils;
@@ -132,8 +133,7 @@ public final class SourcePosition implements Comparable<SourcePosition>, Cloneab
       SourcePosition other = (SourcePosition) o;
       return Integer.valueOf(this.line).equals(Integer.valueOf(other.line))
           && Integer.valueOf(this.column).equals(Integer.valueOf(other.column))
-          && ((!this.fileName.isPresent() && !other.fileName.isPresent()) ||
-          this.fileName.get().equals(other.fileName.get()));
+          && Objects.equals(this.fileName, other.fileName);
     }
     return false;
   }
