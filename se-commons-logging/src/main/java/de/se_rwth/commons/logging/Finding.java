@@ -14,7 +14,7 @@ public class Finding {
   private static final String FORMAT_WITH_SOURCEPOSITION = "%s: %s";
   
   public static enum Type {
-    WARNING, ERROR;
+    WARNING, ERROR, USER_ERROR;
   }
   
   private Finding.Type type;
@@ -134,7 +134,15 @@ public class Finding {
   }
   
   public boolean isError() {
-    return this.type == Type.ERROR;
+    return this.type == Type.ERROR || this.type == Type.USER_ERROR;
+  }
+  
+  public boolean isInternalError() {
+    return this.type == Type.ERROR ;
+  }
+  
+  public boolean isUserError() {
+    return this.type == Type.USER_ERROR ;
   }
   
   /**
@@ -184,6 +192,18 @@ public class Finding {
 
   public static Finding error(String message, SourcePosition start, SourcePosition end) {
     return new Finding(Type.ERROR, message, start, end);
+  }
+  
+  public static Finding userError(String message) {
+    return new Finding(Type.USER_ERROR, message);
+  }
+  
+  public static Finding userError(String message, SourcePosition sourcePosition) {
+    return new Finding(Type.USER_ERROR, message, sourcePosition);
+  }
+  
+  public static Finding userError(String message, SourcePosition start, SourcePosition end) {
+    return new Finding(Type.USER_ERROR, message, start, end);
   }
   
   public static Finding warning(String message) {

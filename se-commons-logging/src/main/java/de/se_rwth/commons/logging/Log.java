@@ -87,7 +87,20 @@ public class Log {
   public static void initSlf4j() {
     Slf4jLog.init();
   }
-
+  
+  /**
+   * Initialize the Log as Log for interative systems (INFO, WARN,
+   * (INTERNAL)ERROR, USER-ERROR)
+   */
+  public static void initInteractive() {
+    Log l = new Log();
+    l.isTRACE = false;
+    l.isDEBUG = false;
+    l.isINFO = true;
+    l.isNonZeroExit = true;
+    l.isInteractive = true;
+    Log.setLog(l);
+  }
 
   /**
    * Assigns a new {@link Log} to use as central logging.
@@ -107,6 +120,9 @@ public class Log {
   
   // terminate immediately on errors?
   protected boolean failQuick = true;
+  
+  // logging for interactive systems -> never terminates system
+  protected boolean isInteractive  = false;
   
   // terminate with an non-zero exit code
   @Deprecated
@@ -308,6 +324,16 @@ public class Log {
   }
   
   /**
+   * Log with level WARN. Intended for interactive systems.
+   * Delegates to the default doWarn method.
+   *
+   * @param msg the warn message
+   */
+  public static final void warnUser(String msg) {
+    getLog().doWarn(msg);
+  }
+  
+  /**
    * Log with level WARN.
    */
   protected void doWarn(String msg) {
@@ -458,6 +484,41 @@ public class Log {
   }
   
   /**
+   * Log with level ERROR. Intended for interactive systems.
+   * Delegates to the default doError method.
+   *
+   * @param msg the error message
+   */
+  public static final void errorInternal(String msg) {
+    getLog().doError(msg);
+  }
+  
+  /**
+   * Log with level ERROR. Intended for interactive systems.
+   * Delegates to a custom doUserError method, which provides
+   * custom behavior not affecting the overall system.
+   * Only available in interactive mode. Otherwise, uses default logging.
+   *
+   * @param msg the error message
+   */
+  public static final void errorUser(String msg) {
+    if (isInteractive()) {
+      getLog().doErrorUser(msg);
+    } else {
+      error(msg);
+    }
+  }
+  
+  /**
+   * Log with level ERROR. For user errirs in interactive systems.
+   */
+  protected void doErrorUser(String msg) {
+    Finding error = Finding.userError(msg);
+    addFinding(error);
+    doErrPrint("[USER-ERROR] " + error.toString());
+  }
+  
+  /**
    * Checks whether the given reference is a null reference.
    * 
    * @param reference to check
@@ -514,6 +575,43 @@ public class Log {
   protected void doEnableFailQuick(boolean enable) {
     this.failQuick = enable;
     terminateIfErrors();
+  }
+  
+  /**
+   * Enables/disables interactive mode. If interactive mode is disnabled
+   * (default) each invocation of an error log should terminate the
+   * application. While interactive mode is enabled, the amount of error logs
+   * is stored and can be accessed by {@link Log#getErrorCount()}.
+   * Also, the application distinguishes between user errors (expected
+   * system behavior) and internal errors (unexpected system behavior).
+   *
+   * @param enable or disable interactive mode
+   */
+  public static final void enableInteractive(boolean enable) {
+    getLog().doEnableInteractive(enable);
+  }
+  
+  /**
+   * Enables/disables interactive mode.
+   */
+  protected void doEnableInteractive(boolean enable) {
+    this.isInteractive = enable;
+  }
+  
+  /**
+   * Is fail quick enabled?
+   *
+   * @return whether fail quick is enabled
+   */
+  public static final boolean isInteractive() {
+    return getLog().doIsInteractive();
+  }
+  
+  /**
+   * Is fail quick enabled?
+   */
+  protected boolean doIsInteractive() {
+    return this.isInteractive;
   }
   
   /**
@@ -604,7 +702,11 @@ public class Log {
    * Check and terminate if required; i.e. if fail quick is enabled and error count greater than zero.
    */
   protected void terminateIfErrors() {
-    if (isFailQuickEnabled() && getErrorCount() > 0) {
+    // do not exit if:
+    // 1. fail quick is disabled
+    // 2. no error occured
+    // 3. running in interactive mode
+    if (isFailQuickEnabled() && getErrorCount() > 0 && !isInteractive()) {
       String messages = this.findings.stream()
           .filter(Finding::isError)
           .map(Finding::toString)
