@@ -492,6 +492,43 @@ public class Log {
   public static final void errorInternal(String msg) {
     getLog().doError(msg);
   }
+
+  /**
+   * Log with level ERROR and source position.
+   * Intended for interactive systems.
+   * Delegates to the default doError method.
+   *
+   * @param msg the error message
+   * @param pos the source position in a model file which caused the error
+   */
+  public static final void errorInternal(String msg, SourcePosition pos) {
+    getLog().doError(msg, pos);
+  }
+
+  /**
+   * Log with level ERROR and source position.
+   * Intended for interactive systems.
+   * Delegates to the default doError method.
+   *
+   * @param msg the error message
+   * @param start the start position in a model file which caused the error
+   * @param end the end position in a model file which caused the error
+   */
+  public static final void errorInternal(String msg, SourcePosition start, SourcePosition end) {
+    getLog().doError(msg, start, end);
+  }
+
+  /**
+   * Log with level ERROR.
+   * Intended for interactive systems.
+   * Delegates to the default doError method.
+   *
+   * @param msg the error message
+   * @param t the exception to log
+   */
+  public static final void errorInternal(String msg, Throwable t) {
+    getLog().doError(msg, t);
+  }
   
   /**
    * Log with level ERROR. Intended for interactive systems.
@@ -508,14 +545,94 @@ public class Log {
       error(msg);
     }
   }
+
+  /**
+   * Log with level ERROR and source position.
+   * Delegates to a custom doUserError method, which provides
+   * custom behavior not affecting the overall system.
+   * Only available in interactive mode. Otherwise, uses default logging.
+   *
+   * @param msg the error message
+   * @param pos the source position in a model file which caused the error
+   */
+  public static final void errorUser(String msg, SourcePosition pos) {
+    if (isInteractive()) {
+      getLog().doErrorUser(msg, pos);
+    } else {
+      error(msg, pos);
+    }
+  }
+
+  /**
+   * Log with level ERROR. Intended for interactive systems.
+   * Delegates to a custom doUserError method, which provides
+   * custom behavior not affecting the overall system.
+   * Only available in interactive mode. Otherwise, uses default logging.
+   *
+   * @param msg the error message
+   * @param start the start position in a model file which caused the error
+   * @param end the end position in a model file which caused the error
+   */
+  public static final void errorUser(String msg, SourcePosition start, SourcePosition end) {
+    if (isInteractive()) {
+      getLog().doErrorUser(msg, start, end);
+    } else {
+      error(msg, start, end);
+    }
+  }
+
+  /**
+   * Log with level ERROR. Intended for interactive systems.
+   * Delegates to a custom doUserError method, which provides
+   * custom behavior not affecting the overall system.
+   * Only available in interactive mode. Otherwise, uses default logging.
+   *
+   * @param msg the error message
+   * @param t the exception to log
+   */
+  public static final void errorUser(String msg, Throwable t) {
+    if (isInteractive()) {
+      getLog().doErrorUser(msg, t);
+    } else {
+      error(msg, t);
+    }
+  }
   
   /**
-   * Log with level ERROR. For user errirs in interactive systems.
+   * Log with level ERROR. For user errors in interactive systems.
    */
   protected void doErrorUser(String msg) {
     Finding error = Finding.userError(msg);
     addFinding(error);
     doErrPrint("[USER-ERROR] " + error.toString());
+  }
+
+  /**
+   * Log with level ERROR and source position. For user errors in interactive systems.
+   */
+  protected void doErrorUser(String msg, SourcePosition pos) {
+    Finding error = Finding.userError(msg, pos);
+    addFinding(error);
+    doErrPrint("[USER-ERROR] " + error.toString());
+  }
+
+  /**
+   * Log with level ERROR and source position for start and end. For user errors in interactive systems.
+   */
+  protected void doErrorUser(String msg, SourcePosition start, SourcePosition end) {
+    Finding error = Finding.userError(msg, start, end);
+    addFinding(error);
+    doErrPrint("[USER-ERROR] " + error.toString());
+  }
+
+  /**
+   * Log with level ERROR. For user errors in interactive systems.
+   */
+  protected void doErrorUser(String msg, Throwable t) {
+    Finding error = Finding.userError(msg);
+    addFinding(error);
+    doErrPrint("[USER-ERROR] " + error.toString());
+    doErrPrintStackTrace(t);
   }
   
   /**
