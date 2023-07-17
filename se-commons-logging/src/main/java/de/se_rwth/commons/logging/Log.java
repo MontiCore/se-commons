@@ -235,21 +235,21 @@ public class Log {
     }
   }
 
-  public static final void debug(String msg, String logName, SourcePosition pos) {
-    getLog().doDebug(msg, logName, pos);
+  public static final void debug(String msg, SourcePosition pos, String logName) {
+    getLog().doDebug(msg, pos, logName);
   }
 
-  protected void doDebug(String msg, String logName, SourcePosition pos) {
+  protected void doDebug(String msg, SourcePosition pos, String logName) {
     if (doIsDebugEnabled(logName)) {
       doPrintln("[DEBUG] " + logName + " " + msg + " " + pos.toString());
     }
   }
 
-  public static final void debug(String msg, String logName, SourcePosition start, SourcePosition end) {
-    getLog().doDebug(msg, logName, start, end);
+  public static final void debug(String msg, SourcePosition start, SourcePosition end, String logName) {
+    getLog().doDebug(msg, start, end, logName);
   }
 
-  protected void doDebug(String msg, String logName, SourcePosition start, SourcePosition end) {
+  protected void doDebug(String msg, SourcePosition start, SourcePosition end, String logName) {
     if (doIsDebugEnabled(logName)) {
       doPrintln("[DEBUG] " + logName + " " + msg + " " + start.toString() + " " + end.toString());
     }
