@@ -234,7 +234,27 @@ public class Log {
       doPrintln("[DEBUG] " + logName + " " + msg);
     }
   }
-  
+
+  public static final void debug(String msg, String logName, SourcePosition pos) {
+    getLog().doDebug(msg, logName, pos);
+  }
+
+  protected void doDebug(String msg, String logName, SourcePosition pos) {
+    if (doIsDebugEnabled(logName)) {
+      doPrintln("[DEBUG] " + logName + " " + msg + " " + pos.toString());
+    }
+  }
+
+  public static final void debug(String msg, String logName, SourcePosition start, SourcePosition end) {
+    getLog().doDebug(msg, logName, start, end);
+  }
+
+  protected void doDebug(String msg, String logName, SourcePosition start, SourcePosition end) {
+    if (doIsDebugEnabled(logName)) {
+      doPrintln("[DEBUG] " + logName + " " + msg + " " + start.toString() + " " + end.toString());
+    }
+  }
+
   /**
    * Log to the specified log name with level DEBUG.
    * 
