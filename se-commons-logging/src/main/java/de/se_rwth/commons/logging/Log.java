@@ -241,7 +241,7 @@ public class Log {
 
   protected void doDebug(String msg, SourcePosition pos, String logName) {
     if (doIsDebugEnabled(logName)) {
-      doPrintln("[DEBUG] " + logName + " " + msg + " " + pos.toString());
+      doPrintln("[DEBUG] " + logName + " " + pos.toString() + ":" + msg);
     }
   }
 
@@ -251,7 +251,7 @@ public class Log {
 
   protected void doDebug(String msg, SourcePosition start, SourcePosition end, String logName) {
     if (doIsDebugEnabled(logName)) {
-      doPrintln("[DEBUG] " + logName + " " + msg + " " + start.toString() + " " + end.toString());
+      doPrintln("[DEBUG] " + logName + " " + start.toString() + " " + end.toString() + ":" + msg);
     }
   }
 
