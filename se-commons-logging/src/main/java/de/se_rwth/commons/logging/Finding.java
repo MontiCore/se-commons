@@ -11,7 +11,9 @@ import de.se_rwth.commons.SourcePosition;
  *
  */
 public class Finding {
-  private static final String FORMAT_WITH_SOURCEPOSITION = "%s: %s";
+  private static final String FORMAT_WITH_SOURCE_POSITION = "%s: %s";
+
+  private static final String FORMAT_WITH_TWO_SOURCE_POSITIONS = "%s - %s: %s";
   
   public static enum Type {
     WARNING, ERROR, USER_ERROR;
@@ -72,8 +74,10 @@ public class Finding {
    * @return the formatted message
    */
   public String buildMsg() {
-    if (this.sourcePosition.isPresent()) {
-      return String.format(FORMAT_WITH_SOURCEPOSITION, this.sourcePosition.get(), this.msg);
+    if (this.sourcePositionEnd.isPresent() && this.sourcePosition.isPresent()) {
+      return String.format(FORMAT_WITH_TWO_SOURCE_POSITIONS, this.sourcePosition.get(), this.sourcePositionEnd.get(), this.msg);
+    } else if (this.sourcePosition.isPresent()) {
+      return String.format(FORMAT_WITH_SOURCE_POSITION, this.sourcePosition.get(), this.msg);
     }
     else {
       return this.msg;
