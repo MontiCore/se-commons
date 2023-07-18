@@ -5,6 +5,7 @@ image: registry.git.rwth-aachen.de/monticore/container-registry/gradle:6.8.2-jdk
 stages:
   - build
   - deploy
+  - trigger_mc
 
 before_script:
   - export GRADLE_USER_HOME=`pwd`/.gradle
@@ -31,3 +32,11 @@ deploy:
     - dev
   except:
     - master
+
+trigger_mc_dev:
+  stage: trigger_mc
+  trigger:
+    project: monticore/monticore
+    branch: dev
+  only:
+    - dev
