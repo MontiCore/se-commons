@@ -84,6 +84,7 @@ public class Log {
    * TODO: remove Slf4j from dependencies and move this initialisation 
    * into a subclass
    */
+  @Deprecated
   public static void initSlf4j() {
     Slf4jLog.init();
   }
