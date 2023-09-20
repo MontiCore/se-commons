@@ -1,11 +1,10 @@
+/* (c) https://github.com/MontiCore/monticore */
 import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 import org.gradle.api.tasks.testing.logging.TestLogEvent
 
-/* (c) https://github.com/MontiCore/monticore */
-
 plugins {
     id 'java-library'
-    id "de.set.ecj" version "1.4.1" // Eclipse compiler as it's much faster than javac
+    id "io.github.themrmilchmann.ecj" version "0.2.0" // Eclipse compiler as it's much faster than javac
     id "org.sonarqube" version "3.0"
     id "jacoco"
     id 'org.barfuin.gradle.jacocolog' version '1.2.3'
@@ -31,7 +30,7 @@ allprojects {
 
 subprojects {
     apply plugin: 'java-library'
-    apply plugin : 'de.set.ecj'
+    apply plugin : 'io.github.themrmilchmann.ecj'
 
     tasks.withType(Test) {
         useJUnit()
