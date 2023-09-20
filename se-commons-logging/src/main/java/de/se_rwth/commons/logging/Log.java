@@ -11,8 +11,8 @@ import java.util.stream.Collectors;
  * Provides a centralized logging component. Subclasses may provide customized
  * implementations by setting itself as the singleton delegator target using
  * {@link Log#setLog(Log)}.<br>
- * If no other initialization is performed {@link Slf4jLog} will be used by
- * default.<br>
+ * If no other initialization is performed, then the Log is initialized
+ * directly (@see Log#init())
  * <br>
  */
 public class Log {
@@ -22,9 +22,7 @@ public class Log {
 
   // Getter for the underlying Log. 
   protected static Log getLog() {
-    if (log == null) {
-      Slf4jLog.init();
-    }
+    ensureInitalization();
     return log;
   }
   
