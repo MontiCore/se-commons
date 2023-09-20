@@ -22,7 +22,7 @@ public class Log {
 
   // Getter for the underlying Log. 
   protected static Log getLog() {
-    ensureInitalization();
+    ensureInitialization();
     return log;
   }
   
@@ -31,7 +31,7 @@ public class Log {
    * Initialize the Log directly as Log (INFO, WARN, ERRORs)
    * (and do not use a subclass like Slf4jLog)
    */
-  public static void ensureInitalization() {
+  public static void ensureInitialization() {
     if (log == null) {
       Log.init();
     }
