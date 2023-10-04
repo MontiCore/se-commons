@@ -1,7 +1,7 @@
 <!-- (c) https://github.com/MontiCore/monticore -->
 # SE Commons
 SE Commons is a collection of utilities and tools. It is among others used 
-development of [MontiCore](http://www.monticore.de). 
+development of [MontiCore](https://www.monticore.de). 
 However, these libraries can be used independently from MontiCore.
 SE Commons comprises the following components:
 
@@ -32,7 +32,7 @@ On Windows you should configure git to not automatically replace LF with CRLF du
 ## Further Information
 
 * [Project root: MontiCore @github](https://github.com/MontiCore/monticore)
-* [MontiCore documentation](http://www.monticore.de/)
+* [MontiCore documentation](https://www.monticore.de/)
 * [**List of languages**](https://github.com/MontiCore/monticore/blob/opendev/docs/Languages.md)
 * [**MontiCore Core Grammar Library**](https://github.com/MontiCore/monticore/blob/opendev/monticore-grammar/src/main/grammars/de/monticore/Grammars.md)
 * [Best Practices](https://github.com/MontiCore/monticore/blob/opendev/docs/BestPractices.md)
