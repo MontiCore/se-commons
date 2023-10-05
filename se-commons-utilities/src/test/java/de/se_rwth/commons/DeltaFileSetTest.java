@@ -1,18 +1,17 @@
 /* (c) https://github.com/MontiCore/monticore */
 package de.se_rwth.commons;
 
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
+import com.google.common.base.Charsets;
+import com.google.common.io.Files;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.IOException;
 
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-
-import com.google.common.base.Charsets;
-import com.google.common.io.Files;
+import static org.hamcrest.Matchers.hasSize;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 
 /**
  * TODO: Write me!

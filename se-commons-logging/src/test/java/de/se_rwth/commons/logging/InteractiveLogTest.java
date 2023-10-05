@@ -1,15 +1,9 @@
 /* (c) https://github.com/MontiCore/monticore */
 package de.se_rwth.commons.logging;
 
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.joran.JoranConfigurator;
-import ch.qos.logback.core.joran.spi.JoranException;
 import org.junit.Test;
-import org.slf4j.LoggerFactory;
 
-import java.util.List;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * This is a test of interactive mode of the Logger.

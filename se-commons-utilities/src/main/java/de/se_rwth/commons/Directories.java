@@ -1,15 +1,15 @@
 /* (c) https://github.com/MontiCore/monticore */
 package de.se_rwth.commons;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.common.collect.ImmutableList;
+import com.google.common.io.Files;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.io.Files;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Utility class with static methods to work with directories.

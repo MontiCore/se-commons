@@ -1,7 +1,12 @@
 /* (c) https://github.com/MontiCore/monticore */
 package de.se_rwth.commons;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.hash.Hashing;
+import com.google.common.io.Closer;
+import com.google.common.io.Files;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,13 +16,7 @@ import java.util.Collection;
 import java.util.Properties;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.ImmutableSet;
-import com.google.common.hash.Hashing;
-import com.google.common.io.Closer;
-import com.google.common.io.Files;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Traces file updates using SHA-1 hash codes.

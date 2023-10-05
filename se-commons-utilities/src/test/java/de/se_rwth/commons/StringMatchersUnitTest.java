@@ -1,12 +1,12 @@
 /* (c) https://github.com/MontiCore/monticore */
 package de.se_rwth.commons;
 
+import org.junit.Test;
+
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-
-import org.junit.Test;
 
 /**
  * Unit test for {@link StringMatchers}

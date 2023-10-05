@@ -1,8 +1,9 @@
 /* (c) https://github.com/MontiCore/monticore */
 package de.se_rwth.commons;
 
-import static com.google.common.base.MoreObjects.firstNonNull;
-import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.common.base.Charsets;
+import com.google.common.base.Throwables;
+import com.google.common.io.Files;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -11,12 +12,11 @@ import java.io.Reader;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Date;
+import java.util.Optional;
 import java.util.Properties;
 
-import com.google.common.base.Charsets;
-import java.util.Optional;
-import com.google.common.base.Throwables;
-import com.google.common.io.Files;
+import static com.google.common.base.MoreObjects.firstNonNull;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Provides build information about the running software containing this class..

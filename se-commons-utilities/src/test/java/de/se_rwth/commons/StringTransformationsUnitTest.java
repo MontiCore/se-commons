@@ -1,10 +1,10 @@
 /* (c) https://github.com/MontiCore/monticore */
 package de.se_rwth.commons;
 
+import org.junit.Test;
+
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-
-import org.junit.Test;
 
 /**
  * Unit test for {@link StringTransformations}.

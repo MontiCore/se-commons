@@ -1,8 +1,7 @@
 /* (c) https://github.com/MontiCore/monticore */
 
+
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder
-import ch.qos.logback.core.ConsoleAppender
-import ch.qos.logback.core.FileAppender
 
 // this is a very user friendly console appender
 // which only prints level >= INFO

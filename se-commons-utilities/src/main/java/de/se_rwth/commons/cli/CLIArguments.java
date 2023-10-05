@@ -1,8 +1,11 @@
 /* (c) https://github.com/MontiCore/monticore */
 package de.se_rwth.commons.cli;
 
-import static com.google.common.collect.Lists.newArrayList;
+import com.google.common.base.CharMatcher;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterators;
 
+import javax.inject.Named;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -10,11 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.inject.Named;
-
-import com.google.common.base.CharMatcher;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterators;
+import static com.google.common.collect.Lists.newArrayList;
 
 /**
  * Parses and represents arguments passed on the command line.

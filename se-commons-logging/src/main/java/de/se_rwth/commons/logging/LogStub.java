@@ -2,7 +2,6 @@
 package de.se_rwth.commons.logging;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 

@@ -1,12 +1,11 @@
 /* (c) https://github.com/MontiCore/monticore */
 package de.se_rwth.commons.logging;
 
-import static org.slf4j.Logger.ROOT_LOGGER_NAME;
-
+import de.se_rwth.commons.SourcePosition;
 import org.slf4j.ILoggerFactory;
 import org.slf4j.LoggerFactory;
 
-import de.se_rwth.commons.SourcePosition;
+import static org.slf4j.Logger.ROOT_LOGGER_NAME;
 
 /**
  * The slf4j variant of {@link Log}. Use {@link Slf4jLog#init()} to enable

@@ -1,14 +1,13 @@
 /* (c) https://github.com/MontiCore/monticore */
 package de.se_rwth.commons;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import com.google.common.collect.ImmutableList;
+import org.junit.Test;
 
 import java.io.File;
 
-import org.junit.Test;
-
-import com.google.common.collect.ImmutableList;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 
 /**
  * Unit test for {@link Names}.

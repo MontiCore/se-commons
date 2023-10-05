@@ -1,10 +1,10 @@
 /* (c) https://github.com/MontiCore/monticore */
 package de.se_rwth.commons;
 
+import org.apache.commons.io.FilenameUtils;
+
 import java.util.Objects;
 import java.util.Optional;
-
-import org.apache.commons.io.FilenameUtils;
 
 /**
  * Represents a textual source code position, i.e., consisting of line and

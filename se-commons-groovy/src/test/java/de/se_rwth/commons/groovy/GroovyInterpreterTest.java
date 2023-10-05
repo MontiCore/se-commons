@@ -1,13 +1,13 @@
 /* (c) https://github.com/MontiCore/monticore */
 package de.se_rwth.commons.groovy;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import org.codehaus.groovy.GroovyException;
+import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.codehaus.groovy.GroovyException;
-import org.junit.Test;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 
 /**
  * Test for {@link GroovyInterpreter}.

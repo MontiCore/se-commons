@@ -1,10 +1,10 @@
 /* (c) https://github.com/MontiCore/monticore */
 package de.se_rwth.commons;
 
+import com.google.common.collect.ImmutableList;
+
 import java.util.List;
 import java.util.Optional;
-
-import com.google.common.collect.ImmutableList;
 
 /**
  * Helper functions for working with values.

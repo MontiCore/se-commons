@@ -1,20 +1,20 @@
 /* (c) https://github.com/MontiCore/monticore */
 package de.se_rwth.commons;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Iterables;
+
+import java.io.File;
+import java.util.List;
+import java.util.regex.Matcher;
+
 import static com.google.common.base.CharMatcher.whitespace;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Iterables.transform;
 import static de.se_rwth.commons.StringMatchers.DOT;
-
-import java.io.File;
-import java.util.List;
-import java.util.regex.Matcher;
-
-import com.google.common.base.Predicate;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Iterables;
 
 /**
  * Functions dealing with the composition and decomposition of names in models.

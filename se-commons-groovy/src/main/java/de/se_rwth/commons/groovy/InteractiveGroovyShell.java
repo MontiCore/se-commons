@@ -1,12 +1,11 @@
 /* (c) https://github.com/MontiCore/monticore */
 package de.se_rwth.commons.groovy;
 
+import jline.console.ConsoleReader;
+import org.codehaus.groovy.GroovyException;
+
 import java.io.IOException;
 import java.io.PrintWriter;
-
-import jline.console.ConsoleReader;
-
-import org.codehaus.groovy.GroovyException;
 
 /**
  * An interactive shell that delegates commands to a {@link GroovyInterpreter}.

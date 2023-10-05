@@ -1,9 +1,9 @@
 /* (c) https://github.com/MontiCore/monticore */
 package de.se_rwth.commons.logging;
 
-import java.util.Optional;
-
 import de.se_rwth.commons.SourcePosition;
+
+import java.util.Optional;
 
 /**
  * Represents an error or warning finding and defines a default log format for

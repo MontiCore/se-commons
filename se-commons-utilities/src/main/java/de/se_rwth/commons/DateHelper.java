@@ -1,14 +1,14 @@
 /* (c) https://github.com/MontiCore/monticore */
 package de.se_rwth.commons;
 
+import com.google.common.collect.Lists;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
-
-import com.google.common.collect.Lists;
 
 /**
  * Provides helper infrastructure to work with java date representation.
