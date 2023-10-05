@@ -5,8 +5,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.hash.Hashing;
 import com.google.common.io.Closer;
 import com.google.common.io.Files;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -45,14 +43,9 @@ public final class DeltaFileSet {
     public final Builder fromFile(File file) {
       
       checkNotNull(file);
-      
-      if (file.exists()) {
-        addFile(file);
-      }
-      else {
-        logger.warn("File/Directory \"{}\" does not exist.", file);
-      }
-      
+
+      addFile(file);
+
       return this;
     }
     
@@ -81,11 +74,6 @@ public final class DeltaFileSet {
     }
     
   }
-  
-  /**
-   * SLF4J logger
-   */
-  private static final Logger logger = LoggerFactory.getLogger(DeltaFileSet.class);
   
   /**
    * @return a new {@link Builder} for a file set of files with changes based on
@@ -143,17 +131,14 @@ public final class DeltaFileSet {
   
   /**
    * Computes the hash code for the content of the given file.
+   *
+   * @throws IOException
    */
-  private final String getHashCode(File file) {
+  private final String getHashCode(File file) throws IOException {
     
     String hashCode = "";
-    
-    try {
-      hashCode = Files.hash(file, Hashing.md5()).toString();
-    }
-    catch (IOException e) {
-      logger.error("Could not compute hash code of file {}", file);
-    }
+
+    hashCode = Files.hash(file, Hashing.md5()).toString();
     
     return hashCode;
   }
