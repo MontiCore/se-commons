@@ -4,6 +4,7 @@ package de.se_rwth.commons.logging;
 import de.se_rwth.commons.SourcePosition;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -133,7 +134,7 @@ public class Log {
   protected boolean isTRACE = false;
   protected boolean isINFO  = false;
   
-  protected List<Finding> findings = new ArrayList<>();
+  protected List<Finding> findings = Collections.synchronizedList(new ArrayList<>());
   
   /* Utility class. */
   protected Log() {
