@@ -38,3 +38,13 @@ trigger_mc_dev:
     branch: dev
   only:
     - dev
+
+trigger_montiverse:
+  stage: trigger_mc
+  trigger:
+    project: monticore/montiverseci
+  variables:
+    SECOMMONS_BRANCH: $CI_MERGE_REQUEST_SOURCE_BRANCH_NAME
+    FULL_MC: "true" # also run MontiCore experiments
+  rules:
+    - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
