@@ -1,0 +1,9 @@
+/* (c) https://github.com/MontiCore/monticore */
+
+description = 'se-commons: gradle'
+
+dependencies {
+  implementation gradleApi()
+  implementation "de.se_rwth.commons:se-commons-logging:$version"
+  implementation "org.apache.commons:commons-lang3:3.8.1"
+}

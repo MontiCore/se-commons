@@ -20,3 +20,4 @@ rootProject.name = 'se-commons'
 include(':se-commons-utilities')
 include(':se-commons-logging')
 include(':se-commons-groovy')
+include(':se-commons-gradle')
