@@ -32,7 +32,7 @@ public class CachedIsolation<T> {
    * Time (in ms) after the last use of an isolated classloader before its
    * allocated resources are freed
    */
-  protected final long closeThreshold = 10 * 1000; // 10 seconds
+  protected final long closeThreshold = 6 * 1000; // 6 seconds
 
   /**
    * We periodically clean up the open classloaders
