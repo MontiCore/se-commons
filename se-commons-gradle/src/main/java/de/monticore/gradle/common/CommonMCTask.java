@@ -47,7 +47,7 @@ import java.util.stream.StreamSupport;
  *  Instead, build upon {@link MCSingleFileTask} or {@link MCAllFilesTask}
  */
 public abstract class CommonMCTask extends DefaultTask {
-  final static String UMLP_TASK_DEBUG = "de.monticore.gradle.debug";
+   final static String TASK_DEBUG = "de.monticore.gradle.debug";
   final static String ORG_GRADLE_PARALLEL = "org.gradle.parallel";
 
   protected final ConfigurableFileCollection input = getProject().getObjects().fileCollection();
@@ -224,16 +224,15 @@ public abstract class CommonMCTask extends DefaultTask {
 
   public static void setDebugConvention(Project project, Property<Boolean> debugProp) {
     // Project wide setting of debug modus
-    if(project.hasProperty(UMLP_TASK_DEBUG)){
-      boolean debug = "true".equals(project.property(UMLP_TASK_DEBUG));
+    if(project.hasProperty(TASK_DEBUG)){
+      boolean debug = "true".equals(project.property(TASK_DEBUG));
       debugProp.convention(debug);
 
       // The debug-mode disables isolation... hence static variables are shared and errors can occur, especially in parallel execution.
       if(debug && project.hasProperty(ORG_GRADLE_PARALLEL) && "true".equals(project.property(ORG_GRADLE_PARALLEL))){
-        Log.warn("Gradle Parallel Execution should be disabled in MontiCore Debug Mode. \n" +
+        Log.warn("Gradle Parallel Execution should be disabled in Debug Mode. \n" +
             "Otherwise static variables (e.g., Mills, SymbolTables) of one Task can influence other parallel Tasks!\n" +
             "set\n\t" + ORG_GRADLE_PARALLEL + "=false\n in your <gradle.properties>" );
-        // TODO: Isolate via classloader
       }
     } else {
       // Default: No Debug
@@ -295,13 +294,10 @@ public abstract class CommonMCTask extends DefaultTask {
       getHandWrittenCodeDir().forEach(x -> result.add(handlePath.apply(x.toPath())));
     }
 
-    // fp/templatepath
-    // TODO: ME
-
     // hcg  handcodedModelPath
     if(!getHandWrittenGrammarDir().isEmpty()) {
       result.add("-" + AMontiCoreConfiguration.HANDCODEDMODELPATH);
-      getHandWrittenCodeDir().forEach(x -> result.add(handlePath.apply(x.toPath())));
+      getHandWrittenGrammarDir().forEach(x -> result.add(handlePath.apply(x.toPath())));
     }
 
     // configTemplate
@@ -311,7 +307,7 @@ public abstract class CommonMCTask extends DefaultTask {
     }
 
     // dev
-    if(getDebug().get() || true){
+    if(getDebug().get()){
       result.add("-" + AMontiCoreConfiguration.DEV);
     }
 
@@ -369,6 +365,7 @@ public abstract class CommonMCTask extends DefaultTask {
     if (getDebug().get()){
       // In debug mode, run code directly. Otherwise, breakpoints etc. do not work
       if (getExtraClasspathElements().isEmpty()) {
+        // we probably should isolate the mills?
         getRunMethod().accept(args.toArray(new String[0]));
       } else {
         // we have to add the extra classpath elements to the classpath
