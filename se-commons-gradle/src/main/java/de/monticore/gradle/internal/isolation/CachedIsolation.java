@@ -112,9 +112,7 @@ public class CachedIsolation<T> {
               .getMethod(method, String[].class)
               .invoke(null, (Object) args);
     } catch (ReflectiveOperationException e) {
-      e.printStackTrace();
-      throw new RuntimeException(prefix + ":" + e.getMessage() + "/" + getMessage(e), e);
-//      passThrowableAlong(e.getCause());
+      passThrowableAlong(e.getCause());
     } finally {
       if (prefix != null) {
         // Reset this threads prefix printers
@@ -186,6 +184,7 @@ public class CachedIsolation<T> {
             ((Closeable) data.classLoader).close();
           } catch (IOException ignored) { }
         }
+        data.classLoader = null;
         data.extraData = null;
         isolated.remove();
       }
