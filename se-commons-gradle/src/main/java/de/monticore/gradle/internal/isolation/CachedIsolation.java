@@ -15,7 +15,6 @@ import java.net.URLClassLoader;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -75,12 +74,16 @@ public class CachedIsolation<T> {
     return data;
   }
 
-  protected Set<String> getFilteredPackages() {
-    return Set.of("de.monticore");
+  /**
+   * @return a set of packages which may be loaded from the context classloader
+   * (and thus are not isolated)
+   */
+  protected Set<String> getPassThroughPackages() {
+    return Set.of("org.gradle");
   }
 
   protected ClassLoader getClassLoader(URLClassLoader contextClassLoader, Supplier<T> supplier) {
-    return new IsolatedURLClassLoader(contextClassLoader, getFilteredPackages());
+    return new IsolatedURLClassLoader(contextClassLoader, getPassThroughPackages());
   }
 
   /**
@@ -242,7 +245,7 @@ public class CachedIsolation<T> {
                         }
                       }), Arrays.stream(contextClassLoader.getURLs()))
               .toArray(URL[]::new);
-      return new IsolatedURLClassLoader(urls, contextClassLoader, getFilteredPackages());
+      return new IsolatedURLClassLoader(urls, contextClassLoader, getPassThroughPackages());
     }
   }
 

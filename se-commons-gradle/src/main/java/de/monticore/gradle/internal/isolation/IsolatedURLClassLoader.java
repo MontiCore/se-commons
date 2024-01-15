@@ -7,17 +7,17 @@ import java.net.URLClassLoader;
 import java.util.Set;
 
 public class IsolatedURLClassLoader extends URLClassLoader {
-  protected final Set<String> filteredPackages;
+  protected final Set<String> passThroughPackages;
   protected final ClassLoader contextClassLoader;
 
-  public IsolatedURLClassLoader(URLClassLoader contextClassLoader, Set<String> filteredPackages) {
-    this(contextClassLoader.getURLs(), contextClassLoader, filteredPackages);
+  public IsolatedURLClassLoader(URLClassLoader contextClassLoader, Set<String> passThroughPackages) {
+    this(contextClassLoader.getURLs(), contextClassLoader, passThroughPackages);
   }
 
-  public IsolatedURLClassLoader(URL[] urls, URLClassLoader contextClassLoader, Set<String> filteredPackages) {
+  public IsolatedURLClassLoader(URL[] urls, URLClassLoader contextClassLoader, Set<String> passThroughPackages) {
     super(urls, null);
     this.contextClassLoader = contextClassLoader;
-    this.filteredPackages = filteredPackages;
+    this.passThroughPackages = passThroughPackages;
   }
 
   @Override
@@ -25,9 +25,9 @@ public class IsolatedURLClassLoader extends URLClassLoader {
     try {
       return super.findClass(name);
     } catch (ClassNotFoundException e) {
-      if (filteredPackages.stream().anyMatch(name::startsWith))
+      if (passThroughPackages.stream().noneMatch(name::startsWith))
         throw e;
-      // Required to allow gradle transformer
+      // Required to allow gradle transformers
       return this.contextClassLoader.loadClass(name);
     }
   }
