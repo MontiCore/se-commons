@@ -22,6 +22,9 @@ public class IsolatedURLClassLoader extends URLClassLoader {
 
   @Override
   protected Class<?> findClass(String name) throws ClassNotFoundException {
+    // Share the CleanerProvider class
+    if (name.equals(CleanerProvider.class.getName()))
+      return CleanerProvider.class;
     try {
       return super.findClass(name);
     } catch (ClassNotFoundException e) {
