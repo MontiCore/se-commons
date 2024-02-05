@@ -6,6 +6,8 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Set;
 
+import de.se_rwth.commons.io.CleanerProvider;
+
 public class IsolatedURLClassLoader extends URLClassLoader {
   protected final Set<String> passThroughPackages;
   protected final ClassLoader contextClassLoader;
