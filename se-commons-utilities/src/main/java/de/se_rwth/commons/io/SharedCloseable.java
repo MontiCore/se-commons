@@ -1,12 +1,11 @@
 /* (c) https://github.com/MontiCore/monticore */
-package de.monticore.gradle.internal.isolation;
+package de.se_rwth.commons.io;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.lang.ref.Cleaner;
 
 /**
- * This class provides a
  * When no more references to this class exists,
  *  the wrapped closeable/resource will be closes if no
  *  other references to the resource exist.

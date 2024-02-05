@@ -1,12 +1,13 @@
 /* (c) https://github.com/MontiCore/monticore */
-package de.monticore.gradle.internal.isolation;
+package de.se_rwth.commons.io;
 
 import java.io.Closeable;
 import java.lang.ref.Cleaner;
 import java.util.WeakHashMap;
 
 /**
- * This class should be shared, even between isolated classloaders
+ * This class should only exist once per JVM
+ * Do not isolate it using classloaders
  */
 public class CleanerProvider {
   private final static Cleaner CLEANER = Cleaner.create();
