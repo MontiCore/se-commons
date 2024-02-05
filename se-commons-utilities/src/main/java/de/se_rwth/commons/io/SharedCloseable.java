@@ -9,13 +9,14 @@ import java.lang.ref.Cleaner;
  * When no more references to this class exists,
  *  the wrapped closeable/resource will be closes if no
  *  other references to the resource exist.
- * @param <T>
+ * @param <T> a {@link Closeable}
  */
 public class SharedCloseable<T extends Closeable> implements AutoCloseable {
   private final Cleaner cleaner = CleanerProvider.getCleaner();
 
   private final Cleaner.Cleanable cleanable;
 
+  // The actual Closeable
   private final T res;
 
   public SharedCloseable(T res) {
@@ -24,16 +25,27 @@ public class SharedCloseable<T extends Closeable> implements AutoCloseable {
     CleanerProvider.notifyResourceUse(res);
   }
 
+  /**
+   * Notifies the resource, that it can be closed.
+   * The resource is only freed if this was the only active usage of it
+   */
   @Override
   public void close() {
-    System.err.println("Got close request");
     this.cleanable.clean();
   }
 
+  /**
+   * @return the actual resource
+   */
   public T get() {
     return this.res;
   }
 
+  /**
+   * The action performed when a {@link SharedCloseable} instance is no longer in memory
+   * @param closeable the actual resource, kept in memory due to being associated with the Runnable
+   * @return a Runnable which is detached from the instance of its {@link SharedCloseable}
+   */
   private static Runnable cleanAction(Closeable closeable) {
     return () -> {
       if (CleanerProvider.notifyResourceClean(closeable)) {
