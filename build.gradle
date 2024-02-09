@@ -7,7 +7,7 @@ plugins {
     id "io.github.themrmilchmann.ecj" version "0.2.0" // Eclipse compiler as it's much faster than javac
     id "org.sonarqube" version "3.0"
     id "jacoco"
-    id 'org.barfuin.gradle.jacocolog' version '1.2.3'
+    id 'org.barfuin.gradle.jacocolog' version '3.1.0'
     id 'maven-publish'
 }
 
@@ -59,8 +59,8 @@ subprojects {
             }
         }
         reports {
-            junitXml.enabled = false
-            html.enabled = false
+            junitXml.required = false
+            html.required = false
         }
     }
 
