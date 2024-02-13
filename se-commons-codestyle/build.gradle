@@ -1,0 +1,29 @@
+/* (c) https://github.com/MontiCore/monticore */
+
+plugins {
+  id 'groovy-gradle-plugin'
+  id 'maven-publish'
+}
+
+description = 'se-commons: SE-CodeStyle'
+
+dependencies {
+  implementation gradleApi()
+  implementation "com.diffplug.spotless:spotless-plugin-gradle:6.25.0"
+}
+
+repositories {
+  mavenCentral()
+}
+
+compileJava {
+  sourceCompatibility = JavaVersion.VERSION_11
+  targetCompatibility = JavaVersion.VERSION_11
+}
+
+gradlePlugin.plugins {
+  secodestyle {
+    id = "de.se_rwth.codestyle"
+    implementationClass = "de.se_rwth.codestyle.SECodeStylePlugin"
+  }
+}

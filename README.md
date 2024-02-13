@@ -19,6 +19,9 @@ SE Commons comprises the following components:
     Further information on MontiToolBox can be found [here](https://git.rwth-aachen.de/monticore/MontiToolBox/wikis/home).  
 * **se-commons-gradle**
   * common gradle task infrastructure for MontiCore gradle plugins
+* **se-commons-codestyle**
+  * a gradle plugin `id 'de.se_rwth.codestyle'` which configures [spotless](https://github.com/diffplug/spotless)
+  with the SE code style.
 
 ## Licenses
 * [LGPL V3.0](https://github.com/MontiCore/monticore/tree/master/00.org/Licenses/LICENSE-LGPL.md) (for handwritten Java code)
