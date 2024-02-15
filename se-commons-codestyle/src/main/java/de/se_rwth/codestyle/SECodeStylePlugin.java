@@ -24,7 +24,7 @@ import java.util.Objects;
 public class SECodeStylePlugin implements Plugin<Project> {
   @Override
   public void apply(@Nonnull Project project) {
-    Provider<RegularFile> codeStyleFile = project.getLayout().getBuildDirectory().file("se-codestyle.xml");
+    Provider<RegularFile> codeStyleFile = project.getLayout().getBuildDirectory().file("se-codestyle-eclipse.xml");
     // The task creation of spotless requires the xml config file to exist
     project.afterEvaluate(p -> {
       // Thus, we create the file if it does not exist
@@ -43,13 +43,12 @@ public class SECodeStylePlugin implements Plugin<Project> {
     var xmlTask = project.getTasks().register("extractSECodeStyle", ExtractCodeStyleFileTask.class);
     xmlTask.configure(it -> {
       it.getDestination().set(codeStyleFile);
-      it.getInput().set("se-codestyle/se-codestyle.xml");
+      it.getInput().set("se-codestyle/se-codestyle-eclipse.xml");
     });
 
     // Ensure the XML is populated before spotless runs
-    project.getTasks().getByName("spotlessCheck").dependsOn(xmlTask);
-    project.getTasks().getByName("spotlessApply").dependsOn(xmlTask);
-    project.getTasks().getByName("spotlessDiagnose").dependsOn(xmlTask);
+    project.getTasks().getByName("spotlessInternalRegisterDependencies").dependsOn(xmlTask);
+    project.getTasks().getByName("spotlessJavaDiagnose").dependsOn(xmlTask);
 
 
     // Configure spotless
