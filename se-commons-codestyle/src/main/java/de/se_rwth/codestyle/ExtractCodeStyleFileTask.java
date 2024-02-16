@@ -20,18 +20,17 @@ import java.util.Objects;
  */
 @CacheableTask
 public abstract class ExtractCodeStyleFileTask extends DefaultTask {
+  
   @OutputFile
   abstract RegularFileProperty getDestination();
-
+  
   @Input
   abstract Property<String> getInput();
-
+  
   @TaskAction
   public void store() throws IOException {
-    Files.copy(
-            Objects.requireNonNull(ExtractCodeStyleFileTask.class.getClassLoader()
-                    .getResourceAsStream(getInput().get())),
-            getDestination().get().getAsFile().toPath(),
-            StandardCopyOption.REPLACE_EXISTING);
+    Files.copy(Objects.requireNonNull(
+            ExtractCodeStyleFileTask.class.getClassLoader().getResourceAsStream(getInput().get())),
+        getDestination().get().getAsFile().toPath(), StandardCopyOption.REPLACE_EXISTING);
   }
 }
