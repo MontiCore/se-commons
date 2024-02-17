@@ -60,7 +60,7 @@ public class SECodeStylePlugin implements Plugin<Project> {
       
       javaExtension.licenseHeader("/* (c) https://github.com/MontiCore/monticore */");
       javaExtension.endWithNewline();
-      javaExtension.toggleOffOn("formatter:off", "formatter:on");
+      javaExtension.toggleOffOn("@formatter:off", "@formatter:on");
       javaExtension.removeUnusedImports();
       javaExtension.trimTrailingWhitespace();
       javaExtension.indentWithSpaces(2);
