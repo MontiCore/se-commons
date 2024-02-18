@@ -79,7 +79,7 @@ subprojects {
     }
 }
 
-subprojects {
+configure(subprojects.findAll { it.name != 'se-commons-codestyle' }) {
     apply plugin: 'maven-publish'
 
     publishing {
