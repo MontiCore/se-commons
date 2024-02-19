@@ -4,7 +4,7 @@ description = 'se-commons: gradle'
 
 dependencies {
   implementation gradleApi()
-  implementation "de.se_rwth.commons:se-commons-logging:$version"
-  implementation "de.se_rwth.commons:se-commons-utilities:$version"
+  implementation project(":se-commons-utilities")
+  implementation project(":se-commons-logging")
   implementation "org.apache.commons:commons-lang3:3.8.1"
 }
