@@ -8,3 +8,11 @@ dependencies {
   implementation project(":se-commons-logging")
   implementation "org.apache.commons:commons-lang3:3.8.1"
 }
+
+publishing {
+  publications {
+    maven(MavenPublication) {
+      from(components.java)
+    }
+  }
+}

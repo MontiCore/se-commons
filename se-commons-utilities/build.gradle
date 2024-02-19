@@ -12,3 +12,11 @@ dependencies {
     testImplementation "org.hamcrest:hamcrest-library:$hamcrest_version"
     testImplementation "junit:junit:$junit_version"
 }
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from(components.java)
+        }
+    }
+}
