@@ -68,7 +68,8 @@ abstract public class MCSingleFileTask extends CommonMCTask {
   private void startGeneration(File f) {
     Path cwd = getProject().getProjectDir().toPath().toAbsolutePath();
     Log.warn("Starting Tool: \n" +
-        String.join(" ", createArgList(f.toPath(), p -> "." + File.separator + cwd.relativize(p)))
+        String.join(" ", createArgList(f.toPath(), p -> "." + File.separator +
+            (cwd.getRoot().equals(p.getRoot()) ? cwd.relativize(p) : p.toAbsolutePath())))
             + " for " + this.getName()
     );
 

@@ -79,15 +79,11 @@ subprojects {
     }
 }
 
-configure(subprojects.findAll { it.name != 'se-commons-codestyle' }) {
+subprojects {
     apply plugin: 'maven-publish'
 
     publishing {
-        publications {
-            maven(MavenPublication) {
-                from(components.java)
-            }
-        }
+        // We do not define a default publication, as some subprojects use the gradle-plugin plugin
         repositories.maven {
             credentials.username mavenUser
             credentials.password mavenPassword
