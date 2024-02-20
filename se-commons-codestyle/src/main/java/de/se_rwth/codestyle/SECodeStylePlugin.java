@@ -32,7 +32,9 @@ public class SECodeStylePlugin implements Plugin<Project> {
       // Thus, we create the file if it does not exist
       if (!codeStyleFile.get().getAsFile().exists()) {
         try {
-          Files.createFile(codeStyleFile.get().getAsFile().toPath());
+          var path = codeStyleFile.get().getAsFile().toPath();
+          Files.createDirectories(path.getParent());
+          Files.createFile(path);
         }
         catch (IOException ex) {
           p.getLogger().error("Failed to prepare se code style file", ex);
@@ -51,34 +53,34 @@ public class SECodeStylePlugin implements Plugin<Project> {
     
     // Ensure the XML is populated before spotless runs
     project.getTasks().getByName("spotlessInternalRegisterDependencies").dependsOn(xmlTask);
-    project.getTasks().getByName("spotlessJavaDiagnose").dependsOn(xmlTask);
+    project.getTasks().getByName("spotlessDiagnose").dependsOn(xmlTask);
     
     // Configure spotless
     SpotlessExtension spotless = project.getExtensions().getByType(SpotlessExtension.class);
-    spotless.java(javaExtension -> {
-      javaExtension.eclipse().configFile(codeStyleFile);
+    spotless.java(extension -> {
+      extension.eclipse().configFile(codeStyleFile);
+      extension.targetExclude("build/**", "target/**");
       
-      javaExtension.licenseHeader("/* (c) https://github.com/MontiCore/monticore */");
-      javaExtension.endWithNewline();
-      javaExtension.toggleOffOn("@formatter:off", "@formatter:on");
-      javaExtension.removeUnusedImports();
-      javaExtension.trimTrailingWhitespace();
-      javaExtension.indentWithSpaces(2);
+      extension.licenseHeader("/* (c) https://github.com/MontiCore/monticore */");
+      extension.endWithNewline();
+      extension.toggleOffOn("@formatter:off", "@formatter:on");
+      extension.removeUnusedImports();
+      extension.trimTrailingWhitespace();
+      extension.indentWithSpaces(2);
     });
     
-    spotless.format("markdown", javaExtension -> {
-      javaExtension.target("**/*.md");
+    spotless.format("markdown", extension -> {
+      extension.target("**/*.md");
       
-      javaExtension.licenseHeader("<!-- (c) https://github.com/MontiCore/monticore -->", ".");
-      javaExtension.endWithNewline();
+      extension.endWithNewline();
     });
     
-    spotless.format("montiCore", javaExtension -> {
-      javaExtension.target("**/*.mc4");
+    spotless.format("montiCore", extension -> {
+      extension.target("**/*.mc4");
       
-      javaExtension.licenseHeader("/* (c) https://github.com/MontiCore/monticore */", ".");
-      javaExtension.indentWithSpaces(2);
-      javaExtension.endWithNewline();
+      extension.licenseHeader("/* (c) https://github.com/MontiCore/monticore */", "(package)");
+      extension.indentWithSpaces(2);
+      extension.endWithNewline();
     });
     
     // Provide the .editorconfig file
