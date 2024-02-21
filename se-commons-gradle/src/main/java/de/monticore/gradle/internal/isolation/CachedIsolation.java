@@ -25,7 +25,7 @@ import java.util.stream.Stream;
  */
 public class CachedIsolation<T> {
 
-  protected final List<IsolationData<T>> internalRunners = Collections.synchronizedList(new LinkedList<>());
+  protected final List<IIsolationData<T>> internalRunners = Collections.synchronizedList(new LinkedList<>());
 
   /**
    * Time (in ms) after the last use of an isolated classloader before its
@@ -38,6 +38,32 @@ public class CachedIsolation<T> {
    * Closing classloaders frees up the resources from memory
    */
   protected Timer cleanupTimer;
+
+  // staggering the startup reduces strain on the (blocking) ZipFile$Source.readFullyAt
+  // When the same class is loaded multiple times in parallel,
+  // the switching between contexts causes a noticeable performance impact on some machines
+  protected int staggeredStartUpFixedDelay = -1;
+  protected int staggeredStartUpDelayPerRunner = -1;
+
+  /**
+   * {@link System#currentTimeMillis()} of when the last startup occurred for staggered startup delay
+   */
+  protected long lastStartup = -1;
+
+  /**
+   * How many class loaders are waiting for their staggered startup
+   */
+  protected int staggerCount;
+
+  /**
+   *
+   * @param staggeredStartUpFixedDelay the (fixed) time between the first and all further runners
+   * @param staggeredStartUpDelayPerRunner the time between the startup of individual runners
+   */
+  public void setStaggeredStartupParams(int staggeredStartUpFixedDelay, int staggeredStartUpDelayPerRunner) {
+    this.staggeredStartUpFixedDelay = staggeredStartUpFixedDelay;
+    this.staggeredStartUpDelayPerRunner = staggeredStartUpDelayPerRunner;
+  }
 
   protected synchronized void setupTimer() {
     if (cleanupTimer != null) return;
@@ -53,25 +79,61 @@ public class CachedIsolation<T> {
   /**
    * Get a new (auto-closing) isolated class loader.
    * In case no available class loaders are present,
-   * a new instance is created.
+   * a new instance may be created.
    */
-  protected synchronized IsolationData<T> getLoader(Predicate<T> predicate, Supplier<T> supplier) {
-    Optional<IsolationData<T>> d = this.internalRunners.stream()
-            .filter(x -> !x.running)
-            .filter(x -> predicate.test(x.extraData))
+  protected synchronized IIsolationData<T> getLoader(Predicate<T> predicate, Supplier<T> supplier) {
+    Optional<IIsolationData<T>> d = this.internalRunners.stream()
+            .filter(x -> !x.isRunning())
+            .filter(x -> predicate.test(x.getExtraData()))
             .findAny();
     if (d.isPresent()) {
-      d.get().running = true;
+      d.get().setRunning(true);
       return d.get();
     }
     this.cleanupOld();
-    IsolationData<T> data = new IsolationData<>();
-    data.classLoader = getClassLoader((URLClassLoader) Thread.currentThread().getContextClassLoader(), supplier);
-    data.running = true;
-    data.extraData = supplier.get();
-    this.internalRunners.add(data);
-    setupTimer();
-    return data;
+    final long staggerWait = getWaitForStaggeredStartup();
+    this.lastStartup = System.currentTimeMillis();
+    if (staggerWait <= 0) {
+      IsolationData<T> data = new IsolationData<>();
+      data.classLoader = getClassLoader((URLClassLoader) Thread.currentThread().getContextClassLoader(), supplier);
+      data.running = true;
+      data.extraData = supplier.get();
+      this.internalRunners.add(data);
+      setupTimer();
+      return data;
+    } else {
+      // Return a surrogate-like IsolationData
+      this.staggerCount++;
+      return new StaggeredIsolationData<>(() -> {
+        // which when asked (out of the synchronized context) first sleeps
+        try {
+          Thread.sleep(staggerWait);
+        } catch (InterruptedException ignored) {
+        }
+        this.staggerCount--;
+        // and then calls the getLoader method again
+        return this.getLoader(predicate, supplier);
+      });
+    }
+  }
+
+  /**
+   * When the startup is staggered,
+   * return the amount of ms to wait
+   * @return the amount of ms to wait, or <=0 to not wait
+   */
+  protected int getWaitForStaggeredStartup() {
+    // the amount of currently running runners
+    long currentlyRunning = this.internalRunners.stream().filter(IIsolationData::isRunning).count();
+    // as well as the amount of waiting-to-run runners
+    currentlyRunning += this.staggerCount;
+    if (currentlyRunning > 0) {
+      long duration = this.staggeredStartUpFixedDelay + currentlyRunning * this.staggeredStartUpDelayPerRunner;
+      // subtract the time which has passed between the last startup and now
+      long diff = (this.lastStartup + duration) - System.currentTimeMillis();
+      return (int) diff;
+    }
+    return -1;
   }
 
   /**
@@ -102,8 +164,8 @@ public class CachedIsolation<T> {
                                    @Nullable String prefix,
                                    Predicate<T> predicate, Supplier<T> supplier) {
     ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
-    try (IsolationData<T> isolationData = getLoader(predicate, supplier)) {
-      Thread.currentThread().setContextClassLoader(isolationData.classLoader);
+    try (IIsolationData<T> isolationData = getLoader(predicate, supplier)) {
+      Thread.currentThread().setContextClassLoader(isolationData.getClassLoader());
 
       // set the prefix for the printing
       if (prefix != null) {
@@ -111,7 +173,7 @@ public class CachedIsolation<T> {
         redirectStream(getOrReplaceOut(), prefix);
       }
 
-      isolationData.classLoader.loadClass(classname)
+      isolationData.getClassLoader().loadClass(classname)
               .getMethod(method, String[].class)
               .invoke(null, (Object) args);
     } catch (ReflectiveOperationException e) {
@@ -177,18 +239,17 @@ public class CachedIsolation<T> {
    */
   protected synchronized void cleanupOld() {
     long threshold = System.currentTimeMillis() - this.closeThreshold;
-    Iterator<IsolationData<T>> isolated = this.internalRunners.iterator();
+    Iterator<IIsolationData<T>> isolated = this.internalRunners.iterator();
     while (isolated.hasNext()) {
-      IsolationData<T> data = isolated.next();
-      if (!data.running && data.lastRun < threshold){
-        if (data.classLoader instanceof Closeable) {
+      IIsolationData<T> data = isolated.next();
+      if (!data.isRunning() && data.getLastRun() < threshold){
+        if (data.getClassLoader() instanceof Closeable) {
           // Close closeable classloaders
           try {
-            ((Closeable) data.classLoader).close();
+            ((Closeable) data.getClassLoader()).close();
           } catch (IOException ignored) { }
         }
-        data.classLoader = null;
-        data.extraData = null;
+        data.cleanUp();
         isolated.remove();
       }
     }
@@ -198,19 +259,119 @@ public class CachedIsolation<T> {
     }
   }
 
-  protected static class IsolationData<T> implements AutoCloseable {
-    ClassLoader classLoader;
-    boolean running;
+  protected static class IsolationData<T> implements IIsolationData<T> {
+    protected ClassLoader classLoader;
 
-    long lastRun = System.currentTimeMillis();
+    protected boolean running;
 
-    T extraData;
+    protected long lastRun = System.currentTimeMillis();
+
+    protected T extraData;
+
+    @Override
+    public ClassLoader getClassLoader() {
+      return classLoader;
+    }
+
+    @Override
+    public boolean isRunning() {
+      return this.running;
+    }
+
+    @Override
+    public void setRunning(boolean r) {
+      this.running = r;
+    }
+
+    @Override
+    public T getExtraData() {
+      return extraData;
+    }
+
+    @Override
+    public long getLastRun() {
+      return lastRun;
+    }
+
+    @Override
+    public void cleanUp() {
+      this.classLoader = null;
+      this.extraData = null;
+    }
 
     @Override
     public void close() {
       this.running = false;
       this.lastRun = System.currentTimeMillis();
     }
+  }
+
+  protected static class StaggeredIsolationData<T> implements IIsolationData<T> {
+    protected Optional<IIsolationData<T>> actual = Optional.empty();
+    protected final Supplier<IIsolationData<T>> supplier;
+
+    public StaggeredIsolationData(Supplier<IIsolationData<T>> supplier) {
+      this.supplier = supplier;
+    }
+
+    protected IIsolationData<T> getActual() {
+      if (!actual.isPresent()) {
+        actual = Optional.of(supplier.get());
+      }
+      return actual.get();
+    }
+
+    @Override
+    public ClassLoader getClassLoader() {
+      return getActual().getClassLoader();
+    }
+
+    @Override
+    public boolean isRunning() {
+      return getActual().isRunning();
+    }
+
+    @Override
+    public void setRunning(boolean r) {
+      getActual().setRunning(r);
+    }
+
+    @Override
+    public T getExtraData() {
+      return getActual().getExtraData();
+    }
+
+    @Override
+    public void cleanUp() {
+      getActual().cleanUp();
+    }
+
+    @Override
+    public long getLastRun() {
+      return getActual().getLastRun();
+    }
+
+    @Override
+    public void close() {
+      getActual().close();
+    }
+  }
+
+  protected interface IIsolationData<T> extends AutoCloseable {
+    ClassLoader getClassLoader();
+
+    boolean isRunning();
+
+    void setRunning(boolean r);
+
+    T getExtraData();
+
+    void cleanUp();
+
+    long getLastRun();
+
+    @Override
+    void close();
   }
 
   /**
