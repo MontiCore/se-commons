@@ -52,7 +52,8 @@ public class SECodeStylePlugin implements Plugin<Project> {
     });
     
     // Ensure the XML is populated before spotless runs
-    project.getTasks().getByName("spotlessInternalRegisterDependencies").dependsOn(xmlTask);
+    project.getTasks().getByName("spotlessCheck").dependsOn(xmlTask);
+    project.getTasks().getByName("spotlessApply").dependsOn(xmlTask);
     project.getTasks().getByName("spotlessDiagnose").dependsOn(xmlTask);
     
     // Configure spotless
@@ -82,7 +83,7 @@ public class SECodeStylePlugin implements Plugin<Project> {
     spotless.format("montiCore", extension -> {
       extension.target("**/*.mc4");
       
-      extension.licenseHeader("/* (c) https://github.com/MontiCore/monticore */", "(package)");
+      extension.licenseHeader("/* (c) https://github.com/MontiCore/monticore */", "(package|grammar)");
       extension.indentWithSpaces(2);
       extension.endWithNewline();
     });
