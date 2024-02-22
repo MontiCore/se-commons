@@ -76,12 +76,14 @@ public class SECodeStylePlugin implements Plugin<Project> {
     
     spotless.format("markdown", extension -> {
       extension.target("**/*.md");
+      extension.targetExclude("build/**", "target/**");
       
       extension.endWithNewline();
     });
     
     spotless.format("montiCore", extension -> {
       extension.target("**/*.mc4");
+      extension.targetExclude("build/**", "target/**");
       
       extension.licenseHeader("/* (c) https://github.com/MontiCore/monticore */", "(package|grammar)");
       extension.indentWithSpaces(2);
