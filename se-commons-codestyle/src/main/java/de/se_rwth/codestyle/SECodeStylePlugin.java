@@ -25,18 +25,17 @@ public class SECodeStylePlugin implements Plugin<Project> {
   
   @Override
   public void apply(@Nonnull Project project) {
-    Provider<RegularFile> codeStyleFile =
-        project.getLayout().getBuildDirectory().file("se-codestyle-eclipse.xml");
+    File codeStyleFile = new File(project.getGradle().getGradleHomeDir(),
+            "se-codestyle-eclipse.xml");
     // The task creation of spotless requires the xml config file to exist
     project.afterEvaluate(p -> {
       // Thus, we create the file if it does not exist
-      if (!codeStyleFile.get().getAsFile().exists()) {
+      if (!codeStyleFile.exists()) {
         try {
-          var path = codeStyleFile.get().getAsFile().toPath();
+          var path = codeStyleFile.toPath();
           Files.createDirectories(path.getParent());
           Files.createFile(path);
-        }
-        catch (IOException ex) {
+        } catch (IOException ex) {
           p.getLogger().error("Failed to prepare se code style file", ex);
         }
       }
@@ -90,10 +89,10 @@ public class SECodeStylePlugin implements Plugin<Project> {
       extension.endWithNewline();
     });
     
-    // Provide the .editorconfig file
+    // Provide the .editorconfig file (only to the root project)
     // We do not provide it via a task to always create it
     File editorConfig = project.file(".editorconfig");
-    if (!editorConfig.exists()) {
+    if (!editorConfig.exists() && project.getParent() == null) {
       try {
         try (
             InputStream url = getClass().getClassLoader()
