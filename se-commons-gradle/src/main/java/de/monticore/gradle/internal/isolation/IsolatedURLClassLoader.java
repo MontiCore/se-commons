@@ -7,6 +7,7 @@ import java.net.URLClassLoader;
 import java.util.Set;
 
 import de.se_rwth.commons.io.CleanerProvider;
+import de.se_rwth.commons.io.SyncDeIsolated;
 
 public class IsolatedURLClassLoader extends URLClassLoader {
   protected final Set<String> passThroughPackages;
@@ -24,9 +25,11 @@ public class IsolatedURLClassLoader extends URLClassLoader {
 
   @Override
   protected Class<?> findClass(String name) throws ClassNotFoundException {
-    // Share the CleanerProvider class
-    if (name.equals(CleanerProvider.class.getName()))
+    // Share the CleanerProvider and SyncDeIsolated classes
+    if (name.equals(CleanerProvider.class.getName()) || name.equals(
+        SyncDeIsolated.class.getName())) {
       return this.contextClassLoader.loadClass(name);
+    }
     try {
       return super.findClass(name);
     } catch (ClassNotFoundException e) {
