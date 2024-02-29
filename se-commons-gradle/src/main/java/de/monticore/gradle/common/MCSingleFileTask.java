@@ -6,7 +6,6 @@ import de.se_rwth.commons.logging.Log;
 import org.apache.commons.io.FileUtils;
 import org.gradle.api.file.Directory;
 import org.gradle.api.file.FileType;
-import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.work.ChangeType;
 import org.gradle.work.InputChanges;
@@ -35,7 +34,7 @@ abstract public class MCSingleFileTask extends CommonMCTask {
   }
 
   protected void deletePreviousOutput(File f, IncGenData lastRun) {
-    Log.info("Deleting generated artifacts from previous run of " + f.getName(), this.getName());
+    Log.debug("Deleting generated artifacts from previous run of " + f.getName(), this.getName());
     lastRun.deleteGeneratedFiles();
 
     // Deleting old reports.
@@ -67,7 +66,7 @@ abstract public class MCSingleFileTask extends CommonMCTask {
 
   private void startGeneration(File f) {
     Path cwd = getProject().getProjectDir().toPath().toAbsolutePath();
-    Log.trace("Starting Tool: \n" +
+    Log.debug("Starting Tool: \n" +
                     String.join(" ", createArgList(f.toPath(), p -> "." + File.separator +
                             (cwd.getRoot().equals(p.getRoot()) ? cwd.relativize(p) : p.toAbsolutePath())))
                     + " for " + this.getName(),

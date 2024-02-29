@@ -71,7 +71,7 @@ public class IncGenData {
 
   public void deleteGeneratedFiles() {
     generatedFiles.forEach(toDelete -> {
-      Log.info("\t Delete " + toDelete.getPath(), this.getClass().getName());
+      Log.debug("\t Delete " + toDelete.getPath(), this.getClass().getName());
       toDelete.delete();
     });
   }
