@@ -5,6 +5,7 @@ import com.diffplug.gradle.spotless.SpotlessExtension;
 import com.diffplug.gradle.spotless.SpotlessPlugin;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
+import org.gradle.api.UnknownTaskException;
 import org.gradle.api.file.RegularFile;
 import org.gradle.api.provider.Provider;
 
@@ -51,9 +52,14 @@ public class SECodeStylePlugin implements Plugin<Project> {
     });
     
     // Ensure the XML is populated before spotless runs
-    project.getTasks().getByName("spotlessCheck").dependsOn(xmlTask);
-    project.getTasks().getByName("spotlessApply").dependsOn(xmlTask);
-    project.getTasks().getByName("spotlessDiagnose").dependsOn(xmlTask);
+    try {
+      project.getTasks().getByName("spotlessCheck").dependsOn(xmlTask);
+      project.getTasks().getByName("spotlessApply").dependsOn(xmlTask);
+      project.getTasks().getByName("spotlessDiagnose").dependsOn(xmlTask);
+    } catch (UnknownTaskException ignored) {
+      // Task spotlessInternalRegisterDependencies is sometimes not found
+      // https://github.com/gradle/gradle/issues/16500#issuecomment-796974906
+    }
     
     // Configure spotless
     SpotlessExtension spotless = project.getExtensions().getByType(SpotlessExtension.class);
