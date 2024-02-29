@@ -1,6 +1,10 @@
 /* (c) https://github.com/MontiCore/monticore */
 package de.se_rwth.commons.io;
 
+/**
+ * The IsolatedURLClassLoader SHALL not isolate this class.
+ * Instead, it should delegate to its contextClassLoader when this class is loaded.
+ */
 public final class SyncDeIsolated {
   
   /**
