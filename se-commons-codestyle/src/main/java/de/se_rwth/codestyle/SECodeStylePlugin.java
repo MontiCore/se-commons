@@ -26,7 +26,7 @@ public class SECodeStylePlugin implements Plugin<Project> {
   
   @Override
   public void apply(@Nonnull Project project) {
-    File codeStyleFile = new File(project.getGradle().getGradleHomeDir(),
+    File codeStyleFile = new File(project.getGradle().getGradleUserHomeDir(),
             "se-codestyle-eclipse.xml");
     // The task creation of spotless requires the xml config file to exist
     project.afterEvaluate(p -> {
