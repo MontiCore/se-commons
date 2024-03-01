@@ -90,7 +90,8 @@ public class SECodeStylePlugin implements Plugin<Project> {
       extension.target("**/*.mc4");
       extension.targetExclude("build/**", "target/**");
       
-      extension.licenseHeader("/* (c) https://github.com/MontiCore/monticore */", "(package|grammar)");
+      String delimiter = "^(\\s*(package|grammar|component))";
+      extension.licenseHeader("/* (c) https://github.com/MontiCore/monticore */", delimiter);
       extension.indentWithSpaces(2);
       extension.endWithNewline();
     });
