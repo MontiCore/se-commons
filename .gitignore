@@ -5,3 +5,9 @@ target/
 .project
 .classpath
 /.gradle/
+
+# Gradle Wrapper
+gradlew
+gradlew.bat
+gradle/wrapper/gradle-wrapper.jar
+gradle/wrapper/gradle-wrapper.properties
