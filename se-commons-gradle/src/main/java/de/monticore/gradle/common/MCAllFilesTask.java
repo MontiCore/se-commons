@@ -1,5 +1,6 @@
 package de.monticore.gradle.common;
 
+import de.monticore.gradle.AMontiCoreConfiguration;
 import de.se_rwth.commons.logging.Log;
 import org.apache.commons.io.FileUtils;
 import org.gradle.api.file.Directory;
@@ -76,6 +77,24 @@ public abstract class MCAllFilesTask extends CommonMCTask {
     }
   }
 
+  /**
+   * @param handlePath function that serializes path
+   * @return Arguments that can be used to start CLI-Tool
+   */
+  protected List<String> createArgList(Function<Path, String> handlePath) {
+    List<String> result = super.createArgList(handlePath);
+
+    getInputFilesAsStream()
+        .forEach(f -> {
+          result.add("-" + getInputOptionString());
+          result.add(handlePath.apply(f.toPath()));
+        });
+
+    result.add("-" + AMontiCoreConfiguration.REPORT);
+    result.add(handlePath.apply(getReportDir().get().getAsFile().toPath()));
+
+    return result;
+  }
 
 
 }
