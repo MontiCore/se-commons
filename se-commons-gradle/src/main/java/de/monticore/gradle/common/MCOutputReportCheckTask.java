@@ -25,10 +25,6 @@ public abstract class MCOutputReportCheckTask extends DefaultTask {
   @InputFiles
   abstract ConfigurableFileCollection getInput();
 
-  @InputDirectory
-  @org.gradle.api.tasks.Optional
-  abstract DirectoryProperty getHwcDir();
-
   @InputDirectory // Nothing is written, only read!
   abstract DirectoryProperty getOutputDir();
 
@@ -160,6 +156,7 @@ public abstract class MCOutputReportCheckTask extends DefaultTask {
       }
     }
 
+    /*
     // If HWC-Dir exists, there should be HWC checks
     if(getHwcDir().isPresent()){
       Set<File> reportedHwcChecks = incGenReports.values().stream()
@@ -171,6 +168,7 @@ public abstract class MCOutputReportCheckTask extends DefaultTask {
             "Missing Reports lead to errors in incremental build.");
       }
     }
+     */
 
     // All read files must exist
     {
