@@ -6,7 +6,9 @@ dependencies {
   implementation gradleApi()
   implementation project(":se-commons-utilities")
   implementation project(":se-commons-logging")
+
   implementation "org.apache.commons:commons-lang3:3.8.1"
+  implementation "com.google.guava:guava:33.1.0-jre"
 }
 
 publishing {
