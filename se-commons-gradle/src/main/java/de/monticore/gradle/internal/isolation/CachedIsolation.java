@@ -207,10 +207,13 @@ public class CachedIsolation<T> {
    * @return the wrapped error stream
    */
   protected synchronized PrintStreamThreadProxy getOrReplaceErr() {
-    if (System.err instanceof PrintStreamThreadProxy)
+    synchronized (System.err) { // make sure we lock onto System.err too
+      if (System.err instanceof PrintStreamThreadProxy) {
+        return (PrintStreamThreadProxy) System.err;
+      }
+      System.setErr(new PrintStreamThreadProxy(System.err));
       return (PrintStreamThreadProxy) System.err;
-    System.setErr(new PrintStreamThreadProxy(System.err));
-    return (PrintStreamThreadProxy) System.err;
+    }
   }
 
   /**
@@ -219,10 +222,13 @@ public class CachedIsolation<T> {
    * @return the wrapped error stream
    */
   protected synchronized PrintStreamThreadProxy getOrReplaceOut() {
-    if (System.out instanceof PrintStreamThreadProxy)
+    synchronized (System.out) { // make sure we lock onto System.out too
+      if (System.out instanceof PrintStreamThreadProxy) {
+        return (PrintStreamThreadProxy) System.out;
+      }
+      System.setOut(new PrintStreamThreadProxy(System.out));
       return (PrintStreamThreadProxy) System.out;
-    System.setOut(new PrintStreamThreadProxy(System.out));
-    return (PrintStreamThreadProxy) System.out;
+    }
   }
 
   /**
