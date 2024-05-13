@@ -4,9 +4,9 @@ package de.monticore.gradle.common;
 import org.apache.commons.io.FileUtils;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.RegularFileProperty;
-import org.gradle.api.tasks.CacheableTask;
 import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
+import org.gradle.work.DisableCachingByDefault;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,7 +16,9 @@ import java.nio.charset.StandardCharsets;
  * Write the current version into a buildInfo.properties file.
  * Which can then be used by the UpdateChecker
  */
-@CacheableTask
+@DisableCachingByDefault(
+        because = "Not worth caching"
+)
 public abstract class MCBuildInfoTask extends DefaultTask {
 
   @OutputFile
