@@ -33,10 +33,7 @@ public abstract class MCBuildInfoTask extends DefaultTask {
   @TaskAction
   public void generateBuildInfo() throws IOException {
     File file = getBuildInfoFile().get().getAsFile();
-    if (!file.getParentFile().exists()) {
-      file.getParentFile().mkdirs();
-    }
-    file.createNewFile();
+    // The parent directories of the file will be created if they do not exist
     FileUtils.writeStringToFile(file, "version = " + getProject().getVersion(), StandardCharsets.UTF_8);
   }
 }
