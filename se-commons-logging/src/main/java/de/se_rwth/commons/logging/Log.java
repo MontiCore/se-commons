@@ -885,7 +885,7 @@ public class Log {
   /**
    * Print something on System.out
    */
-  protected static void println(String msg) {
+  public static void println(String msg) {
     getLog().doPrintln(msg);
   }
 
