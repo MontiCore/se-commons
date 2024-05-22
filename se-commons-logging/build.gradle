@@ -3,7 +3,6 @@ description = 'se-commons: logging'
 
 dependencies {
     api project(":se-commons-utilities")
-    implementation "org.slf4j:slf4j-api:$slf4j_version"
     testImplementation "ch.qos.logback:logback-classic:$logback_version"
     testImplementation "ch.qos.logback:logback-core:$logback_version"
     testImplementation "junit:junit:$junit_version"

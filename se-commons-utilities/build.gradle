@@ -4,6 +4,7 @@ description = 'se-commons: utilities'
 dependencies {
     api "commons-io:commons-io:$commons_io_version"
     implementation "jline:jline:$jline_version"
+    api "org.slf4j:slf4j-api:$slf4j_version"
     implementation "com.google.guava:guava:$guava_version"
     implementation "javax.inject:javax.inject:$javax_inject_version"
     implementation "commons-cli:commons-cli:$commons_cli_version"
