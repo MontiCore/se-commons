@@ -157,6 +157,11 @@ public class Log {
 
   /* Utility class. */
   protected Log() {
+    // TODO: Workaround by ALU to fix the NPE
+    this.logHooks = new ArrayList<>();
+    this.logHooks.add(new ConsoleLogHook());
+    this.errorHook = new DefaultErrorHook();
+    // TODO: END Workaround by ALU to fix the NPE
   }
 
   /**
