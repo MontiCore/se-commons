@@ -7,10 +7,11 @@ import ch.qos.logback.core.joran.spi.JoranException;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 /**
@@ -35,11 +36,8 @@ public class LogTest {
     Log.debug("Now we have an issue.", t, "an.internal.component");
     Log.info("Something went wrong.", "an.internal.component");
     Log.warn("Something went wrong.");
-    Log.error("An internal error occured", t);
-    
-    // this is bogus but hey, it's a test
-    assertNotNull("");
-    
+    Log.error("An internal error occurred", t);
+
     // switch and demonstrate user logging
     
     demonstrateLogbackConfigurationForUser();
@@ -112,7 +110,7 @@ public class LogTest {
     List<String> r1 = LogStub.getPrints();
     assertEquals(r1.size(),3);
     assertEquals(r1.get(0),"line 1");
-    assertEquals(r1.get(1),"line 2\n");
+    assertEquals(r1.get(1),"line 2" + System.lineSeparator());
     assertEquals(r1.get(2),"line 3\n");
     
     LogStub.clearPrints();
@@ -121,5 +119,20 @@ public class LogTest {
     List<String> r2 = LogStub.getPrints();
     assertEquals(r2.size(),2);
     assertEquals(r2.get(0),"line 4");
+  }
+
+  @Test
+  public void testFileOutput() {
+    LogStub.init();
+    String fileName = "target/test/LogOutput.txt";
+    Log.addLogHook(new FileLogHook(fileName));
+
+    Log.println("line 1");
+    Log.println("line 2");
+    Log.println("line 3");
+
+    assertTrue(new File(fileName).exists());
+
+    Log.warn("Warning", new RuntimeException("this is an exception"));
   }
 }

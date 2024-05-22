@@ -381,7 +381,7 @@ public class Files {
   /**
    * Reads a file an returns a list of lines.
    *
-   * @param Inputfile f
+   * @param f
    * @return List<String> with lines.
    */
   public synchronized List<String> fileToLineList(File f) {
@@ -438,12 +438,12 @@ public class Files {
   /**
    * Transforms a Line-List to a List of Tokens.
    *
-   * @param List <String> LineList as input
+   * @param input
    * @return List<String> TokenList
    */
   @SuppressWarnings("unused")
   private synchronized List<String> lineListToTokenList(List<String> input) {
-    List<String> tokenList = new LinkedList<String>();
+    List<String> tokenList = new LinkedList<>();
     for (String s : input) {
       StringTokenizer tokenizer = new StringTokenizer(s);
       while (tokenizer.hasMoreElements()) {
