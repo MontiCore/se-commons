@@ -21,6 +21,12 @@ public class LogStub extends Log {
   public static LogPrintCollector collector;
 
   protected LogStub() {
+    // TODO: Workaround to fix the NPE
+    this.collector = new LogPrintCollector();
+    this.logHooks = new ArrayList<>();
+    this.logHooks.add(collector);
+    this.errorHook = new DefaultErrorHook();
+
   }
 
   // LogStub can in addition behave like Log (and.e.g output results)
@@ -98,8 +104,8 @@ public class LogStub extends Log {
    * Reset List of prints
    */
   public static void clearPrints() {
-    collector.clearPrints();
-  }
+    collector = new LogPrintCollector();
+   }
 
   /**
    * prints out all log messages to the console
