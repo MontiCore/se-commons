@@ -104,7 +104,9 @@ public class LogStub extends Log {
    * Reset List of prints
    */
   public static void clearPrints() {
-    collector = new LogPrintCollector();
+    if (collector != null) {
+      collector.clearPrints();
+    }
    }
 
   /**
