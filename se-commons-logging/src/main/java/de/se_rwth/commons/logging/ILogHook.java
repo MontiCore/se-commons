@@ -14,7 +14,7 @@ import de.se_rwth.commons.SourcePosition;
 public interface ILogHook {
 
   default void doTrace(String msg, String logName) {
-    doPrintln(String.format("[TRACE] %s %s", logName, msg));
+    doPrintln(String.format("[TRACE]  %s %s", logName, msg));
   }
 
   default void doTrace(String msg, Throwable t, String logName) {
@@ -23,18 +23,18 @@ public interface ILogHook {
   }
 
   default void doDebug(String msg, String logName) {
-    doPrintln(String.format("[DEBUG] %s %s", logName, msg));
+    doPrintln(String.format("[DEBUG]  %s %s", logName, msg));
   }
 
   default void doDebug(String msg, SourcePosition pos, String logName) {
-    doPrintln(String.format("[DEBUG] %s %s:%s", logName, pos.toString(), msg));
+    doPrintln(String.format("[DEBUG]  %s %s:%s", logName, pos.toString(), msg));
   }
 
   default void doDebug(String msg,
                        SourcePosition start,
                        SourcePosition end,
                        String logName) {
-    doPrintln(String.format("[DEBUG] %s %s - %s:%s",
+    doPrintln(String.format("[DEBUG]  %s %s - %s:%s",
       logName, start.toString(), end.toString(), msg)
     );
   }
@@ -54,7 +54,7 @@ public interface ILogHook {
   }
 
   default void doWarn(Finding warn) {
-    doPrintln(String.format("[WARN] %s", warn));
+    doPrintln(String.format("[WARN]  %s", warn));
   }
 
   default void doWarn(Finding warn, Throwable t) {
