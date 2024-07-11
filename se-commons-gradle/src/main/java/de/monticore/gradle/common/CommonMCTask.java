@@ -204,7 +204,7 @@ public abstract class CommonMCTask extends DefaultTask {
     super();
     this.type = type;
     this.symbolPathConfigurationName = symbolPathConfigurationName;
-    Log.init();
+    Log.ensureInitialization();
 
     // Report directory is required for incremental check
     this.getReportDir().convention(
