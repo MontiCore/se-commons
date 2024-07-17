@@ -6,7 +6,6 @@ import de.monticore.gradle.internal.DebugClassLoader;
 import de.monticore.gradle.internal.ProgressLoggerService;
 import de.se_rwth.commons.logging.Log;
 import org.gradle.api.DefaultTask;
-import org.gradle.api.Project;
 import org.gradle.api.file.*;
 import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.Property;
@@ -164,11 +163,25 @@ public abstract class CommonMCTask extends DefaultTask {
   @Input
   @Optional
   public abstract ListProperty<String> getMoreArgs();
-
-
+  
+  /**
+   * Whether to call the Tool with the "-d" argument.
+   * Defaults to the value of the {@link #TASK_DEBUG} project property.
+   * Disables up-to-date checks.
+   */
   @Input
   @Optional
   public abstract Property<Boolean> getDebug();
+  
+  /**
+   * Whether to skip the WorkQueue and call the run method directly,
+   * might change class-loading behavior.
+   * Not guaranteed to work with the MontiCoreTemplateLoader!
+   * Disables up-to-date checks.
+   */
+  @Input
+  @Optional
+  public abstract Property<Boolean> getWorkQueueDebug();
 
   @OutputDirectory
   public abstract DirectoryProperty getOutputDir();
@@ -210,35 +223,23 @@ public abstract class CommonMCTask extends DefaultTask {
     this.getReportDir().convention(
         getProject().getLayout().getBuildDirectory().dir("mc_reports/task_" + this.getName())
     );
-
-    setDebugConvention(getProject(), getDebug());
+    
+    // tool debug option: convention to false, except when TASK_DEBUG is set (Project wide setting of the debug mode)
+    getDebug().convention(getProject().hasProperty(TASK_DEBUG) && "true".equals(getProject().property(TASK_DEBUG)));
     this.getOutputs().doNotCacheIf("Do not cache when debugging is enabled",
-        (task) ->  ((CommonMCTask)task).getDebug().get());
+        (task) -> ((CommonMCTask) task).getDebug().get());
+    // work queue debug option: convention to false, must be enabled on individual tasks
+    getWorkQueueDebug().convention(false);
+    this.getOutputs().doNotCacheIf("Do not cache when work queue debugging is enabled",
+        (task) -> ((CommonMCTask) task).getWorkQueueDebug().get());
 
-    // Add the configu
+    // Add the symbol path configuration to the file collection
     if (this.symbolPathConfigurationName != null)
       getSymbolPathConfiguration().from(getProject().getConfigurations().getByName(this.symbolPathConfigurationName));
 
     getAddConfigurationToSymbolPath().convention(true);
   }
 
-  public static void setDebugConvention(Project project, Property<Boolean> debugProp) {
-    // Project wide setting of debug modus
-    if(project.hasProperty(TASK_DEBUG)){
-      boolean debug = "true".equals(project.property(TASK_DEBUG));
-      debugProp.convention(debug);
-
-      // The debug-mode disables isolation... hence static variables are shared and errors can occur, especially in parallel execution.
-      if(debug && project.hasProperty(ORG_GRADLE_PARALLEL) && "true".equals(project.property(ORG_GRADLE_PARALLEL))){
-        Log.warn("Gradle Parallel Execution should be disabled in Debug Mode. \n" +
-            "Otherwise static variables (e.g., Mills, SymbolTables) of one Task can influence other parallel Tasks!\n" +
-            "set\n\t" + ORG_GRADLE_PARALLEL + "=false\n in your <gradle.properties>" );
-      }
-    } else {
-      // Default: No Debug
-      debugProp.convention(false);
-    }
-  }
 
   /** Create CLI-Arguments for a tool. Notice that "input" parameter is not set, must be added in subclass
    *
@@ -362,13 +363,21 @@ public abstract class CommonMCTask extends DefaultTask {
     if (getProgressLoggerService().isPresent()) {
       getProgressLoggerService().get().setFactory(getProgressLoggerFactory());
     }
-    if (getDebug().get()){
+    if (getWorkQueueDebug().get()) {
+      // The work queue debug-mode disables isolation... hence static variables are shared and errors can occur, especially in parallel execution.
+      if (getProject().hasProperty(ORG_GRADLE_PARALLEL) && "true".equals(getProject().property(ORG_GRADLE_PARALLEL))) {
+        Log.warn("Gradle Parallel Execution should be disabled in Debug Mode. \n"
+            + "Otherwise static variables (e.g., Mills, SymbolTables) of one Task can influence other parallel Tasks!\n"
+            + "set\n\t" + ORG_GRADLE_PARALLEL + "=false\n in your <gradle.properties>");
+      }
       // In debug mode, run code directly. Otherwise, breakpoints etc. do not work
       if (getExtraClasspathElements().isEmpty()) {
         // we probably should isolate the mills?
         getRunMethod().accept(args.toArray(new String[0]));
       } else {
         // we have to add the extra classpath elements to the classpath
+        getLogger().warn("Note: This task is run using the DebugClassLoader with extra class path elements, "
+            + "which is not fully supported (i.e. the TemplateLoader does not search in the extra class path).");
         DebugClassLoader.runDirectWithExtraClassPath(getExtraClasspathElements(), getRunMethod(), args.toArray(new String[0]));
       }
     } else {
