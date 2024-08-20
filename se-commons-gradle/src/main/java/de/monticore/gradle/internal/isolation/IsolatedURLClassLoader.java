@@ -22,12 +22,17 @@ public class IsolatedURLClassLoader extends URLClassLoader {
     this.contextClassLoader = contextClassLoader;
     this.passThroughPackages = passThroughPackages;
   }
+  
+  private static final String CLEANER_PROVIDER_NAME = CleanerProvider.class.getName();
+  private static final String SYNCDEISOLATED_NAME = SyncDeIsolated.class.getName();
 
   @Override
   protected Class<?> findClass(String name) throws ClassNotFoundException {
-    // Share the CleanerProvider and SyncDeIsolated classes
-    if (name.equals(CleanerProvider.class.getName()) || name.equals(
-        SyncDeIsolated.class.getName())) {
+    // We explicitly do not isolate some classes:
+    if (name.equals(CLEANER_PROVIDER_NAME) // Tracks usages across isolates instances
+        || name.equals(SYNCDEISOLATED_NAME) // Allows synchronized mutex locks between isolated instances
+        || name.startsWith("org.slf4j")) // also pass slf4j through (to allow gradle to handle logging)
+    {
       return this.contextClassLoader.loadClass(name);
     }
     try {
