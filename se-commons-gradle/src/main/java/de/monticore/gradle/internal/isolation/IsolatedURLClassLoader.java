@@ -4,6 +4,9 @@ package de.monticore.gradle.internal.isolation;
 import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import de.se_rwth.commons.io.CleanerProvider;
@@ -48,8 +51,38 @@ public class IsolatedURLClassLoader extends URLClassLoader {
       try {
         loadClass("de.monticore.gradle.internal.isolation.GroovyLeakCleanup")
                 .getMethod("cleanUp").invoke(null);
-      } catch (ReflectiveOperationException ignored) { }
+      } catch (ReflectiveOperationException ignored) {
+      }
     }
+    // Next, call all (runtime) shutdown hooks (of this classloader)
+    List<Thread> threadsToWaitOn = new ArrayList<>();
+    for (Thread thread : new HashSet<>(Thread.getAllStackTraces().keySet())) {
+      if (thread.getContextClassLoader() != this)
+        continue; // only threads within this context
+      if (Runtime.getRuntime().removeShutdownHook(thread)) {
+        // Remove the shutdown hook from the runtime
+        thread.start(); // and start the thread/run the hook
+        threadsToWaitOn.add(thread);
+      }
+    }
+
+    // Next, wait for all these recently started threads to finish
+    for (Thread thread : threadsToWaitOn) {
+      while (true) {
+        try {
+          thread.join();
+          break;
+        } catch (InterruptedException ignored) {
+        }
+      }
+    }
+    // And finally, make *really* sure we unset their context classloader
+    for (Thread thread : Thread.getAllStackTraces().keySet()) {
+      if (thread.getContextClassLoader() != this)
+        continue; // but only threads within this context
+      thread.setContextClassLoader(null);
+    }
+
     super.close();
   }
 
