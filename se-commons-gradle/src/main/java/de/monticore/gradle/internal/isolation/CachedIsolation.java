@@ -163,9 +163,10 @@ public class CachedIsolation<T> {
   public void executeInClassloader(String classname, String method, String[] args,
                                    @Nullable String prefix,
                                    Predicate<T> predicate, Supplier<T> supplier) {
-    ClassLoader originalClassLoader = Thread.currentThread().getContextClassLoader();
+    final Thread currentThread = Thread.currentThread();
+    ClassLoader originalClassLoader = currentThread.getContextClassLoader();
     try (IIsolationData<T> isolationData = getLoader(predicate, supplier)) {
-      Thread.currentThread().setContextClassLoader(isolationData.getClassLoader());
+      currentThread.setContextClassLoader(isolationData.getClassLoader());
 
       // set the prefix for the printing
       if (prefix != null) {
@@ -184,7 +185,7 @@ public class CachedIsolation<T> {
         getOrReplaceErr().reset();
         getOrReplaceOut().reset();
       }
-      Thread.currentThread().setContextClassLoader(originalClassLoader);
+      currentThread.setContextClassLoader(originalClassLoader);
     }
   }
 
