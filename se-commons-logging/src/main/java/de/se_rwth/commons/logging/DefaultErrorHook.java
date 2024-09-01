@@ -7,10 +7,13 @@ public class DefaultErrorHook implements IErrorHook {
 
   @Override
   public void terminate() {
+
+/* So ein Quatsch: gehört da nicht hin.
     String messages = Log.getFindings().stream()
       .filter(Finding::isError)
       .map(Finding::toString)
       .collect(Collectors.joining(System.lineSeparator()));
     throw new MCFatalError(messages);
+*/
   }
 }
