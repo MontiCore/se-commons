@@ -11,8 +11,6 @@ package de.se_rwth.commons.logging;
  */
 public interface IErrorHook {
 
-  default void terminate() {
-
-  }
+  void terminate();
 
 }
