@@ -2,12 +2,21 @@
 package de.monticore.gradle.common;
 
 import de.se_rwth.commons.logging.IErrorHook;
-import org.gradle.api.GradleException;
+import de.se_rwth.commons.logging.Log;
+import de.se_rwth.commons.logging.Finding;
+import de.se_rwth.commons.logging.MCFatalError;
+
+import java.util.stream.Collectors;
 
 public class GradleErrorHook implements IErrorHook {
 
   @Override
   public void terminate() {
-    throw new GradleException("There were compile errors.");
+    String messages = Log.getFindings().stream()
+        .filter(Finding::isError)
+        .map(Finding::toString)
+        .collect(Collectors.joining(System.lineSeparator()));
+
+    throw new MCFatalError(messages);
   }
 }
