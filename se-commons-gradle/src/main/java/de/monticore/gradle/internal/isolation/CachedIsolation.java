@@ -12,6 +12,7 @@ import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.security.*;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -148,6 +149,13 @@ public class CachedIsolation<T> {
     return new IsolatedURLClassLoader(contextClassLoader, getPassThroughPackages());
   }
 
+  // Empty array of ProtectionDomain - see the doPrivileged() part below
+  private static final ProtectionDomain[] NO_DOMAINS = new ProtectionDomain[0];
+
+  // AccessControlContext without domains - see the doPrivileged() part below
+  private static final AccessControlContext NO_DOMAINS_ACCESS_CONTROL_CONTEXT = new AccessControlContext(NO_DOMAINS);
+
+
   /**
    * Loads a class and runs a given method in an isolated class loader
    * Requires the class and method name as Strings,
@@ -174,11 +182,31 @@ public class CachedIsolation<T> {
         redirectStream(getOrReplaceOut(), prefix);
       }
 
-      isolationData.getClassLoader().loadClass(classname)
-              .getMethod(method, String[].class)
-              .invoke(null, (Object) args);
-    } catch (ReflectiveOperationException e) {
-      passThrowableAlong(e.getCause());
+      // Use doPrivileged() to avoid spawned threads inheriting the
+      // AccessControlContext of the current thread.
+      // No privileged actions are actually performed.
+      // Reason: among the ProtectionDomains of the thread will otherwise be a
+      // reference to the Isolated and/or children Groovy Classloader,
+      // preventing the GC from reclaiming said Classloader with all its
+      // loaded objects
+      AccessController.doPrivileged((PrivilegedAction<Object>) () -> {
+        try{
+          // Prepare for the cleanup after <a href="https://bugs.openjdk.org/browse/JDK-8078641">JDK-8078641</a>
+          // Load the MethodHandleImpl class into the isolated classloader
+          // as the GroovyInterpreter will otherwise load it within its
+          // ClassLoaders, resulting in it being not accessible to this outer CL
+          isolationData.getClassLoader().loadClass("java.lang.invoke.MethodHandleImpl");
+        } catch (ReflectiveOperationException ignored) {}
+        try {
+          isolationData.getClassLoader().loadClass(classname)
+                  .getMethod(method, String[].class)
+                  .invoke(null, (Object) args);
+        } catch (ReflectiveOperationException e) {
+          passThrowableAlong(e.getCause());
+        }
+        return null;
+        // Continue with the modified AccessControlContext
+      }, new AccessControlContext(NO_DOMAINS_ACCESS_CONTROL_CONTEXT, combiner));
     } finally {
       if (prefix != null) {
         // Reset this threads prefix printers
@@ -189,12 +217,35 @@ public class CachedIsolation<T> {
     }
   }
 
-  protected String getMessage(Throwable throwable) {
-    if (throwable.getMessage() != null)
-      return throwable.getMessage();
-    if (throwable.getMessage() == null && throwable.getCause() != null)
-      return getMessage(throwable.getCause());
-    return "no exc";
+  /**
+   * A {@link DomainCombiner} which removes inner class loaders from a Threads
+   * {@link AccessControlContext}
+   *
+   * The {@link #isClassLoaderOrChild(ClassLoader)} method filters said
+   * child class loaders.
+   */
+  protected DomainCombiner combiner = (currentDomains, assignedDomains) -> {
+    // The assigned Domains should be equivalent to CachedIsolation.NO_DOMAINS or null
+    if (assignedDomains != null && assignedDomains.length > 0)
+      throw new IllegalStateException("Unexpected assignedDomains#length: " + assignedDomains.length);
+    final List<ProtectionDomain> combinedWithoutIsolated = new ArrayList<>();
+    for (ProtectionDomain protectionDomain : currentDomains) {
+      if (protectionDomain.getClassLoader() == null
+              || !isClassLoaderOrChild(protectionDomain.getClassLoader())) {
+        combinedWithoutIsolated.add(protectionDomain);
+      }
+    }
+    return combinedWithoutIsolated.toArray(new ProtectionDomain[0]);
+  };
+
+  /**
+   * @return true if said class loader should not be included in an {@link AccessControlContext}
+   */
+  protected boolean isClassLoaderOrChild(ClassLoader classloader) {
+    if (classloader == null) return false;
+    // Note: We are unable to compare using the class object due to classloaders
+    return classloader.getClass().getName().equals(IsolatedURLClassLoader.class.getName())
+            || classloader.getClass().getName().equals("groovy.lang.GroovyClassLoader$InnerLoader");
   }
 
   @SuppressWarnings("unchecked")
