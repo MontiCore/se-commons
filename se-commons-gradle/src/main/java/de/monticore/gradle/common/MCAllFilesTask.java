@@ -61,19 +61,20 @@ public abstract class MCAllFilesTask extends CommonMCTask {
 
     boolean shouldRunAgain = !inputChanges.isIncremental() || shouldRunAgain(inputChanges);
     if (shouldRunAgain) {
-      Log.warn("*NOT* UP-TO-DATE, starting generation process");
+      Log.info("*NOT* UP-TO-DATE, starting generation process", this.getClass().getName());
 
       cleanOutputs();
 
       Path cwd = getProject().getProjectDir().toPath().toAbsolutePath();
-      Log.warn("Starting with args: \n" +
-              String.join(" ", createArgList(p -> "." + File.separator + cwd.relativize(p)))
+      Log.info("Starting with args: \n" +
+              String.join(" ", createArgList(p -> "." + File.separator + cwd.relativize(p))),
+          this.getClass().getName()
       );
 
       List<String> args = createArgList(p -> p.toAbsolutePath().toString());
       startGeneration(args, this.getName());
     } else {
-      Log.warn("UP-TO-DATE, no action required");
+      Log.info("UP-TO-DATE, no action required", this.getClass().getName());
     }
   }
 

@@ -55,12 +55,13 @@ abstract public class MCSingleFileTask extends CommonMCTask {
     IncGenData lastRun = new IncGenData(getIncGenFile(f), this.getProject().getProjectDir());
 
     if (!changedInput.isIncremental()  || !lastRun.isUpToDate(getStreamOfChanges(changedInput))) {
-      Log.warn(f.getName() + " is *NOT* UP-TO-DATE, starting generation process");
+      Log.info(f.getName() + " is *NOT* UP-TO-DATE, starting generation process",
+          this.getClass().getName());
 
       deletePreviousOutput(f, lastRun);
       startGeneration(f);
     } else {
-      Log.warn(f.getName() + " is UP-TO-DATE, no action required");
+      Log.info(f.getName() + " is UP-TO-DATE, no action required", this.getClass().getName());
     }
   }
 

@@ -53,7 +53,7 @@ public class IncGenData {
         reportExists = false;
       }
     } else {
-      Log.warn("Report " + file.getAbsolutePath() + " from previous run not found. No incremental build.");
+      Log.info("Report " + file.getAbsolutePath() + " from previous run not found. No incremental build.", this.getClass().getName());
       reportExists = false;
     }
   }
@@ -104,7 +104,9 @@ public class IncGenData {
           .filter(this::isRelevantChange)
           .findAny();
       if(change.isPresent()){
-        Log.warn("Not UP-TO-DATE! Changed: " + change.get().getChangeType() + " on " + change.get().getFile().getAbsolutePath());;
+        Log.info("Not UP-TO-DATE! Changed: " + change.get().getChangeType()
+                + " on " + change.get().getFile().getAbsolutePath(),
+            this.getClass().getName());;
       }
       return change.isEmpty();
     }
