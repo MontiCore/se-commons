@@ -5,6 +5,7 @@ import com.google.common.collect.Iterables;
 import de.se_rwth.commons.io.CleanerProvider;
 import de.se_rwth.commons.io.SyncDeIsolated;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.URL;
@@ -121,7 +122,12 @@ public class IsolatedURLClassLoader extends URLClassLoader {
       Class<?> hooksClass = Class.forName("java.lang.ApplicationShutdownHooks");
       Field hooksField = hooksClass.getDeclaredField("hooks");
       hooksField.setAccessible(true);
+      @Nullable
       Map<Thread, Thread> actualHooks = (Map<Thread, Thread>) hooksField.get(null);
+      // application shutdown hooks cannot be added if
+      // shutdown is in progress.
+      if (actualHooks == null)
+        return ret;
       for (Thread thread : actualHooks.keySet()) {
         if (thread.getContextClassLoader() == this) {
           ret.add(thread);
