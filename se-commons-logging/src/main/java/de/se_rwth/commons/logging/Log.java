@@ -143,6 +143,17 @@ public class Log {
     Log.log = log;
   }
 
+  /**
+   * Removes the current {@link Log} instance.
+   * Note: It does not further clean up after the Logger
+   */
+  public static void internalRemove() {
+    debug("Resetting logging component from " +
+                    (Log.log != null ? Log.log.getClass().getName() : "none"),
+            Log.class.getName());
+    Log.log = null;
+  }
+
   // terminate immediately on errors?
   protected boolean failQuick = true;
 
