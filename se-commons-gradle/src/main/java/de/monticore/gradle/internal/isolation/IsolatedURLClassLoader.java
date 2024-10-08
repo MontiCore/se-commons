@@ -128,7 +128,8 @@ public class IsolatedURLClassLoader extends URLClassLoader {
       // shutdown is in progress.
       if (actualHooks == null)
         return ret;
-      for (Thread thread : actualHooks.keySet()) {
+      // Work on a copy of the keySet due to possible ConcurrentModificationException
+      for (Thread thread : new ArrayList<>(actualHooks.keySet())) {
         if (thread.getContextClassLoader() == this) {
           ret.add(thread);
         }
