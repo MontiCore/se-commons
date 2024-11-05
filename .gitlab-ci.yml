@@ -91,3 +91,5 @@ githubmirror:
   only:
     - dev
     - master
+  rules:
+   - when: never
