@@ -1,7 +1,6 @@
 package de.monticore.gradle.common;
 
 import de.monticore.gradle.AMontiCoreConfiguration;
-import de.se_rwth.commons.logging.Log;
 import org.apache.commons.io.FileUtils;
 import org.gradle.api.file.Directory;
 import org.gradle.api.tasks.Internal;
@@ -61,20 +60,18 @@ public abstract class MCAllFilesTask extends CommonMCTask {
 
     boolean shouldRunAgain = !inputChanges.isIncremental() || shouldRunAgain(inputChanges);
     if (shouldRunAgain) {
-      Log.info("*NOT* UP-TO-DATE, starting generation process", this.getClass().getName());
+      getLogger().info("*NOT* UP-TO-DATE, starting generation process");
 
       cleanOutputs();
 
       Path cwd = getProject().getProjectDir().toPath().toAbsolutePath();
-      Log.info("Starting with args: \n" +
-              String.join(" ", createArgList(p -> "." + File.separator + cwd.relativize(p))),
-          this.getClass().getName()
-      );
+      getLogger().info("Starting with args: \n{}",
+              String.join(" ", createArgList(p -> "." + File.separator + cwd.relativize(p))));
 
       List<String> args = createArgList(p -> p.toAbsolutePath().toString());
       startGeneration(args, this.getName());
     } else {
-      Log.info("UP-TO-DATE, no action required", this.getClass().getName());
+      getLogger().info("UP-TO-DATE, no action required");
     }
   }
 

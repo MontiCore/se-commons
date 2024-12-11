@@ -217,7 +217,8 @@ public abstract class CommonMCTask extends DefaultTask {
     super();
     this.type = type;
     this.symbolPathConfigurationName = symbolPathConfigurationName;
-    Log.ensureInitialization();
+    Log.ensureInitialization(); // The IncGenCheck requires Log to be present
+    // And we are unable to provide a specific Gradle-Logger due to the Log-singleton
 
     // Report directory is required for incremental check
     this.getReportDir().convention(
@@ -366,7 +367,7 @@ public abstract class CommonMCTask extends DefaultTask {
     if (getWorkQueueDebug().get()) {
       // The work queue debug-mode disables isolation... hence static variables are shared and errors can occur, especially in parallel execution.
       if (getProject().hasProperty(ORG_GRADLE_PARALLEL) && "true".equals(getProject().property(ORG_GRADLE_PARALLEL))) {
-        Log.warn("Gradle Parallel Execution should be disabled in Debug Mode. \n"
+        getLogger().warn("Gradle Parallel Execution should be disabled in Debug Mode. \n"
             + "Otherwise static variables (e.g., Mills, SymbolTables) of one Task can influence other parallel Tasks!\n"
             + "set\n\t" + ORG_GRADLE_PARALLEL + "=false\n in your <gradle.properties>");
       }
@@ -431,7 +432,7 @@ public abstract class CommonMCTask extends DefaultTask {
   }
 
   protected void prepareRun(){
-    Log.info("Starting Task", this.getName());
+    getLogger().info("Starting Task {}", this.getName());
 
     checkParameters();
     this.prepareWorkQueue();

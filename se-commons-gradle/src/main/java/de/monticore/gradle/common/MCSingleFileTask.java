@@ -2,7 +2,6 @@
 package de.monticore.gradle.common;
 
 import de.monticore.gradle.AMontiCoreConfiguration;
-import de.se_rwth.commons.logging.Log;
 import org.apache.commons.io.FileUtils;
 import org.gradle.api.file.Directory;
 import org.gradle.api.file.FileType;
@@ -34,16 +33,16 @@ abstract public class MCSingleFileTask extends CommonMCTask {
   }
 
   protected void deletePreviousOutput(File f, IncGenData lastRun) {
-    Log.debug("Deleting generated artifacts from previous run of " + f.getName(), this.getName());
+    getLogger().debug("Deleting generated artifacts from previous run of {}", f.getName());
     lastRun.deleteGeneratedFiles();
 
     // Deleting old reports.
     try {
       FileUtils.deleteDirectory(this.getReportDirOfFile(f).getAsFile());
     } catch (IOException e) {
-      Log.warn("Error deleting old reports. " +
+      getLogger().warn("Error deleting old reports. " +
           "This could cause errors in upcoming incremental builds." +
-          "Affected directory: " + this.getReportDirOfFile(f));
+          "Affected directory: {}", this.getReportDirOfFile(f));
     }
   }
 
@@ -55,24 +54,22 @@ abstract public class MCSingleFileTask extends CommonMCTask {
     IncGenData lastRun = new IncGenData(getIncGenFile(f), this.getProject().getProjectDir());
 
     if (!changedInput.isIncremental()  || !lastRun.isUpToDate(getStreamOfChanges(changedInput))) {
-      Log.info(f.getName() + " is *NOT* UP-TO-DATE, starting generation process",
-          this.getClass().getName());
+      getLogger().info("{} is *NOT* UP-TO-DATE, starting generation process",
+          f.getName());
 
       deletePreviousOutput(f, lastRun);
       startGeneration(f);
     } else {
-      Log.info(f.getName() + " is UP-TO-DATE, no action required", this.getClass().getName());
+      getLogger().info(f.getName() + " is UP-TO-DATE, no action required", this.getClass().getName());
     }
   }
 
   private void startGeneration(File f) {
     Path cwd = getProject().getProjectDir().toPath().toAbsolutePath();
-    Log.debug("Starting Tool: \n" +
-                    String.join(" ", createArgList(f.toPath(), p -> "." + File.separator +
-                            (cwd.getRoot().equals(p.getRoot()) ? cwd.relativize(p) : p.toAbsolutePath())))
-                    + " for " + this.getName(),
-            this.getName()
-    );
+    getLogger().debug("Starting Tool: \n{} for {}",
+            String.join(" ", createArgList(f.toPath(), p -> "." + File.separator +
+            (cwd.getRoot().equals(p.getRoot()) ? cwd.relativize(p) : p.toAbsolutePath()))),
+            this.getName());
 
     List<String> args = this.createArgList(f.toPath(), p -> p.toAbsolutePath().toString());
     startGeneration(args, f.getName());
