@@ -9,7 +9,7 @@ formatter [spotless][spotless] and provides the SE-specific configuration.
 You can apply the plugin by adding
 
 ```
-id 'de.se_rwth.codestyle' version '7.7.0-SNAPSHOT'
+id 'de.se_rwth.codestyle' version '7.7.0'
 ```
 
 to Gradle's plugin section. Gradle's `check` task depends on the
