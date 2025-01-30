@@ -38,7 +38,5 @@ jobs:
     uses: MontiCore/monticore/.github/workflows/call_montiverse_branch.yml@dev
     with:
       project: "SECOMMONS"
-      branch: github.event.push.ref
-      repo: github.event.push.repository.full_name
     secrets: inherit
 
