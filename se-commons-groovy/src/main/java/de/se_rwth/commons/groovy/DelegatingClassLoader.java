@@ -23,7 +23,8 @@ import java.util.Objects;
  * --
  * This class holds the actual classloader as a reference and delegates
  * all calls to it.
- * When {@link #close()} is called, the reference to the delegate is cleared.
+ * When {@link #close()} is called, only the reference to the delegate is
+ * cleared, the close call is not delegated
  */
 @SuppressWarnings("unused")
 public class DelegatingClassLoader extends ClassLoader implements Closeable {
@@ -85,15 +86,9 @@ public class DelegatingClassLoader extends ClassLoader implements Closeable {
 
   @Override
   public void close() throws IOException {
-    try {
-      // Delegate the close call
-      ClassLoader delegate = this.delegate.get();
-      if (delegate instanceof Closeable)
-        ((Closeable) delegate).close();
-    } finally {
-      // and clean up the reference to the delegate
-      this.delegate.clear();
-      this.delegateLoadClass = null;
-    }
+    // Do not delegate the close call!
+    // only clean up the reference to the delegate
+    this.delegate.clear();
+    this.delegateLoadClass = null;
   }
 }
