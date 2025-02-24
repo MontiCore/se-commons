@@ -46,5 +46,7 @@ jobs:
     uses: MontiCore/monticore/.github/workflows/call_montiverse_branch.yml@dev
     with:
       project: "SECOMMONS"
+    permissions:  # allow this action to give feedback on its checks
+      pull-requests: write
     secrets: inherit
 
