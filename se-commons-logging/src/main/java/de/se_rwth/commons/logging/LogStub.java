@@ -25,7 +25,7 @@ public class LogStub extends Log {
     this.collector = new LogPrintCollector();
     this.logHooks = new ArrayList<>();
     this.logHooks.add(collector);
-    this.errorHook = new DefaultErrorHook();
+    this.errorHook = getDefaultErrorHook();
 
   }
 
@@ -55,7 +55,7 @@ public class LogStub extends Log {
     l.isINFO = true;
     l.logHooks = new ArrayList<>();
     l.logHooks.add(collector);
-    l.errorHook = new DefaultErrorHook();
+    l.errorHook = getDefaultErrorHook();
     Log.setLog(l);
   }
 

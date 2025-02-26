@@ -52,7 +52,7 @@ public class Log {
     l.isINFO = true;
     l.logHooks = new ArrayList<>();
     l.logHooks.add(new ConsoleLogHook());
-    l.errorHook = new DefaultErrorHook();
+    l.errorHook = getDefaultErrorHook();
     Log.setLog(l);
   }
 
@@ -161,7 +161,7 @@ public class Log {
     // TODO: Workaround by ALU to fix the NPE
     this.logHooks = new ArrayList<>();
     this.logHooks.add(new ConsoleLogHook());
-    this.errorHook = new DefaultErrorHook();
+    this.errorHook = getDefaultErrorHook();
     // TODO: END Workaround by ALU to fix the NPE
   }
 
@@ -916,5 +916,31 @@ public class Log {
 
   public static void setErrorHook(IErrorHook hook) {
     getLog().errorHook = hook;
+  }
+
+  protected static IErrorHook getDefaultErrorHook() {
+    IErrorHook defaultErrorHook;
+    // DO NOT RELY ON THE FOLLOWING BEHAVIOR!
+    // many tests are bugged due to wrong Log-initialization,
+    // which leads to incorrectly passing tests.
+    // The following system variable can be set to help find the broken tests.
+    // This is solely meant for internal testing
+    // and is not to be used for other use-cases!
+    // With this variable set it is not guaranteed that projects
+    // will build correctly! -> In that case it needs to be unset again.
+    // The behavior may be removed/changed without further notice,
+    // and as such must not be relied on!!!
+    boolean shouldUseLogInitHotFix =
+        System.getenv("INTERNAL_SE_LOG_INIT_REPLACEMENT") != null;
+    if (shouldUseLogInitHotFix) {
+      defaultErrorHook = () -> {
+        throw new MCFatalError("System.exit would have been called,"
+            + " this has been intercepted for internal log testing");
+      };
+    }
+    else {
+      defaultErrorHook = new DefaultErrorHook();
+    }
+    return defaultErrorHook;
   }
 }
