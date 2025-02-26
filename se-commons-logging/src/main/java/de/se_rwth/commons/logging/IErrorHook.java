@@ -9,6 +9,7 @@ package de.se_rwth.commons.logging;
  * {@link Log#setErrorHook(IErrorHook)} and can also handle additional tasks
  * such as formatting the error messages and printing them out to the console.
  */
+@FunctionalInterface
 public interface IErrorHook {
 
   void terminate();
