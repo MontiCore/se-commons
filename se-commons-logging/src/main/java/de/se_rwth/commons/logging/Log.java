@@ -61,14 +61,10 @@ public class Log {
    * (and do not use Slf4jLog)
    */
   public static void initDEBUG() {
-    Log l = new Log();
-    l.isDEBUG = true;
-    l.isTRACE = true;
-    l.isINFO = true;
-    l.logHooks = new ArrayList<>();
-    l.logHooks.add(new ConsoleLogHook());
-    l.errorHook = new DefaultErrorHook();
-    Log.setLog(l);
+    init();
+    log.isDEBUG = true;
+    log.isTRACE = true;
+    log.isINFO = true;
   }
 
   /**
@@ -76,14 +72,10 @@ public class Log {
    * (and do not use Slf4jLog)
    */
   public static void initWARN() {
-    Log l = new Log();
-    l.isTRACE = false;
-    l.isDEBUG = false;
-    l.isINFO = false;
-    l.logHooks = new ArrayList<>();
-    l.logHooks.add(new ConsoleLogHook());
-    l.errorHook = new DefaultErrorHook();
-    Log.setLog(l);
+    init();
+    log.isDEBUG = false;
+    log.isTRACE = false;
+    log.isINFO = false;
   }
 
   /**
@@ -91,14 +83,10 @@ public class Log {
    * (and do not use Slf4jLog)
    */
   public static void initTRACE() {
-    Log l = new Log();
-    l.isTRACE = true;
-    l.isDEBUG = false;
-    l.isINFO = false;
-    l.logHooks = new ArrayList<>();
-    l.logHooks.add(new ConsoleLogHook());
-    l.errorHook = new DefaultErrorHook();
-    Log.setLog(l);
+    init();
+    log.isTRACE = true;
+    log.isDEBUG = false;
+    log.isINFO = false;
   }
 
   /**
