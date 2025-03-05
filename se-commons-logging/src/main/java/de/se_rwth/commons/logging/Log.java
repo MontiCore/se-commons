@@ -6,6 +6,7 @@ import de.se_rwth.commons.SourcePosition;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Supplier;
 
 /**
  * Provides a centralized logging component. Subclasses may provide customized
@@ -206,6 +207,25 @@ public class Log {
    * Log to the specified log name with level TRACE.
    *
    * @param msg     the trace message
+   * @param logName the log name to use
+   */
+  public static final void trace(Supplier<String> msg, String logName) {
+    getLog().doTrace(msg, logName);
+  }
+
+  /**
+   * Log to the specified log with level TRACE.
+   */
+  protected void doTrace(Supplier<String> msg, String logName) {
+    if (doIsTraceEnabled(logName)) {
+      doTrace(msg.get(), logName);
+    }
+  }
+
+  /**
+   * Log to the specified log name with level TRACE.
+   *
+   * @param msg     the trace message
    * @param t       the exception to log
    * @param logName the log name to use
    */
@@ -220,6 +240,26 @@ public class Log {
     if (doIsTraceEnabled(logName)) {
       trace(msg, logName);
       logHooks.forEach(hook -> hook.doTrace(msg, t, logName));
+    }
+  }
+
+  /**
+   * Log to the specified log name with level TRACE.
+   *
+   * @param msg     the trace message
+   * @param t       the exception to log
+   * @param logName the log name to use
+   */
+  public static final void trace(Supplier<String> msg, Throwable t, String logName) {
+    getLog().doTrace(msg, t, logName);
+  }
+
+  /**
+   * Log to the specified log with level TRACE.<br>
+   */
+  protected void doTrace(Supplier<String> msg, Throwable t, String logName) {
+    if (doIsTraceEnabled(logName)) {
+      doTrace(msg.get(), t, logName);
     }
   }
 
@@ -260,6 +300,25 @@ public class Log {
     }
   }
 
+  /**
+   * Log to the specified log name with level DEBUG.
+   *
+   * @param msg     the debug message
+   * @param logName the log name to use
+   */
+  public static final void debug(Supplier<String> msg, String logName) {
+    getLog().doDebug(msg, logName);
+  }
+
+  /**
+   * Log to the specified log with level DEBUG.
+   */
+  protected void doDebug(Supplier<String> msg, String logName) {
+    if (doIsDebugEnabled(logName)) {
+      doDebug(msg.get(), logName);
+    }
+  }
+
   public static final void debug(String msg, SourcePosition pos, String logName) {
     getLog().doDebug(msg, pos, logName);
   }
@@ -270,6 +329,16 @@ public class Log {
     }
   }
 
+  public static final void debug(Supplier<String> msg, SourcePosition pos, String logName) {
+    getLog().doDebug(msg, pos, logName);
+  }
+
+  protected void doDebug(Supplier<String> msg, SourcePosition pos, String logName) {
+    if (doIsDebugEnabled(logName)) {
+      doDebug(msg.get(), pos, logName);
+    }
+  }
+
   public static final void debug(String msg, SourcePosition start, SourcePosition end, String logName) {
     getLog().doDebug(msg, start, end, logName);
   }
@@ -277,6 +346,16 @@ public class Log {
   protected void doDebug(String msg, SourcePosition start, SourcePosition end, String logName) {
     if (doIsDebugEnabled(logName)) {
       logHooks.forEach(hook -> hook.doDebug(msg, start, end, logName));
+    }
+  }
+
+  public static final void debug(Supplier<String> msg, SourcePosition start, SourcePosition end, String logName) {
+    getLog().doDebug(msg, start, end, logName);
+  }
+
+  protected void doDebug(Supplier<String> msg, SourcePosition start, SourcePosition end, String logName) {
+    if (doIsDebugEnabled(logName)) {
+      doDebug(msg.get(), start, end, logName);
     }
   }
 
@@ -298,6 +377,26 @@ public class Log {
     if (doIsDebugEnabled(logName)) {
       debug(msg, logName);
       logHooks.forEach(hook -> hook.doDebug(msg, t, logName));
+    }
+  }
+
+  /**
+   * Log to the specified log name with level DEBUG.
+   *
+   * @param msg     the debug message
+   * @param t       the exception to log
+   * @param logName the log name to use
+   */
+  public static final void debug(Supplier<String> msg, Throwable t, String logName) {
+    getLog().doDebug(msg, t, logName);
+  }
+
+  /**
+   * Log to the specified log with level DEBUG.
+   */
+  protected void doDebug(Supplier<String> msg, Throwable t, String logName) {
+    if (doIsDebugEnabled(logName)) {
+      doDebug(msg.get(), t, logName);
     }
   }
 
@@ -342,6 +441,25 @@ public class Log {
    * Log to the specified log name with level INFO.
    *
    * @param msg     the info message
+   * @param logName the log name to use
+   */
+  public static final void info(Supplier<String> msg, String logName) {
+    getLog().doInfo(msg, logName);
+  }
+
+  /**
+   * Log to the specified log with level INFO.
+   */
+  protected void doInfo(Supplier<String> msg, String logName) {
+    if (doIsInfoEnabled(logName)) {
+      doInfo(msg.get(), logName);
+    }
+  }
+
+  /**
+   * Log to the specified log name with level INFO.
+   *
+   * @param msg     the info message
    * @param t       the exception to log
    * @param logName the log name to use
    */
@@ -356,6 +474,26 @@ public class Log {
     if (doIsInfoEnabled(logName)) {
       info(msg, logName);
       logHooks.forEach(hook -> hook.doInfo(msg, t, logName));
+    }
+  }
+
+  /**
+   * Log to the specified log name with level INFO.
+   *
+   * @param msg     the info message
+   * @param t       the exception to log
+   * @param logName the log name to use
+   */
+  public static final void info(Supplier<String> msg, Throwable t, String logName) {
+    getLog().doInfo(msg, t, logName);
+  }
+
+  /**
+   * Log to the specified log with level INFO.
+   */
+  protected void doInfo(Supplier<String> msg, Throwable t, String logName) {
+    if (doIsInfoEnabled(logName)) {
+      doInfo(msg.get(), t, logName);
     }
   }
 
