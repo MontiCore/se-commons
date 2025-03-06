@@ -75,11 +75,27 @@ public class Finding {
    */
   public String buildMsg() {
     if (this.sourcePositionEnd.isPresent() && this.sourcePosition.isPresent()) {
-      return String.format(FORMAT_WITH_TWO_SOURCE_POSITIONS, this.sourcePosition.get(), this.sourcePositionEnd.get(), this.msg);
+      return String.format(FORMAT_WITH_TWO_SOURCE_POSITIONS, this.sourcePosition.get().toString(), this.sourcePositionEnd.get().toString(), this.msg);
     } else if (this.sourcePosition.isPresent()) {
-      return String.format(FORMAT_WITH_SOURCE_POSITION, this.sourcePosition.get(), this.msg);
+      return String.format(FORMAT_WITH_SOURCE_POSITION, this.sourcePosition.get().toString(), this.msg);
     }
     else {
+      return this.msg;
+    }
+  }
+
+  /**
+   * Formats the message in the GNU format.
+   * See <a href="https://www.gnu.org/prep/standards/html_node/Errors.html">GNU reference</a> for more information.
+   *
+   * @return the formatted message
+   */
+  public String buildMsgGNU() {
+    if (this.sourcePositionEnd.isPresent() && this.sourcePosition.isPresent()) {
+      return String.format(FORMAT_WITH_TWO_SOURCE_POSITIONS, this.sourcePosition.get().toStringFullPath(), this.sourcePositionEnd.get().getLine() + ":" + this.sourcePositionEnd.get().getColumn(), this.msg);
+    } else if (this.sourcePosition.isPresent()) {
+      return String.format(FORMAT_WITH_SOURCE_POSITION, this.sourcePosition.get().toStringFullPath(), this.msg);
+    } else {
       return this.msg;
     }
   }

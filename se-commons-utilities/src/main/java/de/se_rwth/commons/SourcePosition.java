@@ -12,7 +12,7 @@ import java.util.Optional;
  *
  */
 public final class SourcePosition implements Comparable<SourcePosition>, Cloneable {
-  
+
   /* A default source position at line 0 and column 0. */
   static SourcePosition defaultPosition = new SourcePosition(0, 0);
   
@@ -54,9 +54,7 @@ public final class SourcePosition implements Comparable<SourcePosition>, Cloneab
   
   /**
    * Constructor for mc.ast.SourcePosition
-   * 
-   * @param line
-   * @param column
+   *
    * @param fileName
    */
   public SourcePosition(String fileName) {
@@ -160,6 +158,17 @@ public final class SourcePosition implements Comparable<SourcePosition>, Cloneab
     return (this.fileName.isPresent() ? FilenameUtils.getName(this.fileName.get()) + ":" : "")
         + "<" + this.line + ","
         + this.column + ">";
+  }
+
+  /**
+   * The String representation of this source position of the form:
+   * <code>"filepath:a:b"</code> where <code>"a"</code> denotes the line component
+   * and <code>"b"</code> denotes the column component.
+   *
+   */
+  public String toStringFullPath() {
+    return (this.fileName.isPresent() ? this.fileName.get() : "")
+      + ":" + this.line + ":" + this.column;
   }
   
   @Override
