@@ -1052,6 +1052,10 @@ public class Log {
     getLog().logHooks.remove(hook);
   }
 
+  public static void clearLogHooks() {
+    getLog().logHooks.clear();
+  }
+
   public static void setErrorHook(IErrorHook hook) {
     getLog().errorHook = hook;
   }

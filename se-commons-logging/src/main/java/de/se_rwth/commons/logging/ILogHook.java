@@ -45,7 +45,7 @@ public interface ILogHook {
   }
 
   default void doInfo(String msg, String logName) {
-    doPrintln(String.format("[INFO]  %s %s", logName, msg));
+    doPrintln(formatInfo(msg, logName));
   }
 
   default void doInfo(String msg, Throwable t, String logName) {
@@ -53,31 +53,47 @@ public interface ILogHook {
     doPrintStackTrace(t);
   }
 
+  default String formatInfo(String msg, String logName) {
+    return String.format("[INFO]  %s %s", logName, msg);
+  }
+
   default void doWarn(Finding warn) {
-    doPrintln(String.format("[WARN]  %s", warn));
+    doPrintln(formatWarn(warn));
   }
 
   default void doWarn(Finding warn, Throwable t) {
-    doPrintln(String.format("[WARN]  %s", warn));
+    doPrintln(formatWarn(warn));
     doPrintStackTrace(t);
   }
 
+  default String formatWarn(Finding warn) {
+    return String.format("[WARN]  %s", warn);
+  }
+
   default void doError(Finding error) {
-    doPrintln(String.format("[ERROR]  %s", error));
+    doPrintln(formatError(error));
   }
 
   default void doError(Finding error, Throwable t) {
-    doPrintln(String.format("[ERROR]  %s", error));
+    doPrintln(formatError(error));
     doErrPrintStackTrace(t);
+  }
+
+  default String formatError(Finding error) {
+    return String.format("[ERROR]  %s", error);
   }
 
   default void doErrorUser(Finding error) {
-    doPrintln(String.format("[USER-ERROR]  %s", error));
+    doPrintln(formatErrorUser(error));
   }
 
   default void doErrorUser(Finding error, Throwable t) {
-    doPrintln(String.format("[USER-ERROR]  %s", error));
+    doPrintln(formatErrorUser(error));
     doErrPrintStackTrace(t);
+  }
+
+  default String formatErrorUser(Finding error) {
+    return String.format("[USER-ERROR]  %s", error);
   }
 
   void doPrintln(String msg);
