@@ -120,18 +120,21 @@ public class IsolatedURLClassLoader extends URLClassLoader {
       // Note: Thread.getAllStackTraces().keySet() is not guaranteed to contain shutdown hooks
       // which is the reason we access the ApplicationShutdownHooks via reflections
       Class<?> hooksClass = Class.forName("java.lang.ApplicationShutdownHooks");
-      Field hooksField = hooksClass.getDeclaredField("hooks");
-      hooksField.setAccessible(true);
-      @Nullable
-      Map<Thread, Thread> actualHooks = (Map<Thread, Thread>) hooksField.get(null);
-      // application shutdown hooks cannot be added if
-      // shutdown is in progress.
-      if (actualHooks == null)
-        return ret;
-      // Work on a copy of the keySet due to possible ConcurrentModificationException
-      for (Thread thread : new ArrayList<>(actualHooks.keySet())) {
-        if (thread.getContextClassLoader() == this) {
-          ret.add(thread);
+      // We actually manage to run into a ConcurrentModificationException on IdentityHashMap$KeySet.toArray
+      synchronized (hooksClass) {
+        Field hooksField = hooksClass.getDeclaredField("hooks");
+        hooksField.setAccessible(true);
+        @Nullable
+        Map<Thread, Thread> actualHooks = (Map<Thread, Thread>) hooksField.get(null);
+        // application shutdown hooks cannot be added if
+        // shutdown is in progress.
+        if (actualHooks == null)
+          return ret;
+        // Work on a copy of the keySet due to possible ConcurrentModificationException
+        for (Thread thread : new ArrayList<>(actualHooks.keySet())) {
+          if (thread.getContextClassLoader() == this) {
+            ret.add(thread);
+          }
         }
       }
 
