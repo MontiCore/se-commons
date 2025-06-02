@@ -63,20 +63,24 @@ public class SECodeStylePlugin implements Plugin<Project> {
     
     // Configure spotless
     SpotlessExtension spotless = project.getExtensions().getByType(SpotlessExtension.class);
-    spotless.java(extension -> {
-      extension.targetExclude("build/**", "target/**");
-      
-      // trim trailing whitespace before doing the Eclipse formatting
-      extension.trimTrailingWhitespace();
-      
-      // Eclipse formatting
-      extension.eclipse().configFile(codeStyleFile);
-      
-      extension.licenseHeader("/* (c) https://github.com/MontiCore/monticore */");
-      extension.endWithNewline();
-      extension.toggleOffOn("@formatter:off", "@formatter:on");
-      extension.removeUnusedImports();
-      extension.indentWithSpaces(2);
+    project.getPlugins().withId("java",javaPlugin -> {
+      // Only configure java if the java-plugin is applied
+      spotless.java(extension -> {
+        // exclude generated sources by default
+        extension.targetExclude("build/**", "target/**");
+        
+        // trim trailing whitespace before doing the Eclipse formatting
+        extension.trimTrailingWhitespace();
+        
+        // Eclipse formatting
+        extension.eclipse().configFile(codeStyleFile);
+        
+        extension.licenseHeader("/* (c) https://github.com/MontiCore/monticore */");
+        extension.endWithNewline();
+        extension.toggleOffOn("@formatter:off", "@formatter:on");
+        extension.removeUnusedImports();
+        extension.indentWithSpaces(2);
+      });
     });
     
     spotless.format("markdown", extension -> {
