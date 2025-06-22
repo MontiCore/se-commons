@@ -202,7 +202,12 @@ public class CachedIsolation<T> {
                   .getMethod(method, String[].class)
                   .invoke(null, (Object) args);
         } catch (ReflectiveOperationException e) {
-          passThrowableAlong(e.getCause());
+          if (e.getCause() == null) {
+            // some exceptions, such as ClassNotFoundExceptions, do not have a cause
+            passThrowableAlong(e);
+          } else {
+            passThrowableAlong(e.getCause());
+          }
         }
         return null;
         // Continue with the modified AccessControlContext
