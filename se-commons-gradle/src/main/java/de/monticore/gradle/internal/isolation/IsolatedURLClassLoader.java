@@ -1,6 +1,7 @@
 /* (c) https://github.com/MontiCore/monticore */
 package de.monticore.gradle.internal.isolation;
 
+import com.google.common.base.Stopwatch;
 import com.google.common.collect.Iterables;
 import de.se_rwth.commons.io.CleanerProvider;
 import de.se_rwth.commons.io.SyncDeIsolated;
@@ -11,40 +12,86 @@ import java.lang.reflect.Field;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Pattern;
 
 public class IsolatedURLClassLoader extends URLClassLoader {
   protected final Set<String> passThroughPackages;
   protected final ClassLoader contextClassLoader;
+  protected final List<Pattern> cachedClassPatterns;
 
-  public IsolatedURLClassLoader(URLClassLoader contextClassLoader, Set<String> passThroughPackages) {
-    this(contextClassLoader.getURLs(), contextClassLoader, passThroughPackages);
+  // Static cache for classes that are safe to be shared across classloaders
+  private static final ConcurrentHashMap<String, Class<?>> sharedClassCache = new ConcurrentHashMap<>();
+
+  public IsolatedURLClassLoader(URLClassLoader contextClassLoader, Set<String> passThroughPackages, List<Pattern> cachedClassPatterns) {
+    this(contextClassLoader.getURLs(), contextClassLoader, passThroughPackages, cachedClassPatterns);
   }
 
-  public IsolatedURLClassLoader(URL[] urls, URLClassLoader contextClassLoader, Set<String> passThroughPackages) {
+  public IsolatedURLClassLoader(URL[] urls, URLClassLoader contextClassLoader, Set<String> passThroughPackages, List<Pattern> cachedClassPatterns) {
     super(urls, null);
     this.contextClassLoader = contextClassLoader;
     this.passThroughPackages = passThroughPackages;
+    this.cachedClassPatterns = cachedClassPatterns;
   }
 
   private static final String CLEANER_PROVIDER_NAME = CleanerProvider.class.getName();
   private static final String SYNCDEISOLATED_NAME = SyncDeIsolated.class.getName();
 
+  static AtomicInteger loads = new AtomicInteger();
+  static AtomicInteger cacheHits = new AtomicInteger();
+
   @Override
   protected Class<?> findClass(String name) throws ClassNotFoundException {
-    // We explicitly do not isolate some classes:
-    if (name.equals(CLEANER_PROVIDER_NAME) // Tracks usages across isolates instances
-        || name.equals(SYNCDEISOLATED_NAME) // Allows synchronized mutex locks between isolated instances
-        || name.startsWith("org.slf4j")) // also pass slf4j through (to allow gradle to handle logging)
-    {
-      return this.contextClassLoader.loadClass(name);
-    }
+    System.out.println("findClass " + name);
+    Stopwatch s = Stopwatch.createStarted();
+    boolean cacheMiss = true;
+    loads.incrementAndGet();
+
     try {
-      return super.findClass(name);
-    } catch (ClassNotFoundException e) {
-      if (passThroughPackages.stream().noneMatch(name::startsWith))
-        throw e;
-      // Required to allow gradle transformers
-      return this.contextClassLoader.loadClass(name);
+      // 1. Check the shared cache first
+      Class<?> cachedClass = sharedClassCache.get(name);
+      if (cachedClass != null) {
+        cacheMiss = false;
+        cacheHits.incrementAndGet();
+        return cachedClass;
+      }
+
+      // 2. We explicitly do not isolate some classes:
+      if (name.equals(CLEANER_PROVIDER_NAME) // Tracks usages across isolates instances
+          || name.equals(SYNCDEISOLATED_NAME) // Allows synchronized mutex locks between isolated instances
+          || name.startsWith("org.slf4j")) // also pass slf4j through (to allow gradle to handle logging)
+      {
+        return this.contextClassLoader.loadClass(name);
+      }
+      try {
+        // 3. Try to load the class normally within this isolated classloader
+        Class<?> loadedClass;
+        synchronized (IsolatedURLClassLoader.class) {
+          loadedClass = super.findClass(name);
+        }
+        // If the class is specified for caching, store it
+        if (cachedClassPatterns.stream().anyMatch(p -> p.matcher(loadedClass.getName()).matches())) {
+          sharedClassCache.put(name, loadedClass);
+        }
+        return loadedClass;
+      } catch (ClassNotFoundException e) {
+        // 4. If not found, check if it's a pass-through package
+        if (passThroughPackages.stream().noneMatch(name::startsWith))
+          throw e;
+        // Required to allow gradle transformers
+        return this.contextClassLoader.loadClass(name);
+      }
+    }finally {
+      long elapsed = s.elapsed(TimeUnit.MILLISECONDS);
+      if(elapsed > 50){
+        System.out.println("Classloading took " + elapsed + "ms for " + name);
+        if(cacheMiss){
+          System.out.println("Cache miss for " + name);
+          System.out.println("Cache hit in " + cacheHits.get() + "/" + loads.get() + "=" + (((double)cacheHits.get())/loads.get()));
+        }
+      }
     }
   }
 

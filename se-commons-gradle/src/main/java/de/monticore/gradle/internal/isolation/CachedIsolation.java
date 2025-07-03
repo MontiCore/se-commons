@@ -16,13 +16,14 @@ import java.security.*;
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 /**
  * A class which allows safe, concurrent execution of work units
- *  using reuseabe, isolated classloaders.
+ * using reuseabe, isolated classloaders.
  * @param <T> an optional object associated with an isolated classloader,
- *            used to determine reusability
+ * used to determine reusability
  */
 public class CachedIsolation<T> {
 
@@ -56,6 +57,9 @@ public class CachedIsolation<T> {
    */
   protected int staggerCount;
 
+  // Static set to hold class names that should be cached
+  private final List<Pattern> cachableClassesPatterns = Collections.synchronizedList(new ArrayList<>());
+
   /**
    *
    * @param staggeredStartUpFixedDelay the (fixed) time between the first and all further runners
@@ -84,9 +88,9 @@ public class CachedIsolation<T> {
    */
   protected synchronized IIsolationData<T> getLoader(Predicate<T> predicate, Supplier<T> supplier) {
     Optional<IIsolationData<T>> d = this.internalRunners.stream()
-            .filter(x -> !x.isRunning())
-            .filter(x -> predicate.test(x.getExtraData()))
-            .findAny();
+        .filter(x -> !x.isRunning())
+        .filter(x -> predicate.test(x.getExtraData()))
+        .findAny();
     if (d.isPresent()) {
       d.get().setRunning(true);
       return d.get();
@@ -146,7 +150,7 @@ public class CachedIsolation<T> {
   }
 
   protected ClassLoader getClassLoader(URLClassLoader contextClassLoader, Supplier<T> supplier) {
-    return new IsolatedURLClassLoader(contextClassLoader, getPassThroughPackages());
+    return new IsolatedURLClassLoader(contextClassLoader, getPassThroughPackages(), cachableClassesPatterns);
   }
 
   // Empty array of ProtectionDomain - see the doPrivileged() part below
@@ -159,7 +163,7 @@ public class CachedIsolation<T> {
   /**
    * Loads a class and runs a given method in an isolated class loader
    * Requires the class and method name as Strings,
-   *  such that we do not load them from an existing parent classloader
+   * such that we do not load them from an existing parent classloader
    *
    * @param classname the name of a class {@link Class#getName()}
    * @param method    the method of a method {@link Method#getName()}
@@ -199,8 +203,8 @@ public class CachedIsolation<T> {
         } catch (ReflectiveOperationException ignored) {}
         try {
           isolationData.getClassLoader().loadClass(classname)
-                  .getMethod(method, String[].class)
-                  .invoke(null, (Object) args);
+              .getMethod(method, String[].class)
+              .invoke(null, (Object) args);
         } catch (ReflectiveOperationException e) {
           passThrowableAlong(e.getCause());
         }
@@ -232,7 +236,7 @@ public class CachedIsolation<T> {
     final List<ProtectionDomain> combinedWithoutIsolated = new ArrayList<>();
     for (ProtectionDomain protectionDomain : currentDomains) {
       if (protectionDomain.getClassLoader() == null
-              || !isClassLoaderOrChild(protectionDomain.getClassLoader())) {
+          || !isClassLoaderOrChild(protectionDomain.getClassLoader())) {
         combinedWithoutIsolated.add(protectionDomain);
       }
     }
@@ -246,7 +250,7 @@ public class CachedIsolation<T> {
     if (classloader == null) return false;
     // Note: We are unable to compare using the class object due to classloaders
     return classloader.getClass().getName().equals(IsolatedURLClassLoader.class.getName())
-            || classloader.getClass().getName().equals("groovy.lang.GroovyClassLoader$InnerLoader");
+        || classloader.getClass().getName().equals("groovy.lang.GroovyClassLoader$InnerLoader");
   }
 
   @SuppressWarnings("unchecked")
@@ -444,28 +448,37 @@ public class CachedIsolation<T> {
 
   /**
    * A {@link CachedIsolation} which provides a set of isolated contexts
-   *  with the ability to add extra elements to the classpath
+   * with the ability to add extra elements to the classpath
    */
   public static class WithClassPath extends CachedIsolation<FileCollection> {
+    final List<Pattern> cacheableClassesPattern;
+    public WithClassPath(List<Pattern> cacheableClassesPattern) {
+      this.cacheableClassesPattern = cacheableClassesPattern;
+    }
+
+    public WithClassPath(){
+      this(new ArrayList<>());
+    }
+
     public void executeInClassloader(String classname, String method, String[] args, @Nullable String prefix, FileCollection classPath) {
       super.executeInClassloader(classname, method, args, prefix,
-              f -> f.minus(classPath).getFiles().isEmpty() && classPath.minus(f).getFiles().isEmpty(), // check if the difference between the classpaths is empty
-              () -> classPath);
+          f -> f.minus(classPath).getFiles().isEmpty() && classPath.minus(f).getFiles().isEmpty(), // check if the difference between the classpaths is empty
+          () -> classPath);
     }
 
     @Override
     protected ClassLoader getClassLoader(URLClassLoader contextClassLoader, Supplier<FileCollection> supplier) {
       // Merge the extra classpath with the current classpath
       URL[] urls = Stream.concat(
-                      supplier.get().getFiles().stream().map(f -> {
-                        try {
-                          return f.toURI().toURL();
-                        } catch (MalformedURLException e) {
-                          throw new RuntimeException(e.getMessage(), e);
-                        }
-                      }), Arrays.stream(contextClassLoader.getURLs()))
-              .toArray(URL[]::new);
-      return new IsolatedURLClassLoader(urls, contextClassLoader, getPassThroughPackages());
+              supplier.get().getFiles().stream().map(f -> {
+                try {
+                  return f.toURI().toURL();
+                } catch (MalformedURLException e) {
+                  throw new RuntimeException(e.getMessage(), e);
+                }
+              }), Arrays.stream(contextClassLoader.getURLs()))
+          .toArray(URL[]::new);
+      return new IsolatedURLClassLoader(urls, contextClassLoader, getPassThroughPackages(), cacheableClassesPattern);
     }
   }
 
