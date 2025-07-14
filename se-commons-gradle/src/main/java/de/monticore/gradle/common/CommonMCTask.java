@@ -7,9 +7,11 @@ import de.monticore.gradle.internal.ProgressLoggerService;
 import de.se_rwth.commons.logging.Log;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.file.*;
+import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.provider.Provider;
+import org.gradle.api.provider.ProviderFactory;
 import org.gradle.api.tasks.*;
 import org.gradle.internal.logging.progress.ProgressLoggerFactory;
 import org.gradle.work.FileChange;
@@ -49,7 +51,7 @@ public abstract class CommonMCTask extends DefaultTask {
    final static String TASK_DEBUG = "de.monticore.gradle.debug";
   final static String ORG_GRADLE_PARALLEL = "org.gradle.parallel";
 
-  protected final ConfigurableFileCollection input = getProject().getObjects().fileCollection();
+  protected final ConfigurableFileCollection input = getObjectFactory().fileCollection();
 
   @SkipWhenEmpty    // Implies @Incremental. Do nothing if no input model exists
   @InputFiles
@@ -209,6 +211,15 @@ public abstract class CommonMCTask extends DefaultTask {
   @Inject
   protected abstract ProgressLoggerFactory getProgressLoggerFactory();
 
+  @Inject
+  protected abstract ProjectLayout getProjectLayout();
+
+  @Inject
+  protected abstract ProviderFactory getProviderFactory();
+
+  @Inject
+  protected abstract ObjectFactory getObjectFactory();
+
   // Missing right now:
   // addGrammarConfig - whether to add the grammar configuration to the mp
   // includeConfigs - extra configurations added to the mp
@@ -222,11 +233,11 @@ public abstract class CommonMCTask extends DefaultTask {
 
     // Report directory is required for incremental check
     this.getReportDir().convention(
-        getProject().getLayout().getBuildDirectory().dir("mc_reports/task_" + this.getName())
+            getProjectLayout().getBuildDirectory().dir("mc_reports/task_" + this.getName())
     );
     
     // tool debug option: convention to false, except when TASK_DEBUG is set (Project wide setting of the debug mode)
-    getDebug().convention(getProject().hasProperty(TASK_DEBUG) && "true".equals(getProject().property(TASK_DEBUG)));
+    getDebug().convention(getProviderFactory().gradleProperty(TASK_DEBUG).orElse("false").map(Boolean::parseBoolean));
     this.getOutputs().doNotCacheIf("Do not cache when debugging is enabled",
         (task) -> ((CommonMCTask) task).getDebug().get());
     // work queue debug option: convention to false, must be enabled on individual tasks
@@ -236,7 +247,7 @@ public abstract class CommonMCTask extends DefaultTask {
 
     // Add the symbol path configuration to the file collection
     if (this.symbolPathConfigurationName != null)
-      getSymbolPathConfiguration().from(getProject().getConfigurations().getByName(this.symbolPathConfigurationName));
+      getLogger().error("symbolPathConfigurationName was removed, use getSymbolPathConfiguration().from(...) in the task configuration");
 
     getAddConfigurationToSymbolPath().convention(true);
   }
@@ -264,7 +275,7 @@ public abstract class CommonMCTask extends DefaultTask {
 
     if (getReportDir().isPresent()) {
       result.add("-" + AMontiCoreConfiguration.REPORT_BASE);
-      result.add(handlePath.apply(getProject().getProjectDir().toPath()));
+      result.add(handlePath.apply(getProjectLayout().getProjectDirectory().getAsFile().toPath()));
 
       // reports might differ per file
 //      result.add("-" + AMontiCoreConfiguration.REPORT);
@@ -366,7 +377,7 @@ public abstract class CommonMCTask extends DefaultTask {
     }
     if (getWorkQueueDebug().get()) {
       // The work queue debug-mode disables isolation... hence static variables are shared and errors can occur, especially in parallel execution.
-      if (getProject().hasProperty(ORG_GRADLE_PARALLEL) && "true".equals(getProject().property(ORG_GRADLE_PARALLEL))) {
+      if (getProviderFactory().gradleProperty(ORG_GRADLE_PARALLEL).orElse("false").map(Boolean::parseBoolean).get()) {
         getLogger().warn("Gradle Parallel Execution should be disabled in Debug Mode. \n"
             + "Otherwise static variables (e.g., Mills, SymbolTables) of one Task can influence other parallel Tasks!\n"
             + "set\n\t" + ORG_GRADLE_PARALLEL + "=false\n in your <gradle.properties>");

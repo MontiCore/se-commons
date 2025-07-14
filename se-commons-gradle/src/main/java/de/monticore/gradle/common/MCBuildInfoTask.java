@@ -6,7 +6,6 @@ import org.gradle.api.DefaultTask;
 import org.gradle.api.file.RegularFileProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
-import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.work.DisableCachingByDefault;
@@ -25,7 +24,6 @@ import java.nio.charset.StandardCharsets;
 public abstract class MCBuildInfoTask extends DefaultTask {
 
   @Input
-  @Optional
   public abstract Property<String> getVersion();
 
   @OutputFile
@@ -41,7 +39,7 @@ public abstract class MCBuildInfoTask extends DefaultTask {
   public void generateBuildInfo() throws IOException {
     File file = getBuildInfoFile().get().getAsFile();
     // Provide a fallback in case the version property was not set
-    String version = getVersion().getOrElse(getProject().getVersion().toString());
+    String version = getVersion().get();
     // The parent directories of the file will be created if they do not exist
     FileUtils.writeStringToFile(file, "version = " + version, StandardCharsets.UTF_8);
   }
