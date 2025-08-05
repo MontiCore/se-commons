@@ -1,0 +1,35 @@
+/* (c) https://github.com/MontiCore/monticore */
+
+plugins {
+  id 'version-catalog'
+}
+
+catalog {
+  // declare the aliases, bundles and versions in this block
+  versionCatalog {
+    library("se-logging", "de.se_rwth.commons", "se-commons-logging").version(version)
+    library("se-utilities", "de.se_rwth.commons", "se-commons-utilities").version(version)
+    library("mc-lsp", "de.monticore.language-server", "monticore-language-server-runtime").version(version)
+    library("mc-grammar", "de.monticore", "monticore-grammar").version(version)
+    library("mc-runtime", "de.monticore", "monticore-runtime").version(version)
+    library("mc-c2mc", "de.monticore", "class2mc").version(version)
+    library("mc-cd4a", "de.monticore.lang", "cd4analysis").version(version)
+    library("mc-ocl", "de.monticore.lang", "ocl").version(version)
+    library("mc-ocl-ocl2smt", "de.monticore.lang.ocl", "ocl2smt").version(version)
+    library("mc-sc", "de.monticore.lang", "statecharts").version(version)
+    library("mc-fd", "de.monticore.lang", "fd-lang").version(version)
+    library("mc-sd", "de.monticore.lang", "sd-language").version(version)
+
+    plugin("se-commons", "de.se_rwth.commons.se-commons-gradle").version(version)
+    plugin("mc-generator", "de.monticore.generator.de.monticore.generator.gradle.plugin").version(version)
+    plugin("mc-language-server", "de.monticore.language-server.de.monticore.language-server.gradle.plugin").version(version)
+  }
+}
+
+publishing {
+  publications {
+    maven(MavenPublication) {
+      from components.versionCatalog
+    }
+  }
+}
