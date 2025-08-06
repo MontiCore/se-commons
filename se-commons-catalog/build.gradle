@@ -16,13 +16,17 @@ catalog {
     library("mc-cd4a", "de.monticore.lang", "cd4analysis").version(version)
     library("mc-ocl", "de.monticore.lang", "ocl").version(version)
     library("mc-ocl-ocl2smt", "de.monticore.lang.ocl", "ocl2smt").version(version)
-    library("mc-sc", "de.monticore.lang", "statecharts").version(version)
+    library("mc-statecharts", "de.monticore.lang", "statecharts").version(version)
     library("mc-fd", "de.monticore.lang", "fd-lang").version(version)
     library("mc-sd", "de.monticore.lang", "sd-language").version(version)
+    library("mc-montifun", "de.monticore.lang", "montifun").version(version)
+    library("mc-montiarc", "montiarc.languages", "montiarc").version(version)
+    library("mc-montiarc-ma2jsim", "montiarc.generators", "ma2jsim").version(version)
 
     plugin("se-commons", "de.se_rwth.commons.se-commons-gradle").version(version)
     plugin("mc-generator", "de.monticore.generator.de.monticore.generator.gradle.plugin").version(version)
     plugin("mc-language-server", "de.monticore.language-server.de.monticore.language-server.gradle.plugin").version(version)
+    plugin("montiarc-jsim", "montiarc-jsim.gradle.plugin").version(version)
   }
 }
 
