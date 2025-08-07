@@ -22,7 +22,7 @@ You can then add any library or plugin using the `seLibs` variable inside your
 
 ```groovy
 plugins {
-  alias(seLibs.mc.generator)
+  alias(seLibs.plugins.mc.generator)
 }
 
 dependencies {
