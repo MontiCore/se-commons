@@ -17,7 +17,9 @@ dependencyResolutionManagement {
 }
 ```
 
-You can then add any library or plugin using the seLibs variable inside your `gradle.build`:
+You can then add any library or plugin using the `seLibs` variable inside your
+`gradle.build`:
+
 ```groovy
 plugins {
   alias(seLibs.mc.generator)
@@ -29,4 +31,5 @@ dependencies {
 }
 ```
 
-Read more about version catalogs in the [Gradle documentation](https://docs.gradle.org/current/userguide/version_catalogs.html).
+Read more about version catalogs in
+the [Gradle documentation](https://docs.gradle.org/current/userguide/version_catalogs.html).
