@@ -9,6 +9,7 @@ catalog {
   versionCatalog {
     library("se-logging", "de.se_rwth.commons", "se-commons-logging").version(version)
     library("se-utilities", "de.se_rwth.commons", "se-commons-utilities").version(version)
+    library("se-commons", "de.se_rwth.commons", "se-commons-gradle").version(version)
     library("mc-lsp", "de.monticore.language-server", "monticore-language-server-runtime").version(version)
     library("mc-grammar", "de.monticore", "monticore-grammar").version(version)
     library("mc-runtime", "de.monticore", "monticore-runtime").version(version)
@@ -22,6 +23,8 @@ catalog {
     library("mc-montifun", "de.monticore.lang", "montifun").version(version)
     library("mc-montiarc", "montiarc.languages", "montiarc").version(version)
     library("mc-montiarc-ma2jsim", "montiarc.generators", "ma2jsim").version(version)
+    library("mc-generator", "de.monticore.generator", "de.monticore.generator.gradle.plugin").version(version)
+    library("mc-language-server", "de.monticore.language-server", "de.monticore.language-server.gradle.plugin").version(version)
 
     plugin("se-commons", "de.se_rwth.commons.se-commons-gradle").version(version)
     plugin("mc-generator", "de.monticore.generator.de.monticore.generator.gradle.plugin").version(version)
