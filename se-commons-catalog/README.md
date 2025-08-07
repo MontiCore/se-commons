@@ -11,7 +11,7 @@ dependencyResolutionManagement {
   }
   versionCatalogs {
     seLibs {
-      from("de.se_rwth.commons:se-commons-catalog:7.8.0-SNAPSHOT")
+      from("de.se_rwth.commons:se-commons-catalog:$mc_version")
     }
   }
 }
@@ -26,7 +26,6 @@ plugins {
 }
 
 dependencies {
-  implementation seLibs.se.logging
   implementation seLibs.mc.statecharts
 }
 ```
