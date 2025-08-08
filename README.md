@@ -17,6 +17,8 @@ SE Commons comprises the following components:
 * **se-commons-codestyle**
   * a gradle plugin `id 'de.se_rwth.codestyle'` which configures [spotless](https://github.com/diffplug/spotless)
   with the SE code style.
+* **se-commons-catalog**
+  * a gradle catalog for easy dependency access to all SE libraries and plugins
 
 ## Licenses
 * [LGPL V3.0](https://github.com/MontiCore/monticore/tree/master/00.org/Licenses/LICENSE-LGPL.md) (for handwritten Java code)
