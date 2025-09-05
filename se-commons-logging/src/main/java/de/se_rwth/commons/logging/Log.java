@@ -839,7 +839,7 @@ public class Log {
    */
   public static final <T> T errorIfNull(T reference) {
     return errorIfNull(reference,
-        "0xIECEF Internal error: an illegal null reference occurred. We don't know where and why.");
+        "0xEECFF Internal error: an illegal null reference occurred. We don't know where and why.");
   }
 
   /**
