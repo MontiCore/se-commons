@@ -819,13 +819,29 @@ public class Log {
    * Checks whether the given reference is a null reference.
    *
    * @param reference to check
-   * @param message   in case the reference is in fact null
+   * @param message   in case the reference is in fact null,
+   *                  it is allowed to only provide an error code
+   *                  instead of a full message.
    * @return the reference or throws a {@link NullPointerException} with the
    * given message
    */
   public static final <T> T errorIfNull(T reference, String message) {
+    return getLog().doErrorIfNull(reference, message);
+  }
+
+  protected <T> T doErrorIfNull(T reference, String message) {
     if (reference == null) {
-      throw new NullPointerException(message);
+      String fullMessage;
+      // check if we only have an error code without a real message
+      if (message.contains(" ")) {
+        fullMessage = message;
+      }
+      else {
+        fullMessage = message
+            + " Internal error: an illegal null reference occurred.";
+      }
+      Log.error(fullMessage);
+      throw new NullPointerException(fullMessage);
     }
     return reference;
   }
@@ -836,7 +852,10 @@ public class Log {
    * @param reference to check
    * @return the reference or throws a {@link NullPointerException} with a
    * default message
+   *
+   * @deprecated No error code (per reference). Provide an error code.
    */
+  @Deprecated(forRemoval = true)
   public static final <T> T errorIfNull(T reference) {
     return errorIfNull(reference,
         "0xEECFF Internal error: an illegal null reference occurred. We don't know where and why.");
