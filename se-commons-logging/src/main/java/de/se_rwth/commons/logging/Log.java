@@ -840,7 +840,6 @@ public class Log {
         fullMessage = message
             + " Internal error: an illegal null reference occurred.";
       }
-      Log.error(fullMessage);
       throw new NullPointerException(fullMessage);
     }
     return reference;
