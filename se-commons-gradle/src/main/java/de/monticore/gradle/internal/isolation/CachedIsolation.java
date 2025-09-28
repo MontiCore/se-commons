@@ -1,9 +1,12 @@
 /* (c) https://github.com/MontiCore/monticore */
 package de.monticore.gradle.internal.isolation;
 
+import com.google.common.collect.Sets;
 import de.monticore.gradle.internal.io.PrefixStream;
 import de.monticore.gradle.internal.io.PrintStreamThreadProxy;
 import org.gradle.api.file.FileCollection;
+import org.gradle.api.logging.Logger;
+import org.gradle.api.logging.Logging;
 
 import javax.annotation.Nullable;
 import java.io.Closeable;
@@ -27,12 +30,18 @@ import java.util.stream.Stream;
 public class CachedIsolation<T> {
 
   protected final List<IIsolationData<T>> internalRunners = Collections.synchronizedList(new LinkedList<>());
+  protected final Logger logger = Logging.getLogger(CachedIsolation.class);
+
+  /**
+   * Time (in ms) in which the close threshold timer is checked
+   */
+  protected final long closeThresholdTimer = 2 * 1000; // 6 seconds by default
 
   /**
    * Time (in ms) after the last use of an isolated classloader before its
    * allocated resources are freed
    */
-  protected final long closeThreshold = 6 * 1000; // 6 seconds
+  protected long closeThreshold = 6 * 1000; // 6 seconds by default
 
   /**
    * We periodically clean up the open classloaders
@@ -57,10 +66,20 @@ public class CachedIsolation<T> {
   protected int staggerCount;
 
   /**
+   * The threshold to use to check for unused classloaders
+   * @param closeThreshold the new threshold
+   */
+  public void setCloseThreshold(long closeThreshold) {
+    logger.debug("Setting close threshold to {} ", closeThreshold );
+    this.closeThreshold = closeThreshold;
+  }
+
+  /**
    *
    * @param staggeredStartUpFixedDelay the (fixed) time between the first and all further runners
    * @param staggeredStartUpDelayPerRunner the time between the startup of individual runners
    */
+  @Deprecated
   public void setStaggeredStartupParams(int staggeredStartUpFixedDelay, int staggeredStartUpDelayPerRunner) {
     this.staggeredStartUpFixedDelay = staggeredStartUpFixedDelay;
     this.staggeredStartUpDelayPerRunner = staggeredStartUpDelayPerRunner;
@@ -72,9 +91,17 @@ public class CachedIsolation<T> {
     cleanupTimer.schedule(new TimerTask() {
       @Override
       public void run() {
-        CachedIsolation.this.cleanupOld();
+        CachedIsolation.this.cleanupOld(closeThreshold);
       }
-    }, closeThreshold, closeThreshold);
+    }, closeThresholdTimer, closeThresholdTimer);
+  }
+
+  /**
+   * Mark all internal runers as ready to be unloaded
+   */
+  public void markForErasure() {
+    logger.debug("Marking forErasure");
+    this.internalRunners.forEach(r -> ((IsolationData<?>)r).lastRun = 0);
   }
 
   /**
@@ -88,14 +115,16 @@ public class CachedIsolation<T> {
             .filter(x -> predicate.test(x.getExtraData()))
             .findAny();
     if (d.isPresent()) {
+      logger.debug("Reusing existing runner " + d.get().getUUID());
       d.get().setRunning(true);
       return d.get();
     }
-    this.cleanupOld();
+    this.cleanupOld(closeThreshold);
     final long staggerWait = getWaitForStaggeredStartup();
     this.lastStartup = System.currentTimeMillis();
     if (staggerWait <= 0) {
       IsolationData<T> data = new IsolationData<>();
+      logger.debug("Creating new loader " + data.getUUID());
       data.classLoader = getClassLoader((URLClassLoader) Thread.currentThread().getContextClassLoader(), supplier);
       data.running = true;
       data.extraData = supplier.get();
@@ -142,7 +171,7 @@ public class CachedIsolation<T> {
    * (and thus are not isolated)
    */
   protected Set<String> getPassThroughPackages() {
-    return Set.of("org.gradle");
+    return Sets.newHashSet("org.gradle");
   }
 
   protected ClassLoader getClassLoader(URLClassLoader contextClassLoader, Supplier<T> supplier) {
@@ -297,16 +326,26 @@ public class CachedIsolation<T> {
     ps.setRedirect(new PrefixStream(ps.getOriginal(), prefix));
   }
 
+  /**
+   * Cleanup all (unused) class loaders
+   */
+  public void cleanupAll() {
+    this.cleanupOld(0);
+  }
 
   /**
    * Close unused classloaders to free up memory
+   * @param pCloseThreshold the threshold to use
    */
-  protected synchronized void cleanupOld() {
-    long threshold = System.currentTimeMillis() - this.closeThreshold;
+  protected synchronized void cleanupOld(long pCloseThreshold) {
+    long threshold = System.currentTimeMillis() - pCloseThreshold;
     Iterator<IIsolationData<T>> isolated = this.internalRunners.iterator();
+    logger.debug("Running cleanup thread");
     while (isolated.hasNext()) {
       IIsolationData<T> data = isolated.next();
+      logger.debug(" - {} - {} - {}", data.isRunning() ? "R" : "I", data.getLastRun(), data.getUUID());
       if (!data.isRunning() && data.getLastRun() < threshold){
+        logger.debug("   - close ");
         if (data.getClassLoader() instanceof Closeable) {
           // Close closeable classloaders
           try {
@@ -331,6 +370,8 @@ public class CachedIsolation<T> {
     protected long lastRun = System.currentTimeMillis();
 
     protected T extraData;
+
+    protected final UUID uuid = UUID.randomUUID();
 
     @Override
     public ClassLoader getClassLoader() {
@@ -368,8 +409,14 @@ public class CachedIsolation<T> {
       this.running = false;
       this.lastRun = System.currentTimeMillis();
     }
+
+    @Override
+    public UUID getUUID() {
+      return this.uuid;
+    }
   }
 
+  @Deprecated
   protected static class StaggeredIsolationData<T> implements IIsolationData<T> {
     protected Optional<IIsolationData<T>> actual = Optional.empty();
     protected final Supplier<IIsolationData<T>> supplier;
@@ -419,6 +466,11 @@ public class CachedIsolation<T> {
     public void close() {
       getActual().close();
     }
+
+    @Override
+    public UUID getUUID() {
+      return getActual().getUUID();
+    }
   }
 
   protected interface IIsolationData<T> extends AutoCloseable {
@@ -436,6 +488,8 @@ public class CachedIsolation<T> {
 
     @Override
     void close();
+
+    UUID getUUID();
   }
 
   /**
