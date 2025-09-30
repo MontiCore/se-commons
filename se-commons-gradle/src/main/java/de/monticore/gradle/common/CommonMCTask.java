@@ -476,5 +476,23 @@ public abstract class CommonMCTask extends DefaultTask {
       add.accept(f);
     }
   }
+  
+  /**
+   * Turn a path into string accepted by {@link File#File(String)}.
+   * This especially contains spaces
+   *
+   * @param path the path
+   * @return a valid argument for File
+   */
+  protected String pathToFileString(Path path) {
+    return path.toFile().getAbsolutePath();
+  }
+  
+  protected String pathToHumanReadableString(Path path, Path projectWorkingDir) {
+    if (projectWorkingDir.getRoot().equals(path.getRoot())) {
+      return projectWorkingDir.relativize(path).toString();
+    }
+    return pathToFileString(path);
+  }
 
 }

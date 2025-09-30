@@ -66,11 +66,10 @@ public abstract class MCAllFilesTask extends CommonMCTask {
 
       Path cwd = getProject().getProjectDir().toPath().toAbsolutePath();
       getLogger().debug("Starting Tool with args: \n{} for {}",
-              String.join(" ", createArgList(p -> "." + File.separator +
-                      (cwd.getRoot().equals(p.getRoot()) ? cwd.relativize(p) : p.toAbsolutePath()))),
-              this.getName());
+          String.join(" ", createArgList(p -> this.pathToHumanReadableString(p, cwd))),
+          this.getName());
 
-      List<String> args = createArgList(p -> p.toAbsolutePath().toString());
+      List<String> args = createArgList(this::pathToFileString);
       startGeneration(args, this.getName());
     } else {
       getLogger().info("UP-TO-DATE, no action required");
