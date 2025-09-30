@@ -23,10 +23,12 @@ import java.util.stream.Stream;
 
 /**
  * A class which allows safe, concurrent execution of work units
- *  using reuseabe, isolated classloaders.
+ *  using re-useabe, isolated classloaders.
+ * @deprecated consider using the {@link de.monticore.gradle.queue.CachedIsolatedWorkQueue}
  * @param <T> an optional object associated with an isolated classloader,
  *            used to determine reusability
  */
+@Deprecated
 public class CachedIsolation<T> {
 
   protected final List<IIsolationData<T>> internalRunners = Collections.synchronizedList(new LinkedList<>());

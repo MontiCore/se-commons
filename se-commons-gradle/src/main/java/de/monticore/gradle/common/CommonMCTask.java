@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -386,17 +387,33 @@ public abstract class CommonMCTask extends DefaultTask {
       workQueue.submit(getToolAction(), param -> {
         param.getArgs().set(args);
         param.getProgressName().set(progressName);
+        param.getPrefix().set("[" + progressName + "]");
+        // A unique name for the stats reporter, etc.
+        int classPathHash = getExtraClasspathElements().getFiles().stream().map(File::getName).collect(Collectors.joining(",")).hashCode();
+        param.getStatsUniqueName().set( "[" + getPath() + "(" + getClass().getSimpleName() + ")"
+                + "[" + classPathHash + "]"
+                + "#" + progressName + "]");
         param.getExtraClasspathElements().setFrom(this.getExtraClasspathElements());
         param.getProgressLogger().set(getProgressLoggerService());
+        this.specParam(param);
       });
     }
+  }
+
+  /**
+   * Customize the tool parameters
+   * @param param the params being constructed
+   */
+  protected void specParam(ToolArgActionParameter param) {
+    // noop
   }
 
   @Internal
   public abstract Property<ProgressLoggerService> getProgressLoggerService();
 
-  @Internal
-  protected abstract Consumer<String[]> getRunMethod();
+  protected Consumer<String[]> getRunMethod() {
+    throw new IllegalStateException("No tool invoker present, workQueueDebug is not supported!");
+  }
 
   @Internal
   protected abstract Class<? extends AToolAction> getToolAction();
