@@ -97,13 +97,11 @@ public abstract class CommonMCTask extends DefaultTask {
 
 
   @Deprecated // old-school hwcDir = ..
-  @Internal
   public void setHwcDir(File f){
     this.getHandWrittenCodeDir().setFrom(f);
   }
 
   @Deprecated // old-school hwcDir = [...] / hwcDir +=
-  @Internal
   public void setHwcDir(Iterable<File> f){
     this.getHandWrittenCodeDir().setFrom(f);
   }
@@ -115,13 +113,11 @@ public abstract class CommonMCTask extends DefaultTask {
   }
 
   @Deprecated
-  @Internal
   public void setHwgDir(File f){
     this.getHandWrittenGrammarDir().setFrom(f);
   }
 
   @Deprecated
-  @Internal
   public void setHwgDir(Iterable<File> f){
     this.getHandWrittenGrammarDir().setFrom(f);
   }
@@ -411,6 +407,7 @@ public abstract class CommonMCTask extends DefaultTask {
   @Internal
   public abstract Property<ProgressLoggerService> getProgressLoggerService();
 
+  @Internal
   protected Consumer<String[]> getRunMethod() {
     throw new IllegalStateException("No tool invoker present, workQueueDebug is not supported!");
   }
