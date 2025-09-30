@@ -156,7 +156,7 @@ public abstract class CommonMCTask extends DefaultTask {
   @Incremental  // Incremental symbol path (such as MC generation the modelpath)
   @Optional
   // Absolute, since this can contain elements from the gradle jar cache, outside the project
-  @PathSensitive(PathSensitivity.ABSOLUTE) // TODO: really absolute?
+  @Classpath // The content of the jar file is normalized so that time stamps and order of the zip entries in the jar file do not matter
   public abstract ConfigurableFileCollection getIncrementalSymbolPath();
 
 
