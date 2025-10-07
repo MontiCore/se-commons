@@ -2,15 +2,15 @@
 package de.monticore.gradle.common;
 
 import de.monticore.gradle.internal.ProgressLoggerService;
+import de.monticore.gradle.queue.CachedIsolatedWorkQueue;
 import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.Property;
-import org.gradle.workers.WorkParameters;
 
 /**
  * work parameters consisting of CLI arguments
  */
-public interface ToolArgActionParameter extends WorkParameters {
+public interface ToolArgActionParameter extends CachedIsolatedWorkQueue.WorkQueueParameters {
     /**
      * Arguments passed to a Tool
      */
@@ -19,6 +19,7 @@ public interface ToolArgActionParameter extends WorkParameters {
     /**
      * Name of this work action, passed to the log
      */
+    @Deprecated
     Property<String> getProgressName();
 
     /**

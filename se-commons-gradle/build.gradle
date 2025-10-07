@@ -1,11 +1,16 @@
 /* (c) https://github.com/MontiCore/monticore */
 
+plugins {
+  id 'java-gradle-plugin' // No plugin will be published, but for tests
+}
+
 description = 'se-commons: gradle'
 
 dependencies {
   implementation gradleApi()
   implementation project(":se-commons-utilities")
   implementation project(":se-commons-logging")
+  implementation 'com.google.code.gson:gson:2.13.2'
 
   implementation "org.apache.commons:commons-lang3:3.8.1"
   implementation "com.google.guava:guava:33.1.0-jre"
@@ -17,4 +22,43 @@ publishing {
       from(components.java)
     }
   }
+}
+
+// Test our plugin infrastructure with a test-plugin
+sourceSets {
+  testPlugin {
+    compileClasspath += sourceSets.main.output
+    runtimeClasspath += sourceSets.main.output
+  }
+}
+configurations {
+  testPluginImplementation.extendsFrom implementation
+  testPluginRuntimeOnly.extendsFrom runtimeOnly
+}
+
+dependencies {
+  testPluginImplementation gradleApi()
+  testImplementation gradleTestKit()
+  testImplementation("org.junit.jupiter:junit-jupiter:5.7.1")
+  testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.0")
+  testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+tasks.named('test', Test) {
+  useJUnitPlatform()
+  // Parallel test execution
+  systemProperty("junit.jupiter.execution.parallel.enabled", true)
+  systemProperty("junit.jupiter.execution.parallel.mode.default", "concurrent")
+}
+
+gradlePlugin {
+  testSourceSet sourceSets.test
+}
+
+tasks.register('testPluginJar', Jar) {
+  archiveClassifier = 'testPlugin'
+  from sourceSets.testPlugin.output
+}
+
+tasks.pluginUnderTestMetadata {
+  pluginClasspath.from(tasks.testPluginJar)
 }

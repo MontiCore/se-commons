@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -96,13 +97,11 @@ public abstract class CommonMCTask extends DefaultTask {
 
 
   @Deprecated // old-school hwcDir = ..
-  @Internal
   public void setHwcDir(File f){
     this.getHandWrittenCodeDir().setFrom(f);
   }
 
   @Deprecated // old-school hwcDir = [...] / hwcDir +=
-  @Internal
   public void setHwcDir(Iterable<File> f){
     this.getHandWrittenCodeDir().setFrom(f);
   }
@@ -114,13 +113,11 @@ public abstract class CommonMCTask extends DefaultTask {
   }
 
   @Deprecated
-  @Internal
   public void setHwgDir(File f){
     this.getHandWrittenGrammarDir().setFrom(f);
   }
 
   @Deprecated
-  @Internal
   public void setHwgDir(Iterable<File> f){
     this.getHandWrittenGrammarDir().setFrom(f);
   }
@@ -156,7 +153,7 @@ public abstract class CommonMCTask extends DefaultTask {
   @Incremental  // Incremental symbol path (such as MC generation the modelpath)
   @Optional
   // Absolute, since this can contain elements from the gradle jar cache, outside the project
-  @PathSensitive(PathSensitivity.ABSOLUTE) // TODO: really absolute?
+  @Classpath // The content of the jar file is normalized so that time stamps and order of the zip entries in the jar file do not matter
   public abstract ConfigurableFileCollection getIncrementalSymbolPath();
 
 
@@ -386,17 +383,34 @@ public abstract class CommonMCTask extends DefaultTask {
       workQueue.submit(getToolAction(), param -> {
         param.getArgs().set(args);
         param.getProgressName().set(progressName);
+        param.getPrefix().set("[" + progressName + "]");
+        // A unique name for the stats reporter, etc.
+        int classPathHash = getExtraClasspathElements().getFiles().stream().map(File::getName).collect(Collectors.joining(",")).hashCode();
+        param.getStatsUniqueName().set( "[" + getPath() + "(" + getClass().getSimpleName() + ")"
+                + "[" + classPathHash + "]"
+                + "#" + progressName + "]");
         param.getExtraClasspathElements().setFrom(this.getExtraClasspathElements());
         param.getProgressLogger().set(getProgressLoggerService());
+        this.specParam(param);
       });
     }
+  }
+
+  /**
+   * Customize the tool parameters
+   * @param param the params being constructed
+   */
+  protected void specParam(ToolArgActionParameter param) {
+    // noop
   }
 
   @Internal
   public abstract Property<ProgressLoggerService> getProgressLoggerService();
 
   @Internal
-  protected abstract Consumer<String[]> getRunMethod();
+  protected Consumer<String[]> getRunMethod() {
+    throw new IllegalStateException("No tool invoker present, workQueueDebug is not supported!");
+  }
 
   @Internal
   protected abstract Class<? extends AToolAction> getToolAction();
@@ -475,6 +489,24 @@ public abstract class CommonMCTask extends DefaultTask {
     if (f.exists()) {
       add.accept(f);
     }
+  }
+  
+  /**
+   * Turn a path into string accepted by {@link File#File(String)}.
+   * This especially contains spaces
+   *
+   * @param path the path
+   * @return a valid argument for File
+   */
+  protected String pathToFileString(Path path) {
+    return path.toFile().getAbsolutePath();
+  }
+  
+  protected String pathToHumanReadableString(Path path, Path projectWorkingDir) {
+    if (projectWorkingDir.getRoot().equals(path.getRoot())) {
+      return projectWorkingDir.relativize(path).toString();
+    }
+    return pathToFileString(path);
   }
 
 }
