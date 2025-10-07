@@ -172,6 +172,7 @@ public abstract class CachedQueueService
     Optional<IIsolationData> d = this.internalRunners.stream().filter(x -> !x.isRunning())
             .filter(x -> predicate.test(x.getExtraData())).findAny();
     if (d.isPresent()) {
+      logger.debug("Reusing existing runner " + d.get().getUUID());
       d.get().setRunning(true);
       stats.track(CachedIsolationStats.EventKind.REUSE, d.get().getUUID(), maximumLoadersFromConfig, this.internalRunners, uniqueId);
       return d.get();
@@ -187,6 +188,7 @@ public abstract class CachedQueueService
     data.extraData = supplier.get();
     stats.track(CachedIsolationStats.EventKind.CREATE, data.getUUID(), maximumLoadersFromConfig, this.internalRunners, uniqueId);
     this.internalRunners.add(data);
+    logger.debug("Creating new loader " + data.getUUID());
     setupTimer();
     return data;
   }
@@ -205,6 +207,11 @@ public abstract class CachedQueueService
     }, 2 * 1000, 2 * 1000);
   }
 
+  public void setCloseThreshold(long closeThreshold) {
+    logger.debug("Setting close threshold to {} ", closeThreshold );
+    this.closeThreshold = closeThreshold;
+  }
+
   /**
    * Close unused classloaders to free up memory
    */
@@ -214,10 +221,13 @@ public abstract class CachedQueueService
 
     long threshold = System.currentTimeMillis() - pCloseThreshold;
     Iterator<IIsolationData> isolated = this.internalRunners.iterator();
+    logger.debug("Running cleanup thread");
     while (isolated.hasNext()) {
       IIsolationData data = isolated.next();
+      logger.debug(" - {} - {} - {}", data.isRunning() ? "R" : "I", data.getLastRun(), data.getUUID());
       if (!data.isRunning() && data.getLastRun() < threshold) {
         stats.track(CachedIsolationStats.EventKind.CLEANUP, data.getUUID(), maximumLoadersFromConfig, this.internalRunners);
+        logger.debug("   - close ");
         if (data.getClassLoader() instanceof Closeable) {
           // Close closeable classloaders
           try {
