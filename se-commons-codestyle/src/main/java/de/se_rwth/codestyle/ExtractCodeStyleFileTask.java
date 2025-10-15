@@ -9,11 +9,11 @@ import org.gradle.api.tasks.CacheableTask;
 import org.gradle.api.tasks.Input;
 import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
+import org.gradle.internal.impldep.com.google.common.base.Preconditions;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.Objects;
 
 /**
  * This task just extracts a file from the resources
@@ -29,8 +29,8 @@ public abstract class ExtractCodeStyleFileTask extends DefaultTask {
   
   @TaskAction
   public void store() throws IOException {
-    Files.copy(Objects.requireNonNull(
-            ExtractCodeStyleFileTask.class.getClassLoader().getResourceAsStream(getInput().get())),
+    Files.copy(Preconditions.checkNotNull(
+               ExtractCodeStyleFileTask.class.getClassLoader().getResourceAsStream(getInput().get())),
         getDestination().get().getAsFile().toPath(), StandardCopyOption.REPLACE_EXISTING);
   }
 }

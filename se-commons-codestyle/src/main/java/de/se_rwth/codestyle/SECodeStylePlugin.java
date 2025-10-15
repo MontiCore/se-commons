@@ -8,6 +8,7 @@ import org.gradle.api.Project;
 import org.gradle.api.UnknownTaskException;
 import org.gradle.api.file.RegularFile;
 import org.gradle.api.provider.Provider;
+import org.gradle.internal.impldep.com.google.api.client.util.Preconditions;
 
 import javax.annotation.Nonnull;
 import java.io.File;
@@ -108,7 +109,7 @@ public class SECodeStylePlugin implements Plugin<Project> {
         try (
             InputStream url = getClass().getClassLoader()
                 .getResourceAsStream("se-codestyle/.editorconfig")) {
-          Files.copy(Objects.requireNonNull(url), editorConfig.toPath(),
+          Files.copy(Preconditions.checkNotNull(url), editorConfig.toPath(),
               StandardCopyOption.REPLACE_EXISTING);
         }
       }

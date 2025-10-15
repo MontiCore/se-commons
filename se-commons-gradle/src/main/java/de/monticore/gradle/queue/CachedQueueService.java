@@ -1,6 +1,7 @@
 /* (c) https://github.com/MontiCore/monticore */
 package de.monticore.gradle.queue;
 
+import com.google.common.base.Preconditions;
 import com.google.gson.Gson;
 import de.monticore.gradle.internal.io.PrefixStream;
 import de.monticore.gradle.internal.io.PrintStreamThreadProxy;
@@ -76,10 +77,10 @@ public abstract class CachedQueueService
       logger.warn("Possibly overriding the CachedQueueService instance");
       INSTANCE = this;
     }
-    this.serviceRegistry = Objects.requireNonNull(serviceRegistry);
+    this.serviceRegistry = Preconditions.checkNotNull(serviceRegistry);
     this.providerSelf = (Provider<CachedQueueService>) serviceRegistry.get(BuildServiceRegistry.class).getRegistrations().getByName(NAME).getService();
-    Objects.requireNonNull(serviceRegistry.get(ActionExecutionSpecFactory.class), "ActionExecutionSpecFactory");
-    Objects.requireNonNull(serviceRegistry.get(IsolatableFactory.class), "isolatableFactory");
+    Preconditions.checkNotNull(serviceRegistry.get(ActionExecutionSpecFactory.class), "ActionExecutionSpecFactory");
+    Preconditions.checkNotNull(serviceRegistry.get(IsolatableFactory.class), "isolatableFactory");
 
     serviceRegistry.get(BuildEventListenerRegistryInternal.class)
             .onOperationCompletion(this.providerSelf);
@@ -635,7 +636,7 @@ public abstract class CachedQueueService
 
 
   /**
-   * Construc
+   * Constructor for a new WorkQueue
    *
    * @param workerExecutor        the worker executor to use
    * @param extraClasspathElement the classpath elements to use
@@ -644,7 +645,7 @@ public abstract class CachedQueueService
   public WorkQueue newWorkQueue(WorkerExecutor workerExecutor, FileCollection extraClasspathElement) {
     return new CachedIsolatedWorkQueue(workerExecutor.noIsolation(),
             serviceRegistry.get(InstantiatorFactory.class),
-            Objects.requireNonNull(serviceRegistry, "serviceRegistry"),
+            Preconditions.checkNotNull(serviceRegistry, "serviceRegistry"),
             this.providerSelf,
             extraClasspathElement);
   }
