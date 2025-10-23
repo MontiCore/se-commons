@@ -822,8 +822,19 @@ public class Log {
    * @param message   in case the reference is in fact null
    * @return the reference or throws a {@link NullPointerException} with the
    * given message
+   *
+   * @deprecated to be improved discussed
    */
+  @Deprecated
   public static final <T> T errorIfNull(T reference, String message) {
+    return getLog().doErrorIfNull(reference, message);
+  }
+
+  /**
+   * @deprecated to be discussed
+   */
+  @Deprecated
+  protected <T> T doErrorIfNull(T reference, String message) {
     if (reference == null) {
       throw new NullPointerException(message);
     }
@@ -836,10 +847,13 @@ public class Log {
    * @param reference to check
    * @return the reference or throws a {@link NullPointerException} with a
    * default message
+   *
+   * @deprecated No error code (per reference). Provide an error code.
    */
+  @Deprecated(forRemoval = true)
   public static final <T> T errorIfNull(T reference) {
     return errorIfNull(reference,
-        "Internal error: a null reference occurred (see/enable debug output).");
+        "0xEECFF Internal error: an illegal null reference occurred. We don't know where and why.");
   }
 
   /**
