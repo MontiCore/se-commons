@@ -25,6 +25,7 @@ catalog {
     library("mc-montiarc-ma2jsim", "montiarc.generators", "ma2jsim").version(version)
     library("mc-generator", "de.monticore.generator", "de.monticore.generator.gradle.plugin").version(version)
     library("mc-language-server", "de.monticore.language-server", "de.monticore.language-server.gradle.plugin").version(version)
+    library("mc-stream-symbols", "de.monticore", "stream-symbols").version(version)
 
     plugin("se-commons-gradle", "de.se_rwth.commons.se-commons-gradle").version(version)
     plugin("mc-generator", "de.monticore.generator.de.monticore.generator.gradle.plugin").version(version)
