@@ -11,6 +11,7 @@ catalog {
     library("se-commons-utilities", "de.se_rwth.commons", "se-commons-utilities").version(version)
     library("se-commons-gradle", "de.se_rwth.commons", "se-commons-gradle").version(version)
     library("mc-lsp", "de.monticore.language-server", "monticore-language-server-runtime").version(version)
+    library("mc-lsp-intellij", "de.monticore.language-server.plugin", "monticore-language-server-runtime-intellij").version(version)
     library("mc-grammar", "de.monticore", "monticore-grammar").version(version)
     library("mc-runtime", "de.monticore", "monticore-runtime").version(version)
     library("mc-c2mc", "de.monticore", "class2mc").version(version)
