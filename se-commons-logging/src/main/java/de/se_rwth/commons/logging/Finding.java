@@ -195,6 +195,7 @@ public class Finding {
       Finding other = (Finding) obj;
       if (this.msg.equals(other.msg)
           && this.sourcePosition.equals(other.sourcePosition)
+          && this.sourcePositionEnd.equals(other.sourcePositionEnd)
           && this.type == other.type) {
         return true;
       }
