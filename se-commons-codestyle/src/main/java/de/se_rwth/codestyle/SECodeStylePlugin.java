@@ -6,17 +6,13 @@ import com.diffplug.gradle.spotless.SpotlessPlugin;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.UnknownTaskException;
-import org.gradle.api.file.RegularFile;
-import org.gradle.api.provider.Provider;
-import org.gradle.internal.impldep.com.google.api.client.util.Preconditions;
-
+import com.google.common.base.Preconditions;
 import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.Objects;
 
 /**
  * This plugin applies & configures the spotless code formatter,
