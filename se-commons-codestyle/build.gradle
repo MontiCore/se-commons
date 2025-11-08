@@ -16,11 +16,6 @@ repositories {
   mavenCentral()
 }
 
-compileJava {
-  sourceCompatibility = JavaVersion.VERSION_11
-  targetCompatibility = JavaVersion.VERSION_11
-}
-
 gradlePlugin.plugins {
   secodestyle {
     id = "de.se_rwth.codestyle"

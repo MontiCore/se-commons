@@ -32,7 +32,7 @@ subprojects {
     apply plugin: 'java-library'
     apply plugin : 'io.github.themrmilchmann.ecj'
 
-    tasks.withType(Test) {
+    tasks.withType(Test).configureEach {
         useJUnit()
         testLogging {
             // controls whether test output is shown
@@ -65,9 +65,9 @@ subprojects {
     }
 
 
-    tasks.withType(JavaCompile) {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+    tasks.withType(JavaCompile).configureEach {
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
         options.encoding = "UTF-8"
         options.deprecation false
         options.warnings = false
@@ -76,6 +76,11 @@ subprojects {
     }
     java {
         withSourcesJar()
+        // Configure the java toolchain to use Java 11 (overriding the locally installed JDK)
+        // https://docs.gradle.org/current/userguide/toolchains.html
+        toolchain {
+          languageVersion = JavaLanguageVersion.of(11)
+        }
     }
 }
 
