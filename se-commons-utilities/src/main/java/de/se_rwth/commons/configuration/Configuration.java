@@ -9,7 +9,7 @@ import org.apache.commons.cli.Option;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -25,7 +25,7 @@ public interface Configuration {
    * @return all values stored in this configuration.
    */
   default Map<String, Object> getAllValues() {
-    Map<String, Object> values = new HashMap<>();
+    Map<String, Object> values = new LinkedHashMap<>();
     for (Option option : getConfig().getOptions()) {
       if (option.getArgs() == 1) {
         values.put(option.getOpt(), option.getValue());
@@ -40,7 +40,7 @@ public interface Configuration {
    * @return all values stored in this configuration as strings.
    */
   default Map<String, String> getAllValuesAsStrings() {
-    Map<String, String> values = new HashMap<>();
+    Map<String, String> values = new LinkedHashMap<>();
     for (Option option : getConfig().getOptions()) {
       if (option.getArgs() == 1) {
         values.put(option.getOpt(), option.getValue());

@@ -2,7 +2,7 @@
 package de.se_rwth.commons;
 
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 /**
@@ -51,7 +51,7 @@ public class JavaNamesHelper {
     public static String getNonReservedName(String name) {
       
       if (goodNames == null) {
-        goodNames = new HashSet<String>();
+        goodNames = new LinkedHashSet<String>();
         goodNames.addAll(Arrays.asList(new String[] { "abstract", "continue",
             "for", "new", "switch", "assert", "default", "goto", "package",
             "synchronized", "boolean", "do", "if", "private", "this",

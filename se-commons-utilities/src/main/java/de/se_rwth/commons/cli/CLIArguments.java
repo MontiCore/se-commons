@@ -7,7 +7,7 @@ import com.google.common.collect.Iterators;
 
 import javax.inject.Named;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +47,7 @@ public final class CLIArguments {
     ImmutableSet.Builder<String> parameters = ImmutableSet.builder();
     // ImmutableListMultimap.Builder<String, String> valueMap =
     // ImmutableListMultimap.builder();
-    Map<String, List<String>> valueMap = new HashMap<>();
+    Map<String, List<String>> valueMap = new LinkedHashMap<>();
     
     Iterator<String> i = Iterators.forArray(arguments);
     
