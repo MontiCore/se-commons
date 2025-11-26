@@ -14,7 +14,7 @@ import de.se_rwth.commons.Values;
 import de.se_rwth.commons.configuration.Configuration;
 
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -63,7 +63,7 @@ public class GroovyRunnerMapConfiguration implements Configuration {
      */
     GroovyRunnerMapConfiguration(Map<String, String> properties, Splitter listSplitter) {
         Splitter splitter = listSplitter.trimResults().omitEmptyStrings();
-        Map<String, Iterable<String>> splitProperties = new HashMap<>();
+        Map<String, Iterable<String>> splitProperties = new LinkedHashMap<>();
         for (Map.Entry<String, String> property : properties.entrySet()) {
             splitProperties.put(property.getKey(), splitter.split(property.getValue()));
         }
@@ -83,7 +83,7 @@ public class GroovyRunnerMapConfiguration implements Configuration {
      * de.se_rwth.commons.groovy.GroovyRunnerMapConfiguration
      */
     GroovyRunnerMapConfiguration(Multimap<String, String> properties) {
-        Map<String, Iterable<String>> builtProperties = new HashMap<>();
+        Map<String, Iterable<String>> builtProperties = new LinkedHashMap<>();
         for (Map.Entry<String, String> property : properties.entries()) {
             builtProperties.put(property.getKey(), properties.get(property.getKey()));
         }

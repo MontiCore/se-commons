@@ -126,7 +126,7 @@ public abstract class CachedQueueService
    * WorkParameters do not support the information stored in the {@link ActualTaskInfo},
    * which is why we use this weird workaround of a UUID-key
    */
-  protected Map<UUID, ActualTaskInfo<?>> taskInfoMap = new HashMap<>();
+  protected Map<UUID, ActualTaskInfo<?>> taskInfoMap = new LinkedHashMap<>();
 
   protected final IsolationScheme<WorkAction<?>, WorkParameters> isolationScheme =
           new IsolationScheme<>(Cast.uncheckedCast(WorkAction.class), WorkParameters.class,
