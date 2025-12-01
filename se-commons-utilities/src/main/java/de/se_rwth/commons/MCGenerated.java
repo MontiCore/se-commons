@@ -16,5 +16,5 @@ import java.lang.annotation.Target;
 
 public @interface MCGenerated {
 
-  String value() default "";
+  String value();
 }
