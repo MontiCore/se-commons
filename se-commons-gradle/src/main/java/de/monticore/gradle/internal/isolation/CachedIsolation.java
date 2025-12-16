@@ -352,7 +352,10 @@ public class CachedIsolation<T> {
           // Close closeable classloaders
           try {
             ((Closeable) data.getClassLoader()).close();
-          } catch (IOException ignored) { }
+          } catch (Throwable ignored) {
+            // In case java is eagerly unloading the classloader already,
+            // used classes from libraries might result in NoClassDefErrors
+          }
         }
         data.cleanUp();
         isolated.remove();

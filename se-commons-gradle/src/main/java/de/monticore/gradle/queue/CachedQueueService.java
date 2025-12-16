@@ -24,6 +24,7 @@ import org.gradle.internal.isolation.Isolatable;
 import org.gradle.internal.isolation.IsolatableFactory;
 import org.gradle.internal.operations.*;
 import org.gradle.internal.reflect.Instantiator;
+import org.gradle.internal.serialize.Decoder;
 import org.gradle.internal.serialize.InputStreamBackedDecoder;
 import org.gradle.internal.serialize.OutputStreamBackedEncoder;
 import org.gradle.internal.serialize.Serializer;
@@ -34,7 +35,6 @@ import org.gradle.workers.WorkParameters;
 import org.gradle.workers.WorkQueue;
 import org.gradle.workers.WorkerExecutor;
 import org.gradle.workers.internal.ActionExecutionSpecFactory;
-import org.gradle.workers.internal.IsolatableSerializerRegistry;
 
 import javax.annotation.Nullable;
 import java.io.ByteArrayInputStream;
@@ -55,7 +55,7 @@ import java.util.stream.Stream;
  * Service managing the cached isolators and their backing queue
  */
 public abstract class CachedQueueService
-        implements BuildService<BuildServiceParameters.None>, AutoCloseable, BuildOperationListener {
+        implements ICachedQueueService, BuildService<BuildServiceParameters.None>, AutoCloseable, BuildOperationListener {
 
   static CachedQueueService INSTANCE;
 
@@ -299,14 +299,14 @@ public abstract class CachedQueueService
 
     Isolatable<WorkParameters> paramIsol = serviceRegistry.get(IsolatableFactory.class).isolate(parametersUnsafe);
 
-    IsolatableSerializerRegistry isolatableSerializerRegistry = this.serviceRegistry.get(IsolatableSerializerRegistry.class);
+    IsolatableSerializerRegistryWrapper isolatableSerializerRegistry = getIsolatableSerializerRegistryWrapper();
 
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     Serializer serializer = isolatableSerializerRegistry.build(paramIsol.getClass());
     try {
       serializer.write(new OutputStreamBackedEncoder(bos), paramIsol);
     } catch (Exception e) {
-      passThrowableAlong(e);
+      throw new RuntimeException("Failed to serialize " + info.workActionClass.getName() + " " + parameterTypeNotIsolated.getName() + " with " + parametersUnsafe.getClass(), e);
     }
 
     String prefix = parametersUnsafe instanceof CachedIsolatedWorkQueue.WorkQueueParameters ? ((CachedIsolatedWorkQueue.WorkQueueParameters) parametersUnsafe)
@@ -635,17 +635,71 @@ public abstract class CachedQueueService
 
 
   /**
-   * Construc
+   * Construct a new WorkQueue
    *
    * @param workerExecutor        the worker executor to use
    * @param extraClasspathElement the classpath elements to use
    * @return a new {@link WorkQueue}
    */
   public WorkQueue newWorkQueue(WorkerExecutor workerExecutor, FileCollection extraClasspathElement) {
+    Objects.requireNonNull(workerExecutor, "worker executor must not be null");
+    Objects.requireNonNull(serviceRegistry, "serviceRegistry must not be null");
     return new CachedIsolatedWorkQueue(workerExecutor.noIsolation(),
             serviceRegistry.get(InstantiatorFactory.class),
             Objects.requireNonNull(serviceRegistry, "serviceRegistry"),
             this.providerSelf,
             extraClasspathElement);
+  }
+  
+  // Gradle Version compat
+  protected IsolatableSerializerRegistryWrapper getIsolatableSerializerRegistryWrapper() {
+    return new IsolatableSerializerRegistryWrapper(this.serviceRegistry.get(getIsolatableSerializerRegistryClass()));
+  }
+  
+  protected Class<?> getIsolatableSerializerRegistryClass() {
+    try {
+      return Class.forName("org.gradle.workers.internal.IsolatableSerializerRegistry");
+    }
+    catch (ClassNotFoundException e) {
+      try {
+        return Class.forName("org.gradle.internal.snapshot.impl.IsolatableSerializerRegistry");
+      }
+      catch (ClassNotFoundException ex) {
+        throw new IllegalStateException(ex);
+      }
+    }
+  }
+  
+  /**
+   * Wrapper around gradle internals.
+   * Must not refer to gradle internal classes to avoid errors during plugin-ASM-phase
+   */
+  protected static class IsolatableSerializerRegistryWrapper {
+    
+    final Object instance;
+    
+    IsolatableSerializerRegistryWrapper(Object instance) {
+      this.instance = instance;
+    }
+    
+    <T> Serializer<T> build(Class<T> baseType) {
+      try {
+        return (Serializer<T>) instance.getClass().getMethod("build", Class.class)
+            .invoke(instance, baseType);
+      }
+      catch (ReflectiveOperationException e) {
+        throw new IllegalStateException("Failed to wrap IsolatableSerializerRegistry", e);
+      }
+    }
+    
+    Isolatable<?> readIsolatable(Decoder decoder) {
+      try {
+        return (Isolatable<?>) instance.getClass().getMethod("readIsolatable", Decoder.class)
+            .invoke(instance, decoder);
+      }
+      catch (ReflectiveOperationException e) {
+        throw new IllegalStateException("Failed to wrap IsolatableSerializerRegistry", e);
+      }
+    }
   }
 }

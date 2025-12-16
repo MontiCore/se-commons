@@ -10,6 +10,7 @@ import javax.annotation.Nonnull;
 /**
  * We use a build service to pass a ProgressLogger instance to the workers
  * See https://github.com/gradle/gradle/issues/2678
+ * Note: Build services cannot be serialized when isolation a workqueue (when isolating the queue)
  */
 public abstract class ProgressLoggerService implements BuildService<BuildServiceParameters.None> {
 

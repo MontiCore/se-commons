@@ -75,7 +75,14 @@ public class IsolatedURLClassLoader extends URLClassLoader {
       }
     }
     // And finally, make *really* sure we unset their context classloader
-    for (Thread thread : Iterables.concat(Thread.getAllStackTraces().keySet(), shutdownHooks)) {
+    for (Thread thread : Thread.getAllStackTraces().keySet()) {
+      if (thread.getContextClassLoader() != IsolatedURLClassLoader.this)
+        continue; // but only threads within this context
+      thread.setContextClassLoader(null);
+    }
+    // duplicate code to avoid library usage here during cleanup
+    // (in case Iterables were to be used the first time)
+    for (Thread thread : shutdownHooks) {
       if (thread.getContextClassLoader() != IsolatedURLClassLoader.this)
         continue; // but only threads within this context
       thread.setContextClassLoader(null);

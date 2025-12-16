@@ -12,7 +12,7 @@ public abstract class ReportStatsTask extends DefaultTask implements ICachedQueu
 
   @TaskAction
   public void execute() {
-    System.err.println("Stats[[" + getSharedQueueService().get().getStats() + "]]Stats");
+    System.err.println("Stats[[" + doGetSharedQueueService().getStats() + "]]Stats");
   }
 
 }
