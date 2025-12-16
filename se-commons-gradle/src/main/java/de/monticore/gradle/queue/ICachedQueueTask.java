@@ -27,13 +27,11 @@ public interface ICachedQueueTask extends Task {
     if (sharedQueueService instanceof ICachedQueueService) {
       return (ICachedQueueService) getSharedQueueServiceProperty().get();
     }
-    System.err.println("Invoking CachedQueueService cast workaround");
     // Gradle might load the plugin into multiple classloaders (once per subproject where it is applied)
     // If that is the case, ICachedQueueService (from CL 1) is not castable to ICachedQueueService (from CL 2)
     // As we only expose the ICachedQueueService, we can create a proxy between both classloaders
     return (ICachedQueueService) Proxy.newProxyInstance(CachedQueueService.class.getClassLoader(),
         new Class[] { ICachedQueueService.class }, (proxy, method, args) -> {
-          System.err.println("called " + method.getName());
           Object realObject = getSharedQueueServiceProperty().get();
           return realObject.getClass().getMethod(method.getName(), method.getParameterTypes()).invoke(realObject, args);
         });
