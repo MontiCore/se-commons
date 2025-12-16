@@ -22,7 +22,6 @@ public interface ICachedQueueTask extends Task {
     return (Property<ICachedQueueService>)(  (Property)getSharedQueueServiceProperty());
   }
   
-  @Internal
   default ICachedQueueService doGetSharedQueueService() {
     Object sharedQueueService = getSharedQueueServiceProperty().get();
     if (sharedQueueService instanceof ICachedQueueService) {
