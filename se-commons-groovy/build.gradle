@@ -13,8 +13,7 @@ dependencies {
     implementation "jline:jline:$jline_version"
     implementation "com.google.guava:guava:$guava_version"
     implementation "org.apache.groovy:groovy:$groovy_version"
-    testImplementation "org.hamcrest:hamcrest-core:$hamcrest_version"
-    testImplementation "org.hamcrest:hamcrest-library:$hamcrest_version"
+    testImplementation "org.hamcrest:hamcrest:$hamcrest_version"
     testImplementation "junit:junit:$junit_version"
 }
 

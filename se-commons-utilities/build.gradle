@@ -9,8 +9,7 @@ dependencies {
     implementation "javax.inject:javax.inject:$javax_inject_version"
     implementation "commons-cli:commons-cli:$commons_cli_version"
     implementation "com.github.spotbugs:spotbugs-annotations:$spotbugs_annotation_version"
-    testImplementation "org.hamcrest:hamcrest-core:$hamcrest_version"
-    testImplementation "org.hamcrest:hamcrest-library:$hamcrest_version"
+    testImplementation "org.hamcrest:hamcrest:$hamcrest_version"
     testImplementation "junit:junit:$junit_version"
 }
 
