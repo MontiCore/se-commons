@@ -95,7 +95,7 @@ public abstract class CachedQueueService
    * Time (in ms) after the last use of an isolated classloader before its
    * allocated resources are freed
    */
-  protected long closeThreshold = 6 * 1000; // 6 seconds
+  protected long closeThreshold = 20 * 1000; // 20 seconds
 
   /**
    * We periodically clean up the open classloaders
@@ -267,6 +267,7 @@ public abstract class CachedQueueService
   }
 
   public void doExecuteWorkAction(UUID actionUUID) {
+    long timeWaited = System.currentTimeMillis();
     try {
       // In case we run into the limit of maximum concurrent MontiCore Generation actions,
       // we wait until another generation has concluded
@@ -275,14 +276,15 @@ public abstract class CachedQueueService
       // Unable to acquire slot to run -> abort
       throw new RuntimeException(e);
     }
+    timeWaited = System.currentTimeMillis() - timeWaited;
     try {
-      doExecuteWorkAction(taskInfoMap.get(actionUUID));
+      doExecuteWorkAction(taskInfoMap.get(actionUUID), timeWaited);
     } finally {
       semaphore.release();
     }
   }
 
-  void doExecuteWorkAction(ActualTaskInfo<?> info) {
+  void doExecuteWorkAction(ActualTaskInfo<?> info, long timeWaitedForSemaphore) {
 
     Class<? extends WorkParameters> parameterTypeNotIsolated =
             isolationScheme.parameterTypeFor(info.workActionClass);
@@ -313,7 +315,9 @@ public abstract class CachedQueueService
             .getPrefix().getOrElse("[WA]") : "[WA]";
 
     String uniqueId = parametersUnsafe instanceof CachedIsolatedWorkQueue.WorkQueueParameters ? ((CachedIsolatedWorkQueue.WorkQueueParameters) parametersUnsafe).getStatsUniqueName().getOrElse("?") : "?";
-
+    
+    uniqueId += "," + timeWaitedForSemaphore + "ms";
+    
     executeInClassloader(() -> {
 
               try {
