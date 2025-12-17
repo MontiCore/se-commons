@@ -3,6 +3,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.TaskOutcome;
+import org.gradle.testkit.runner.UnexpectedBuildFailure;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -83,7 +84,7 @@ public class IsolatedWorkerQueueTest {
 
 
   @ParameterizedTest
-  @ValueSource(strings = {"7.4.2", "7.6.4", "8.0.1", "8.7"})
+  @ValueSource(strings = {"7.4.2", "7.6.4", "7.6.6", "8.0.1", "8.7", "8.14"}) // gradle 9 requires class file version 61
   public void testSharedIsolation(String version) throws Exception {
     File projectDir = new File("build/functionalTest/shared/" + version);
     projectDir.mkdirs();
@@ -119,8 +120,34 @@ public class IsolatedWorkerQueueTest {
     Assertions.assertEquals(4, StringUtils.countMatches(json, "\"START\""));
     Assertions.assertEquals(4, StringUtils.countMatches(json, "\"DONE\""));
   }
-
-
+  
+  @Test
+  
+  public void testSharedBuildService( ) throws Exception {
+    File projectDir = new File("build/functionalTest/shared_bs/");
+    projectDir.mkdirs();
+    new File(projectDir, "settings.gradle").createNewFile();
+    write(new File(projectDir, "build.gradle"),
+        "    plugins {\n" + "        id 'se.rwth.example' \n" + "    } \n"
+            + "    import se.rwth.example.ExampleTask \n"
+            + "    import se.rwth.example.ExampleTask.WorkerKind \n"
+            + "    tasks.register('A', ExampleTask.class, t -> {t.taskNames.add('A1'); t.taskNames.add('A2'); t.workerKind = WorkerKind.SHARED; t.withTestService = true;} ) \n"
+            + "    tasks.register('B', ExampleTask.class, t -> {t.taskNames.add('B1'); t.taskNames.add('B2'); t.waitSeconds = 1; t.workerKind = WorkerKind.SHARED; t.withTestService = true;} ) \n"
+            + "    B.dependsOn(A)\n" + "    \n");
+    
+    Assertions.assertThrows(UnexpectedBuildFailure.class, () -> {
+      BuildResult result = GradleRunner.create()
+          .withGradleVersion("7.6.4")
+          .withProjectDir(projectDir).withPluginClasspath()
+          .withArguments("A", "B", "--stacktrace").build();
+    });
+    // Unfortunately, isolation and shared build services is not supported by gradle:
+    // Caused by: java.lang.UnsupportedOperationException: Build services cannot be serialized
+    // https://github.com/gradle/gradle/issues/28061#issuecomment-1945685806
+    
+  }
+  
+  
   protected void write(File file, String content) throws IOException {
     Files.write(file.toPath(), content.getBytes());
   }

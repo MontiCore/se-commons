@@ -1,11 +1,13 @@
 /* (c) https://github.com/MontiCore/monticore */
 package se.rwth.example;
 
+import de.monticore.gradle.internal.ProgressLoggerService;
 import de.monticore.gradle.queue.ICachedQueueTask;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
+import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.Optional;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.workers.WorkQueue;
@@ -31,7 +33,11 @@ public abstract class ExampleTask extends DefaultTask implements ICachedQueueTas
   @Input
   @Optional
   abstract public Property<WorkerKind> getWorkerKind();
-
+  
+  @Input
+  @Optional
+  abstract public Property<Boolean> getWithTestService();
+  
   @TaskAction
   public void execute() {
     WorkQueue queue;
@@ -43,7 +49,7 @@ public abstract class ExampleTask extends DefaultTask implements ICachedQueueTas
         queue = getWorkerExecutor().classLoaderIsolation();
         break;
       case SHARED:
-        queue = getSharedQueueService().get().newWorkQueue(getWorkerExecutor(), getProject().getObjects().fileCollection());
+        queue = doGetSharedQueueService().newWorkQueue(getWorkerExecutor(), getProject().getObjects().fileCollection());
         break;
       default:
         throw new IllegalStateException("Unknown worker kind: " + getWorkerKind().get());
@@ -52,11 +58,15 @@ public abstract class ExampleTask extends DefaultTask implements ICachedQueueTas
     int waitSeconds = getWaitSeconds().getOrElse(1);
     for (final String name : getTaskNames().get()) {
       final int secondForThisRun = waitSeconds += 2;
-      queue.submit(TestAction.class, task -> {
-        task.getWaitSeconds().set(secondForThisRun);
-        task.getName().set(name);
-        task.getPrefix().set("[" + name + "]"); // and set the prefix
-        task.getStatsUniqueName().set(name);
+      queue.submit(TestAction.class, params -> {
+        params.getWaitSeconds().set(secondForThisRun);
+        params.getName().set(name);
+        params.getPrefix().set("[" + name + "]"); // and set the prefix
+        params.getStatsUniqueName().set(name);
+        params.getWithTestService().set(this.getWithTestService().orElse(false));
+        if (this.getWithTestService().getOrElse(false)) {
+          params.getProgressLogger().set(getProgressLoggerService());
+        }
       });
     }
 
@@ -67,4 +77,8 @@ public abstract class ExampleTask extends DefaultTask implements ICachedQueueTas
     CL, // classloader isolation
     SHARED // shared isolation
   }
+  
+  
+  @Internal
+  public abstract Property<ProgressLoggerService> getProgressLoggerService();
 }

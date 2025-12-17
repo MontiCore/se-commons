@@ -19,6 +19,9 @@ public abstract class TestAction implements WorkAction<TestParams> {
 
   @Override
   public void execute() {
+    if (getParameters().getWithTestService().get()) {
+      getParameters().getProgressLogger().get();
+    }
     try {
       System.out.println("before wait " + getParameters().getName().get());
       Thread.sleep(1000L * getParameters().getWaitSeconds().get());

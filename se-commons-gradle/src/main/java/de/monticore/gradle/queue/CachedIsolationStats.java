@@ -5,16 +5,26 @@ package de.monticore.gradle.queue;
 import com.google.gson.Gson;
 
 import javax.annotation.Nullable;
+import java.io.File;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
 
 /**
  * Statistics collector for the cached isolated worker.
- *
+ * Can be exported via the reportCachedQueueService gradle task
+ * or -Dde.se_rwth.workqueue.report.continuous=true
  */
 public class CachedIsolationStats {
-
+  // Unique ID for tracing reasons
+  final UUID instanceUUID = UUID.randomUUID();
+  
   protected List<Event> events = Collections.synchronizedList(new ArrayList<>());
+  protected boolean continuousTrack = shouldContinuousTrack();
+  
+  protected boolean shouldContinuousTrack() {
+    return "true".equals(System.getProperty("de.se_rwth.workqueue.report.continuous", "false"));
+  }
 
   void track(EventKind kind, @Nullable UUID uuid, int semaphoreMax, List<CachedQueueService.IIsolationData> runners) {
     track(kind, uuid, semaphoreMax, runners, null);
@@ -29,6 +39,22 @@ public class CachedIsolationStats {
     event.existingRunnerList = createRunnerList(runners);
     event.reason = reason;
     events.add(event);
+    
+    if (continuousTrack) {
+      report();
+    }
+  }
+  
+  /**
+   * Continuously report the current workqueue state
+   */
+  protected synchronized void report() {
+    File f = new File("report-workqueue-" + instanceUUID + ".json");
+    try{
+      Files.writeString(f.getAbsoluteFile().toPath(), asJson(new Gson()));
+    }catch (Exception ignored) {
+    
+    }
   }
 
   public String asJson(Gson gson) {
