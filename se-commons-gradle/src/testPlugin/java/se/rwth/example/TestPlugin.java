@@ -4,7 +4,7 @@ package se.rwth.example;
 
 import de.monticore.gradle.internal.ProgressLoggerService;
 import de.monticore.gradle.queue.CachedQueueServicePlugin;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import edu.umd.cs.findbugs.annotations.NonNull;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.provider.Provider;
