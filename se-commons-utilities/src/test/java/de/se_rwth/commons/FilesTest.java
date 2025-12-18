@@ -1,17 +1,14 @@
 /* (c) https://github.com/MontiCore/monticore */
 package de.se_rwth.commons;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
-
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Unit tests for {@link Files}
@@ -23,7 +20,7 @@ public class FilesTest {
   @Test
   public void unzipAttack() throws URISyntaxException {
     URL zipFile = getClass().getResource("/directoryTraversal.zip");
-    assertNotNull("Test file missing", zipFile);
+    assertNotNull(zipFile, "Test file missing");
     
     File tmp = Files.createTempDir();
     
@@ -33,7 +30,7 @@ public class FilesTest {
       fail();
     }
     catch (IOException e) {
-      assertEquals(e.getMessage(), "Zip file entry contains ../ which leads to directory traversal");
+      assertEquals("Zip file entry contains ../ which leads to directory traversal", e.getMessage());
     }
     
     Files.deleteFiles(tmp);
@@ -42,12 +39,12 @@ public class FilesTest {
   @Test
   public void unzipFunctionality() throws URISyntaxException, IOException {
     URL zipFile = getClass().getResource("/test.zip");
-    assertNotNull("Test file missing", zipFile);
+    assertNotNull(zipFile, "Test file missing");
     
     File tmp = Files.createTempDir();
     
     for (File entry : Files.unzip(new File(zipFile.toURI()), tmp)) {
-      assertEquals(entry.getName(), "test");
+      assertEquals("test", entry.getName());
     }
 
     Files.deleteFiles(tmp);

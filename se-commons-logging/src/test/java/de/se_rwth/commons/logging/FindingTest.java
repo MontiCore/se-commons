@@ -3,8 +3,10 @@ package de.se_rwth.commons.logging;
 
 import de.se_rwth.commons.SourcePosition;
 import de.se_rwth.commons.SourcePositionBuilder;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings({"SimplifiableAssertion", "EqualsWithItself"})
 public class FindingTest {
@@ -19,7 +21,7 @@ public class FindingTest {
     Finding f = new Finding(Finding.Type.ERROR, "A");
 
     // When && Then
-    Assert.assertTrue(f.equals(f));
+    assertTrue(f.equals(f));
   }
 
   @Test
@@ -29,7 +31,7 @@ public class FindingTest {
     Finding f = new Finding(Finding.Type.ERROR, "E", sp);
 
     // When && Then
-    Assert.assertTrue(f.equals(f));
+    assertTrue(f.equals(f));
   }
 
   @Test
@@ -39,7 +41,7 @@ public class FindingTest {
     Finding f = new Finding(Finding.Type.WARNING, "E", sp);
 
     // When && Then
-    Assert.assertTrue(f.equals(f));
+    assertTrue(f.equals(f));
   }
 
   @Test
@@ -49,7 +51,7 @@ public class FindingTest {
     Finding f = new Finding(Finding.Type.USER_ERROR, "E", sp);
 
     // When && Then
-    Assert.assertTrue(f.equals(f));
+    assertTrue(f.equals(f));
   }
 
   @Test
@@ -60,7 +62,7 @@ public class FindingTest {
     Finding f = new Finding(Finding.Type.ERROR, "E", sp, spe);
 
     // When && Then
-    Assert.assertTrue(f.equals(f));
+    assertTrue(f.equals(f));
   }
 
   @Test
@@ -70,7 +72,7 @@ public class FindingTest {
     Finding f2 = new Finding(Finding.Type.ERROR, "A");
 
     // When && Then
-    Assert.assertTrue(f1.equals(f2));
+    assertTrue(f1.equals(f2));
   }
 
   @Test
@@ -80,7 +82,7 @@ public class FindingTest {
     Finding f2 = new Finding(Finding.Type.WARNING, "A");
 
     // When && Then
-    Assert.assertTrue(f1.equals(f2));
+    assertTrue(f1.equals(f2));
   }
 
   @Test
@@ -90,7 +92,7 @@ public class FindingTest {
     Finding f2 = new Finding(Finding.Type.USER_ERROR, "A");
 
     // When && Then
-    Assert.assertTrue(f1.equals(f2));
+    assertTrue(f1.equals(f2));
   }
 
   @Test
@@ -102,7 +104,7 @@ public class FindingTest {
     Finding f2 = new Finding(Finding.Type.ERROR, "E", sp2);
 
     // When && Then
-    Assert.assertTrue(f1.equals(f2));
+    assertTrue(f1.equals(f2));
   }
 
   @Test
@@ -116,7 +118,7 @@ public class FindingTest {
     Finding f2 = new Finding(Finding.Type.ERROR, "E", sp2, spe2);
 
     // When && Then
-    Assert.assertTrue(f1.equals(f2));
+    assertTrue(f1.equals(f2));
   }
 
   @Test
@@ -126,7 +128,7 @@ public class FindingTest {
     Finding f2 = new Finding(Finding.Type.ERROR, "B");
 
     // When && Then
-    Assert.assertFalse(f1.equals(f2));
+    assertFalse(f1.equals(f2));
   }
 
   @Test
@@ -136,7 +138,7 @@ public class FindingTest {
     Finding f2 = new Finding(Finding.Type.WARNING, "A");
 
     // When && Then
-    Assert.assertFalse(f1.equals(f2));
+    assertFalse(f1.equals(f2));
   }
 
   @Test
@@ -146,7 +148,7 @@ public class FindingTest {
     Finding f2 = new Finding(Finding.Type.WARNING, "B");
 
     // When && Then
-    Assert.assertFalse(f1.equals(f2));
+    assertFalse(f1.equals(f2));
   }
 
   @Test
@@ -158,7 +160,7 @@ public class FindingTest {
     Finding f2 = new Finding(Finding.Type.ERROR, "E", sp2);
 
     // When && Then
-    Assert.assertFalse(f1.equals(f2));
+    assertFalse(f1.equals(f2));
   }
 
   @Test
@@ -170,7 +172,7 @@ public class FindingTest {
     Finding f2 = new Finding(Finding.Type.ERROR, "E", sp2);
 
     // When && Then
-    Assert.assertFalse(f1.equals(f2));
+    assertFalse(f1.equals(f2));
   }
 
   @Test
@@ -182,7 +184,7 @@ public class FindingTest {
     Finding f2 = new Finding(Finding.Type.ERROR, "E", sp2);
 
     // When && Then
-    Assert.assertFalse(f1.equals(f2));
+    assertFalse(f1.equals(f2));
   }
 
   @Test
@@ -196,7 +198,7 @@ public class FindingTest {
     Finding f2 = new Finding(Finding.Type.ERROR, "E", sp2, spe2);
 
     // When && Then
-    Assert.assertFalse(f1.equals(f2));
+    assertFalse(f1.equals(f2));
   }
 
   @Test
@@ -210,6 +212,6 @@ public class FindingTest {
     Finding f2 = new Finding(Finding.Type.ERROR, "E", sp2, spe2);
 
     // When && Then
-    Assert.assertFalse(f1.equals(f2));
+    assertFalse(f1.equals(f2));
   }
 }

@@ -33,7 +33,7 @@ subprojects {
     apply plugin : 'io.github.themrmilchmann.ecj'
 
     tasks.withType(Test).configureEach {
-        useJUnit()
+        useJUnitPlatform()
         testLogging {
             // controls whether test output is shown
             showStandardStreams= ("false").equals(getProperty('showTestOutput'))? false : true

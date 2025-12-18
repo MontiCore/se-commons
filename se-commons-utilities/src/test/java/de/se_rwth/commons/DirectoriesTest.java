@@ -1,17 +1,18 @@
 /* (c) https://github.com/MontiCore/monticore */
 package de.se_rwth.commons;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import java.io.File;
 import java.io.IOException;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Unit tests for {@link Directories}
@@ -19,24 +20,17 @@ import static org.junit.Assert.assertThat;
  *
  */
 public class DirectoriesTest {
-  
-  @Rule
-  public TemporaryFolder folder = new TemporaryFolder();
-  
   /**
    * Tests a copy operation on two flat directories.
    */
   @Test
-  public void testCopy__flatDirectoryToDirectory() throws IOException {
-    
-    this.folder.create();
-    File sourceDirectory = this.folder.newFolder();
-    File targetDirectory = this.folder.newFolder();
+  public void testCopy__flatDirectoryToDirectory(@TempDir File sourceDirectory, @TempDir File targetDirectory) throws IOException {
     File someFile = new File(sourceDirectory, "foo");
-    someFile.createNewFile();
+    assertTrue(someFile.createNewFile());
     
     Directories.copy(sourceDirectory, targetDirectory);
     
+    assertNotNull(targetDirectory.listFiles());
     assertThat(targetDirectory.listFiles().length, is(1));
     assertThat(targetDirectory.listFiles()[0].getName(), equalTo(someFile.getName()));
     
@@ -46,19 +40,16 @@ public class DirectoriesTest {
    * Tests a copy operation on two nested directories.
    */
   @Test
-  public void testCopy__nestedDirectoryToDirectory() throws IOException {
-    
-    this.folder.create();
-    File sourceDirectory = this.folder.newFolder();
-    File targetDirectory = this.folder.newFolder();
+  public void testCopy__nestedDirectoryToDirectory(@TempDir File sourceDirectory, @TempDir File targetDirectory) throws IOException {
     File sourceSubDirectory = new File(sourceDirectory, "a/b/c");
-    sourceSubDirectory.mkdirs();
+    assertTrue(sourceSubDirectory.mkdirs());
     File someFile = new File(sourceSubDirectory, "foo");
-    someFile.createNewFile();
+    assertTrue(someFile.createNewFile());
     
     Directories.copy(sourceDirectory, targetDirectory);
     
     File targetSubDirectory = new File(targetDirectory, "a/b/c");
+    assertNotNull(targetSubDirectory.listFiles());
     assertThat(targetDirectory.listFiles().length, is(1));
     assertThat(targetSubDirectory.listFiles().length, is(1));
     assertThat(targetSubDirectory.listFiles()[0].getName(), equalTo(someFile.getName()));

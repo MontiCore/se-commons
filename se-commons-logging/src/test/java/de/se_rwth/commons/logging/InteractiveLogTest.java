@@ -1,9 +1,9 @@
 /* (c) https://github.com/MontiCore/monticore */
 package de.se_rwth.commons.logging;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * This is a test of interactive mode of the Logger.
@@ -30,23 +30,23 @@ public class InteractiveLogTest {
     Log.warn(f4);
     
     // check entries
-    assertEquals(Log.getFindings().size(),5);
-    assertEquals(Log.getErrorCount(),3);
+    assertEquals(5, Log.getFindings().size());
+    assertEquals(3, Log.getErrorCount());
     
-    assertEquals(Log.getFindings().get(0).getType() , Finding.Type.ERROR);
-    assertEquals(Log.getFindings().get(0).getMsg() , f0);
+    assertEquals(Finding.Type.ERROR, Log.getFindings().get(0).getType());
+    assertEquals(f0, Log.getFindings().get(0).getMsg());
     
-    assertEquals(Log.getFindings().get(1).getType(), Finding.Type.USER_ERROR);
-    assertEquals(Log.getFindings().get(1).getMsg() , f1);
+    assertEquals(Finding.Type.USER_ERROR, Log.getFindings().get(1).getType());
+    assertEquals(f1, Log.getFindings().get(1).getMsg());
     
-    assertEquals(Log.getFindings().get(2).getType(), Finding.Type.WARNING);
-    assertEquals(Log.getFindings().get(2).getMsg() , f2);
+    assertEquals(Finding.Type.WARNING, Log.getFindings().get(2).getType());
+    assertEquals(f2, Log.getFindings().get(2).getMsg());
     
-    assertEquals(Log.getFindings().get(3).getType(), Finding.Type.ERROR);
-    assertEquals(Log.getFindings().get(3).getMsg() , f3);
+    assertEquals(Finding.Type.ERROR, Log.getFindings().get(3).getType());
+    assertEquals(f3, Log.getFindings().get(3).getMsg());
     
-    assertEquals(Log.getFindings().get(4).getType(), Finding.Type.WARNING);
-    assertEquals(Log.getFindings().get(4).getMsg() , f4);
+    assertEquals(Finding.Type.WARNING, Log.getFindings().get(4).getType());
+    assertEquals(f4, Log.getFindings().get(4).getMsg());
   }
   
   @Test
@@ -63,22 +63,22 @@ public class InteractiveLogTest {
     Log.warn(f4);
     
     // check entries
-    assertEquals(Log.getFindings().size(),5);
-    assertEquals(Log.getErrorCount(),3);
+    assertEquals(5, Log.getFindings().size());
+    assertEquals(3, Log.getErrorCount());
     
-    assertEquals(Log.getFindings().get(0).getType() , Finding.Type.ERROR);
-    assertEquals(Log.getFindings().get(0).getMsg() , f0);
+    assertEquals(Finding.Type.ERROR, Log.getFindings().get(0).getType());
+    assertEquals(f0, Log.getFindings().get(0).getMsg());
     
-    assertEquals(Log.getFindings().get(1).getType(), Finding.Type.ERROR);
-    assertEquals(Log.getFindings().get(1).getMsg() , f1);
+    assertEquals(Finding.Type.ERROR, Log.getFindings().get(1).getType());
+    assertEquals(f1, Log.getFindings().get(1).getMsg());
     
-    assertEquals(Log.getFindings().get(2).getType(), Finding.Type.WARNING);
-    assertEquals(Log.getFindings().get(2).getMsg() , f2);
+    assertEquals(Finding.Type.WARNING, Log.getFindings().get(2).getType());
+    assertEquals(f2, Log.getFindings().get(2).getMsg());
     
-    assertEquals(Log.getFindings().get(3).getType(), Finding.Type.ERROR);
-    assertEquals(Log.getFindings().get(3).getMsg() , f3);
+    assertEquals(Finding.Type.ERROR, Log.getFindings().get(3).getType());
+    assertEquals(f3, Log.getFindings().get(3).getMsg());
     
-    assertEquals(Log.getFindings().get(4).getType(), Finding.Type.WARNING);
-    assertEquals(Log.getFindings().get(4).getMsg() , f4);
+    assertEquals(Finding.Type.WARNING, Log.getFindings().get(4).getType());
+    assertEquals(f4, Log.getFindings().get(4).getMsg());
   }
 }
