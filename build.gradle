@@ -4,16 +4,16 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent
 
 plugins {
     id 'java-library'
-    id "io.github.themrmilchmann.ecj" version "0.2.0" // Eclipse compiler as it's much faster than javac
-    id "org.sonarqube" version "3.0"
+    id "io.github.themrmilchmann.ecj" version "$ecj_plugin_version" // Eclipse compiler as it's much faster than javac
+    id "org.sonarqube" version "$sonarqube_plugin_version"
     id "jacoco"
-    id 'org.barfuin.gradle.jacocolog' version '3.1.0'
+    id 'org.barfuin.gradle.jacocolog' version "$jacocolog_plugin_version"
     id 'maven-publish'
 }
 
 allprojects {
     group = "de.se_rwth.commons"
-    buildDir = file("$projectDir/target")
+    layout.buildDirectory = file("$projectDir/target")
 
     repositories {
         if(("true").equals(getProperty('useLocalRepo'))){
@@ -36,7 +36,7 @@ subprojects {
         useJUnitPlatform()
         testLogging {
             // controls whether test output is shown
-            showStandardStreams= ("false").equals(getProperty('showTestOutput'))? false : true
+            showStandardStreams= !("false").equals(getProperty('showTestOutput'))
             showExceptions true
             showCauses true
             showStackTraces true
