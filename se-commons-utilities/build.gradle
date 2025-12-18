@@ -3,8 +3,8 @@ description = 'se-commons: utilities'
 
 dependencies {
     api "commons-io:commons-io:$commons_io_version"
-    implementation "jline:jline:$jline_version"
     api "org.slf4j:slf4j-api:$slf4j_version"
+    implementation "org.jline:jline:$jline_version:jdk8"
     implementation "com.google.guava:guava:$guava_version"
     implementation "jakarta.inject:jakarta.inject-api:$jakarta_inject_version"
     implementation "commons-cli:commons-cli:$commons_cli_version"

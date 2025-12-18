@@ -3,9 +3,9 @@ package de.se_rwth.commons.configuration;
 
 import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Ints;
-import jline.internal.Log;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Option;
+import org.jline.utils.Log;
 
 import java.util.ArrayList;
 import java.util.Arrays;
