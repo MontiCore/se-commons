@@ -12,8 +12,8 @@ dependencies {
   implementation project(":se-commons-logging")
   implementation "com.google.code.gson:gson:$gson_version"
 
-  implementation "com.google.guava:guava:33.1.0-jre"
   implementation "org.apache.commons:commons-lang3:$commons_lang3_version"
+  implementation "com.google.guava:guava:$guava_version"
   implementation "com.github.spotbugs:spotbugs-annotations:$spotbugs_annotation_version"
 }
 
