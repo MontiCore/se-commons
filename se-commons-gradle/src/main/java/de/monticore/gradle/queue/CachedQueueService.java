@@ -168,7 +168,7 @@ public abstract class CachedQueueService
    */
   protected synchronized IIsolationData getLoader(Predicate<FileCollection> predicate,
                                                   Supplier<FileCollection> supplier,
-                                                  String uniqueId) {
+                                                  String uniqueId, boolean withContext) {
     Optional<IIsolationData> d = this.internalRunners.stream().filter(x -> !x.isRunning())
             .filter(x -> predicate.test(x.getExtraData())).findAny();
     if (d.isPresent()) {
@@ -183,7 +183,7 @@ public abstract class CachedQueueService
     this.cleanupOld(closeThreshold);
     IsolationData data = new IsolationData();
     data.classLoader =
-            getClassLoader((URLClassLoader) Thread.currentThread().getContextClassLoader(), supplier);
+            getClassLoader((URLClassLoader) Thread.currentThread().getContextClassLoader(), supplier, withContext);
     data.running = true;
     data.extraData = supplier.get();
     stats.track(CachedIsolationStats.EventKind.CREATE, data.getUUID(), maximumLoadersFromConfig, this.internalRunners, uniqueId);
@@ -246,15 +246,20 @@ public abstract class CachedQueueService
   }
 
   protected ClassLoader getClassLoader(URLClassLoader contextClassLoader,
-                                       Supplier<FileCollection> supplier) {
+                                       Supplier<FileCollection> supplier,
+                                       boolean doMergeContextURLs) {
     // Merge the extra classpath with the current classpath
-    URL[] urls = Stream.concat(supplier.get().getFiles().stream().map(f -> {
+    Stream<URL> streamOfUrls = supplier.get().getFiles().stream().map(f -> {
       try {
         return f.toURI().toURL();
       } catch (MalformedURLException e) {
         throw new RuntimeException(e.getMessage(), e);
       }
-    }), Arrays.stream(contextClassLoader.getURLs())).toArray(URL[]::new);
+    });
+    if (doMergeContextURLs)
+      streamOfUrls = Stream.concat(streamOfUrls, Arrays.stream(contextClassLoader.getURLs()));
+
+    URL[] urls = streamOfUrls.toArray(URL[]::new);
     return new IsolatedURLClassLoader(urls, contextClassLoader, getPassThroughPackages());
   }
 
@@ -354,7 +359,15 @@ public abstract class CachedQueueService
             }, prefix, uniqueId,
             f -> f.minus(info.classPath).getFiles().isEmpty() && info.classPath.minus(f).getFiles()
                     .isEmpty(), // check if the difference between the classpaths is empty
-            () -> info.classPath);
+            () -> info.classPath,
+            info.withContext);
+  }
+
+  @Deprecated
+  protected void executeInClassloader(Runnable runnable, @Nullable String prefix,
+                                      @Nullable String uniqueId,
+                                      Predicate<FileCollection> predicate, Supplier<FileCollection> supplier) {
+    this.executeInClassloader(runnable, prefix, uniqueId, predicate, supplier, true);
   }
 
   /**
@@ -366,14 +379,16 @@ public abstract class CachedQueueService
    * @param uniqueId  Uniqueid for tracking via the stats
    * @param predicate allows to check for additional elements, such as classpath
    * @param supplier  allows to set the additional arguments for a new loader
+   * @param withContext  if the URLs of the context classloader should be merged
    */
   protected void executeInClassloader(Runnable runnable, @Nullable String prefix,
                                       @Nullable String uniqueId,
-                                      Predicate<FileCollection> predicate, Supplier<FileCollection> supplier) {
+                                      Predicate<FileCollection> predicate, Supplier<FileCollection> supplier,
+                                      boolean withContext) {
     final Thread currentThread = Thread.currentThread();
     ClassLoader originalClassLoader = currentThread.getContextClassLoader();
     UUID uuid = null;
-    try (IIsolationData isolationData = getLoader(predicate, supplier, uniqueId)) {
+    try (IIsolationData isolationData = getLoader(predicate, supplier, uniqueId, withContext)) {
       uuid = isolationData.getUUID();
       currentThread.setContextClassLoader(isolationData.getClassLoader());
 
@@ -500,7 +515,7 @@ public abstract class CachedQueueService
     this.taskInfoMap.put(uuid,
             new CachedQueueService.ActualTaskInfo(workActionClass, parameterAction,
                     Objects.requireNonNull(instantiatorFactory, "instantiatorFactory"),
-                    Objects.requireNonNull(serviceRegistry, "serviceRegistry"), classPath));
+                    Objects.requireNonNull(serviceRegistry, "serviceRegistry"), classPath, false));
   }
 
   public static class ActualTaskInfo<T extends WorkParameters> {
@@ -510,15 +525,17 @@ public abstract class CachedQueueService
     public InstantiatorFactory instantiatorFactory;
     public ServiceRegistry services;
     public FileCollection classPath;
+    public boolean withContext;
 
     public ActualTaskInfo(Class<? extends WorkAction<T>> workActionClass,
                           Action<? super WorkParameters> parameterAction, InstantiatorFactory instantiatorFactory,
-                          ServiceRegistry serviceRegistry, FileCollection classPath) {
+                          ServiceRegistry serviceRegistry, FileCollection classPath, boolean withContext) {
       this.workActionClass = workActionClass;
       this.parameterAction = parameterAction;
       this.instantiatorFactory = instantiatorFactory;
       this.services = serviceRegistry;
       this.classPath = classPath;
+      this.withContext = withContext;
     }
   }
 
