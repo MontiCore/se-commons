@@ -275,7 +275,7 @@ public abstract class CachedQueueService
       semaphore.acquire();
     } catch (InterruptedException e) {
       // Unable to acquire slot to run -> abort
-      throw new RuntimeException(e);
+      passThrowableAlong(e);
     }
     timeWaited = System.currentTimeMillis() - timeWaited;
     try {
@@ -321,42 +321,49 @@ public abstract class CachedQueueService
     uniqueId += "," + timeWaitedForSemaphore + "ms";
     
     executeInClassloader(() -> {
-
-              try {
-                Isolatable<?> params = isolatableSerializerRegistry.readIsolatable(new InputStreamBackedDecoder(
-                        new ByteArrayInputStream(bos.toByteArray())));
-
-                // finished params init
-
-                // Create the WorkAction itself
-
-                // instantiate within the new classloader
-
-                // prepare instantiator to set parameters
-
-                Class<? extends WorkParameters> paramTypeIsolated =
-                        (Class<? extends WorkParameters>) Thread.currentThread().getContextClassLoader()
-                                .loadClass(parameterTypeNotIsolated.getName());
-
-                ServiceLookup instantiationServices =
-                        isolationScheme.servicesForImplementation(params.coerce(paramTypeIsolated), info.services,
-                                Collections.emptySet(), aClass -> false);
-
-                Instantiator instantiator = info.instantiatorFactory.inject(instantiationServices);
-
-                // Load a fresh instance of this class
-                Class<? extends WorkAction> c =
-                        (Class<? extends WorkAction>) Thread.currentThread().getContextClassLoader()
-                                .loadClass(info.workActionClass.getName());
-                WorkAction<?> action = instantiator.newInstance(c);
-                action.execute();
-              } catch (Exception e) {
-                passThrowableAlong(e);
-              }
-            }, prefix, uniqueId,
-            f -> f.minus(info.classPath).getFiles().isEmpty() && info.classPath.minus(f).getFiles()
-                    .isEmpty(), // check if the difference between the classpaths is empty
-            () -> info.classPath);
+          
+          final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+          try {
+            Isolatable<?> params = isolatableSerializerRegistry.readIsolatable(
+                new InputStreamBackedDecoder(new ByteArrayInputStream(bos.toByteArray())));
+            
+            // finished params init
+            
+            // Create the WorkAction itself
+            
+            // instantiate within the new classloader
+            
+            // prepare instantiator to set parameters
+            
+            Class<? extends WorkParameters> paramTypeIsolated =
+                (Class<? extends WorkParameters>) contextClassLoader.loadClass(
+                    parameterTypeNotIsolated.getName());
+            
+            ServiceLookup instantiationServices =
+                isolationScheme.servicesForImplementation(params.coerce(paramTypeIsolated),
+                    info.services, Collections.emptySet(), aClass -> false);
+            
+            Instantiator instantiator = info.instantiatorFactory.inject(instantiationServices);
+            
+            // Load a fresh instance of this class
+            Class<? extends WorkAction> c = (Class<? extends WorkAction>) contextClassLoader.loadClass(
+                info.workActionClass.getName());
+            WorkAction<?> action = instantiator.newInstance(c);
+            action.execute();
+          }
+          catch (ClassNotFoundException e) {
+            // This exception might indicate a possible problem with our classloader -> ALu
+            throw new RuntimeException(
+                "Potential classloader issue in CL " + contextClassLoader + " with classpath "
+                    + info.classPath.getFiles(), e);
+          }
+          catch (Exception e) {
+            passThrowableAlong(e);
+          }
+        }, prefix, uniqueId,
+        f -> f.minus(info.classPath).getFiles().isEmpty() && info.classPath.minus(f).getFiles()
+            .isEmpty(), // check if the difference between the classpaths is empty
+        () -> info.classPath);
   }
 
   /**
