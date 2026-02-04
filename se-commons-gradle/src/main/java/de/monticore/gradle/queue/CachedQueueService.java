@@ -46,6 +46,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.security.*;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -126,7 +127,7 @@ public abstract class CachedQueueService
    * WorkParameters do not support the information stored in the {@link ActualTaskInfo},
    * which is why we use this weird workaround of a UUID-key
    */
-  protected Map<UUID, ActualTaskInfo<?>> taskInfoMap = new LinkedHashMap<>();
+  protected Map<UUID, ActualTaskInfo<?>> taskInfoMap = new ConcurrentHashMap<>();
 
   protected final IsolationScheme<WorkAction<?>, WorkParameters> isolationScheme =
           new IsolationScheme<>(Cast.uncheckedCast(WorkAction.class), WorkParameters.class,
@@ -278,7 +279,8 @@ public abstract class CachedQueueService
     }
     timeWaited = System.currentTimeMillis() - timeWaited;
     try {
-      doExecuteWorkAction(taskInfoMap.get(actionUUID), timeWaited);
+      ActualTaskInfo<?> info = Objects.requireNonNull(taskInfoMap.remove(actionUUID), "WorkAction with UUID " + actionUUID + " was never registered. This is an internal error.");
+      doExecuteWorkAction(info, timeWaited);
     } finally {
       semaphore.release();
     }
