@@ -19,9 +19,10 @@ public class CachedQueueServicePlugin implements Plugin<Project> {
       TaskProvider<ReportCachedQueueServiceTask> reportTask = project.getTasks().register("reportCachedQueueService", ReportCachedQueueServiceTask.class, spec -> {
         spec.mustRunAfter(project.getTasks().withType(ICachedQueueTask.class));
       });
-      project.getTasks().withType(ICachedQueueTask.class).configureEach(task -> {
-        task.finalizedBy(reportTask);
-      });
+      // TODO: https://git.rwth-aachen.de/monticore/monticore/-/issues/4949
+//      project.getTasks().withType(ICachedQueueTask.class).configureEach(task -> {
+//        task.finalizedBy(reportTask);
+//      });
     }
   }
 
