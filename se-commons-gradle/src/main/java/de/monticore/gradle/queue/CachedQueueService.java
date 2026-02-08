@@ -41,6 +41,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -229,6 +230,7 @@ public abstract class CachedQueueService
       if (!data.isRunning() && data.getLastRun() < threshold) {
         stats.track(CachedIsolationStats.EventKind.CLEANUP, data.getUUID(), maximumLoadersFromConfig, this.internalRunners);
         logger.debug("   - close ");
+        cleanupGradleInternals(data.getClassLoader());
         if (data.getClassLoader() instanceof Closeable) {
           // Close closeable classloaders
           try {
@@ -243,6 +245,64 @@ public abstract class CachedQueueService
     if (cleanupTimer != null && this.internalRunners.isEmpty()) {
       cleanupTimer.cancel();
       cleanupTimer = null;
+    }
+  }
+  
+  /**
+   * Gradle stores each generated class in a cache.
+   * We thus have to remove it from instantiationScheme.deserializationConstructorCache
+   * and instantiationScheme.constructorSelector.constructorCache
+   * @param loader the classloader to clean up after
+   */
+  protected void cleanupGradleInternals(ClassLoader loader) {
+    try {
+      // This functionality is hidden within Gradle's internal API and subject to change.
+      // the following cleanup has been tested with gradle 8.14
+      
+      // Unfortunately, we have to use reflections as Gradle does not provide an API for
+      // either clearing this cache or using a cache-less instantiator
+      Field instantiationSchemeF = providerSelf.getClass().getDeclaredField("instantiationScheme");
+      instantiationSchemeF.setAccessible(true);
+      Object instantiationScheme = instantiationSchemeF.get(providerSelf);
+      
+      Field deserializationConstructorCacheF =
+          instantiationScheme.getClass().getDeclaredField("deserializationConstructorCache");
+      deserializationConstructorCacheF.setAccessible(true);
+      clearBuildInMemoryCache(deserializationConstructorCacheF.get(instantiationScheme), loader);
+      
+      Field constructorSelectorF =
+          instantiationScheme.getClass().getDeclaredField("constructorSelector");
+      constructorSelectorF.setAccessible(true);
+      Object constructorSelector = constructorSelectorF.get(instantiationScheme);
+      
+      Field constructorCacheF = constructorSelector.getClass().getDeclaredField("constructorCache");
+      constructorCacheF.setAccessible(true);
+      clearBuildInMemoryCache(constructorCacheF.get(constructorSelector), loader);
+    }
+    catch (Exception e) {
+      logger.warn("Failed to cleanup after gradle internals. "
+          + "You might notice an increased memory usage", e);
+    }
+  }
+  
+  /**
+   * remove all classes loaded by a given classloader from the valuesForThisSession map/cache
+   * @param deserializationConstructorCache most likely a DefaultCrossBuildInMemoryCache
+   * @param loader the classloader
+   * @throws ReflectiveOperationException when the internal api changes
+   */
+  protected void clearBuildInMemoryCache(Object deserializationConstructorCache, ClassLoader loader) throws ReflectiveOperationException {
+    Field valuesForThisSessionF = deserializationConstructorCache.getClass().getSuperclass()
+        .getDeclaredField("valuesForThisSession");
+    valuesForThisSessionF.setAccessible(true);
+    Map<Object, Object> valuesForThisSession =
+        (Map<Object, Object>) valuesForThisSessionF.get(deserializationConstructorCache);
+    Iterator<?> it = valuesForThisSession.keySet().iterator();
+    while (it.hasNext()) {
+      Object e = it.next();
+      if (e instanceof Class && ((Class<?>) e).getClassLoader() == loader) {
+        it.remove();
+      }
     }
   }
 
@@ -351,7 +411,7 @@ public abstract class CachedQueueService
             WorkAction<?> action = instantiator.newInstance(c);
             action.execute();
           }
-          catch (ClassNotFoundException e) {
+          catch (ClassNotFoundException | NoClassDefFoundError e) {
             // This exception might indicate a possible problem with our classloader -> ALu
             throw new RuntimeException(
                 "Potential classloader issue in CL " + contextClassLoader + " with classpath "
@@ -607,12 +667,15 @@ public abstract class CachedQueueService
   }
 
   protected static int guessInitialMaxParallel() {
-    // We generously estimate 500MB of memory usage per concurrent worker execution
+    // We generously estimate 150MB of memory usage per concurrent worker execution
     // This memory footprint includes the runtime object, as well as overhead for loading classes, the jars
     // within the classpath, etc.
     long leftOverMemory = Runtime.getRuntime().maxMemory() - Runtime.getRuntime().totalMemory();
-    // We always allow 4 parallel workers by default (use CONCURRENT_MC_PROPERTY to increase this value)
-    return (int) Math.max(4, leftOverMemory / 500000000d);
+    // But as a note: metaspace is GCed/managed by the JVM, so we actually have no idea how many classes we could load
+    final int estimated_memory_usage_in_mb = 150; // from testing, 512 MB allows ~2 parallel workers (XML DSL)
+    // We always allow 2 parallel workers by default (use CONCURRENT_MC_PROPERTY to increase/decrease this value)
+    // In the future: Move this limit to a per-workqueue basis - as in "do I have 150MB available?"
+    return (int) Math.max(2, leftOverMemory / (estimated_memory_usage_in_mb*1000*1000));
   }
 
   @Override

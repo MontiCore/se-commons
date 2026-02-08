@@ -1,9 +1,9 @@
 /* (c) https://github.com/MontiCore/monticore */
 package de.monticore.gradle.internal.isolation;
 
-import com.google.common.collect.Iterables;
 import de.se_rwth.commons.io.CleanerProvider;
 import de.se_rwth.commons.io.SyncDeIsolated;
+import org.gradle.internal.classloader.VisitableURLClassLoader;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -12,7 +12,8 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
 
-public class IsolatedURLClassLoader extends URLClassLoader {
+public class IsolatedURLClassLoader extends VisitableURLClassLoader {
+  // Extend VisitableURLClassLoader, as otherwise gradle tends to cache our classes as well
   protected final Set<String> passThroughPackages;
   protected final ClassLoader contextClassLoader;
 
@@ -21,7 +22,7 @@ public class IsolatedURLClassLoader extends URLClassLoader {
   }
 
   public IsolatedURLClassLoader(URL[] urls, URLClassLoader contextClassLoader, Set<String> passThroughPackages) {
-    super(urls, null);
+    super("IsolatedURLClassLoader", null, Arrays.asList(urls));
     this.contextClassLoader = contextClassLoader;
     this.passThroughPackages = passThroughPackages;
   }
@@ -34,7 +35,8 @@ public class IsolatedURLClassLoader extends URLClassLoader {
     // We explicitly do not isolate some classes:
     if (name.equals(CLEANER_PROVIDER_NAME) // Tracks usages across isolates instances
         || name.equals(SYNCDEISOLATED_NAME) // Allows synchronized mutex locks between isolated instances
-        || name.startsWith("org.slf4j")) // also pass slf4j through (to allow gradle to handle logging)
+        || name.startsWith("org.slf4j") // also pass slf4j through (to allow gradle to handle logging)
+    )
     {
       return this.contextClassLoader.loadClass(name);
     }
