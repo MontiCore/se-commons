@@ -496,6 +496,9 @@ public abstract class CachedQueueService
     // but groovy uses AccessController.doPrivileged itself, causing
     // the UpdateCheckerRunnable to be assigned its current domains
     // We thus skip them, as otherwise the context loader leaks
+    if (currentDomains == null) {
+      return null;
+    }
     final List<ProtectionDomain> combinedWithoutIsolated = new ArrayList<>();
     for (ProtectionDomain protectionDomain : currentDomains) {
       if (protectionDomain.getClassLoader() == null || !isClassLoaderOrChild(
