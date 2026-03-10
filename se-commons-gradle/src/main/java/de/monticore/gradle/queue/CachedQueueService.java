@@ -48,6 +48,7 @@ import java.net.URLClassLoader;
 import java.security.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Semaphore;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -104,9 +105,13 @@ public abstract class CachedQueueService
    * Closing classloaders frees up the resources from memory
    */
   protected Timer cleanupTimer;
-
-  protected final List<IIsolationData> internalRunners =
-          Collections.synchronizedList(new LinkedList<>());
+  
+  /**
+   * This list of "runners" is accessed by multiple threads.
+   * In the best-case, few writes (due to new runners being spawned/removed)
+   * and many reads (re-use of runners) occur.
+   */
+  protected final List<IIsolationData> internalRunners = new CopyOnWriteArrayList<>();
 
   /**
    * Unfortunately, Gradle does not allow us to limit the maximum work-actions of a WorkQueue being
@@ -222,10 +227,9 @@ public abstract class CachedQueueService
     // whether we still need to run a task with this classloader
 
     long threshold = System.currentTimeMillis() - pCloseThreshold;
-    Iterator<IIsolationData> isolated = this.internalRunners.iterator();
     logger.debug("Running cleanup thread");
-    while (isolated.hasNext()) {
-      IIsolationData data = isolated.next();
+    List<IIsolationData> toRemove = new ArrayList<>();
+    for (IIsolationData data : this.internalRunners) {
       logger.debug(" - {} - {} - {}", data.isRunning() ? "R" : "I", data.getLastRun(), data.getUUID());
       if (!data.isRunning() && data.getLastRun() < threshold) {
         stats.track(CachedIsolationStats.EventKind.CLEANUP, data.getUUID(), maximumLoadersFromConfig, this.internalRunners);
@@ -239,9 +243,10 @@ public abstract class CachedQueueService
           }
         }
         data.cleanUp();
-        isolated.remove();
+        toRemove.add(data);
       }
     }
+    this.internalRunners.removeAll(toRemove);
     if (cleanupTimer != null && this.internalRunners.isEmpty()) {
       cleanupTimer.cancel();
       cleanupTimer = null;
