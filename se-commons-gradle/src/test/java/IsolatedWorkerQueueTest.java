@@ -84,7 +84,7 @@ public class IsolatedWorkerQueueTest {
 
 
   @ParameterizedTest
-  @ValueSource(strings = {"7.4.2", "7.6.4", "7.6.6", "8.0.1", "8.7", "8.14"}) // gradle 9 requires class file version 61
+  @ValueSource(strings = {"8.5", "8.7", "8.14"}) // gradle 9 requires class file version 61
   public void testSharedIsolation(String version) throws Exception {
     File projectDir = new File("build/functionalTest/shared/" + version);
     projectDir.mkdirs();

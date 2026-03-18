@@ -352,9 +352,22 @@ public class CachedIsolation<T> {
           // Close closeable classloaders
           try {
             ((Closeable) data.getClassLoader()).close();
-          } catch (Throwable ignored) {
+          } catch (Throwable onlyLogged) {
             // In case java is eagerly unloading the classloader already,
             // used classes from libraries might result in NoClassDefErrors
+            // We warn tool users that
+            logger.warn("Failed to properly cleanup ClassLoader {}, known as {}, during build.\n"
+                    + "Build should continue, but increased memory usage/improper file handle cleanup might occur.",
+                data.getClassLoader(), data.getUUID());
+            // And log a debug-message with the throwable
+            logger.debug("ClassLoader " + data.getUUID()
+                    + " cleanup failed. Check your ClassLoader implementation or shutdown hooks!",
+                onlyLogged);
+            // And in case you stumbled across this warning/error:
+            // When using a library during cleanup (either in your ClassLoader implementation or
+            // in a JVM shutdown hook), it may be impossible to load classes from libraries
+            
+            // Do not fail upwards, as the ClassLoader is going to be removed and will no longer be used
           }
         }
         data.cleanUp();

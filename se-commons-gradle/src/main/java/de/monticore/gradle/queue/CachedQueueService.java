@@ -41,11 +41,14 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.security.*;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Semaphore;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -102,9 +105,13 @@ public abstract class CachedQueueService
    * Closing classloaders frees up the resources from memory
    */
   protected Timer cleanupTimer;
-
-  protected final List<IIsolationData> internalRunners =
-          Collections.synchronizedList(new LinkedList<>());
+  
+  /**
+   * This list of "runners" is accessed by multiple threads.
+   * In the best-case, few writes (due to new runners being spawned/removed)
+   * and many reads (re-use of runners) occur.
+   */
+  protected final List<IIsolationData> internalRunners = new CopyOnWriteArrayList<>();
 
   /**
    * Unfortunately, Gradle does not allow us to limit the maximum work-actions of a WorkQueue being
@@ -126,7 +133,7 @@ public abstract class CachedQueueService
    * WorkParameters do not support the information stored in the {@link ActualTaskInfo},
    * which is why we use this weird workaround of a UUID-key
    */
-  protected Map<UUID, ActualTaskInfo<?>> taskInfoMap = new LinkedHashMap<>();
+  protected Map<UUID, ActualTaskInfo<?>> taskInfoMap = new ConcurrentHashMap<>();
 
   protected final IsolationScheme<WorkAction<?>, WorkParameters> isolationScheme =
           new IsolationScheme<>(Cast.uncheckedCast(WorkAction.class), WorkParameters.class,
@@ -220,14 +227,14 @@ public abstract class CachedQueueService
     // whether we still need to run a task with this classloader
 
     long threshold = System.currentTimeMillis() - pCloseThreshold;
-    Iterator<IIsolationData> isolated = this.internalRunners.iterator();
     logger.debug("Running cleanup thread");
-    while (isolated.hasNext()) {
-      IIsolationData data = isolated.next();
+    List<IIsolationData> toRemove = new ArrayList<>();
+    for (IIsolationData data : this.internalRunners) {
       logger.debug(" - {} - {} - {}", data.isRunning() ? "R" : "I", data.getLastRun(), data.getUUID());
       if (!data.isRunning() && data.getLastRun() < threshold) {
         stats.track(CachedIsolationStats.EventKind.CLEANUP, data.getUUID(), maximumLoadersFromConfig, this.internalRunners);
         logger.debug("   - close ");
+        cleanupGradleInternals(data.getClassLoader());
         if (data.getClassLoader() instanceof Closeable) {
           // Close closeable classloaders
           try {
@@ -236,12 +243,71 @@ public abstract class CachedQueueService
           }
         }
         data.cleanUp();
-        isolated.remove();
+        toRemove.add(data);
       }
     }
+    this.internalRunners.removeAll(toRemove);
     if (cleanupTimer != null && this.internalRunners.isEmpty()) {
       cleanupTimer.cancel();
       cleanupTimer = null;
+    }
+  }
+  
+  /**
+   * Gradle stores each generated class in a cache.
+   * We thus have to remove it from instantiationScheme.deserializationConstructorCache
+   * and instantiationScheme.constructorSelector.constructorCache
+   * @param loader the classloader to clean up after
+   */
+  protected void cleanupGradleInternals(ClassLoader loader) {
+    try {
+      // This functionality is hidden within Gradle's internal API and subject to change.
+      // the following cleanup has been tested with gradle 8.14
+      
+      // Unfortunately, we have to use reflections as Gradle does not provide an API for
+      // either clearing this cache or using a cache-less instantiator
+      Field instantiationSchemeF = providerSelf.getClass().getDeclaredField("instantiationScheme");
+      instantiationSchemeF.setAccessible(true);
+      Object instantiationScheme = instantiationSchemeF.get(providerSelf);
+      
+      Field deserializationConstructorCacheF =
+          instantiationScheme.getClass().getDeclaredField("deserializationConstructorCache");
+      deserializationConstructorCacheF.setAccessible(true);
+      clearBuildInMemoryCache(deserializationConstructorCacheF.get(instantiationScheme), loader);
+      
+      Field constructorSelectorF =
+          instantiationScheme.getClass().getDeclaredField("constructorSelector");
+      constructorSelectorF.setAccessible(true);
+      Object constructorSelector = constructorSelectorF.get(instantiationScheme);
+      
+      Field constructorCacheF = constructorSelector.getClass().getDeclaredField("constructorCache");
+      constructorCacheF.setAccessible(true);
+      clearBuildInMemoryCache(constructorCacheF.get(constructorSelector), loader);
+    }
+    catch (Exception e) {
+      logger.warn("Failed to cleanup after gradle internals. "
+          + "You might notice an increased memory usage", e);
+    }
+  }
+  
+  /**
+   * remove all classes loaded by a given classloader from the valuesForThisSession map/cache
+   * @param deserializationConstructorCache most likely a DefaultCrossBuildInMemoryCache
+   * @param loader the classloader
+   * @throws ReflectiveOperationException when the internal api changes
+   */
+  protected void clearBuildInMemoryCache(Object deserializationConstructorCache, ClassLoader loader) throws ReflectiveOperationException {
+    Field valuesForThisSessionF = deserializationConstructorCache.getClass().getSuperclass()
+        .getDeclaredField("valuesForThisSession");
+    valuesForThisSessionF.setAccessible(true);
+    Map<Object, Object> valuesForThisSession =
+        (Map<Object, Object>) valuesForThisSessionF.get(deserializationConstructorCache);
+    Iterator<?> it = valuesForThisSession.keySet().iterator();
+    while (it.hasNext()) {
+      Object e = it.next();
+      if (e instanceof Class && ((Class<?>) e).getClassLoader() == loader) {
+        it.remove();
+      }
     }
   }
 
@@ -274,11 +340,12 @@ public abstract class CachedQueueService
       semaphore.acquire();
     } catch (InterruptedException e) {
       // Unable to acquire slot to run -> abort
-      throw new RuntimeException(e);
+      passThrowableAlong(e);
     }
     timeWaited = System.currentTimeMillis() - timeWaited;
     try {
-      doExecuteWorkAction(taskInfoMap.get(actionUUID), timeWaited);
+      ActualTaskInfo<?> info = Objects.requireNonNull(taskInfoMap.remove(actionUUID), "WorkAction with UUID " + actionUUID + " was never registered. This is an internal error.");
+      doExecuteWorkAction(info, timeWaited);
     } finally {
       semaphore.release();
     }
@@ -319,42 +386,49 @@ public abstract class CachedQueueService
     uniqueId += "," + timeWaitedForSemaphore + "ms";
     
     executeInClassloader(() -> {
-
-              try {
-                Isolatable<?> params = isolatableSerializerRegistry.readIsolatable(new InputStreamBackedDecoder(
-                        new ByteArrayInputStream(bos.toByteArray())));
-
-                // finished params init
-
-                // Create the WorkAction itself
-
-                // instantiate within the new classloader
-
-                // prepare instantiator to set parameters
-
-                Class<? extends WorkParameters> paramTypeIsolated =
-                        (Class<? extends WorkParameters>) Thread.currentThread().getContextClassLoader()
-                                .loadClass(parameterTypeNotIsolated.getName());
-
-                ServiceLookup instantiationServices =
-                        isolationScheme.servicesForImplementation(params.coerce(paramTypeIsolated), info.services,
-                                Collections.emptySet(), aClass -> false);
-
-                Instantiator instantiator = info.instantiatorFactory.inject(instantiationServices);
-
-                // Load a fresh instance of this class
-                Class<? extends WorkAction> c =
-                        (Class<? extends WorkAction>) Thread.currentThread().getContextClassLoader()
-                                .loadClass(info.workActionClass.getName());
-                WorkAction<?> action = instantiator.newInstance(c);
-                action.execute();
-              } catch (Exception e) {
-                passThrowableAlong(e);
-              }
-            }, prefix, uniqueId,
-            f -> f.minus(info.classPath).getFiles().isEmpty() && info.classPath.minus(f).getFiles()
-                    .isEmpty(), // check if the difference between the classpaths is empty
-            () -> info.classPath);
+          
+          final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+          try {
+            Isolatable<?> params = isolatableSerializerRegistry.readIsolatable(
+                new InputStreamBackedDecoder(new ByteArrayInputStream(bos.toByteArray())));
+            
+            // finished params init
+            
+            // Create the WorkAction itself
+            
+            // instantiate within the new classloader
+            
+            // prepare instantiator to set parameters
+            
+            Class<? extends WorkParameters> paramTypeIsolated =
+                (Class<? extends WorkParameters>) contextClassLoader.loadClass(
+                    parameterTypeNotIsolated.getName());
+            
+            ServiceLookup instantiationServices =
+                isolationScheme.servicesForImplementation(params.coerce(paramTypeIsolated),
+                    info.services, Collections.emptySet(), aClass -> false);
+            
+            Instantiator instantiator = info.instantiatorFactory.inject(instantiationServices);
+            
+            // Load a fresh instance of this class
+            Class<? extends WorkAction> c = (Class<? extends WorkAction>) contextClassLoader.loadClass(
+                info.workActionClass.getName());
+            WorkAction<?> action = instantiator.newInstance(c);
+            action.execute();
+          }
+          catch (ClassNotFoundException | NoClassDefFoundError e) {
+            // This exception might indicate a possible problem with our classloader -> ALu
+            throw new RuntimeException(
+                "Potential classloader issue in CL " + contextClassLoader + " with classpath "
+                    + info.classPath.getFiles(), e);
+          }
+          catch (Exception e) {
+            passThrowableAlong(e);
+          }
+        }, prefix, uniqueId,
+        f -> f.minus(info.classPath).getFiles().isEmpty() && info.classPath.minus(f).getFiles()
+            .isEmpty(), // check if the difference between the classpaths is empty
+        () -> info.classPath);
   }
 
   /**
@@ -427,6 +501,9 @@ public abstract class CachedQueueService
     // but groovy uses AccessController.doPrivileged itself, causing
     // the UpdateCheckerRunnable to be assigned its current domains
     // We thus skip them, as otherwise the context loader leaks
+    if (currentDomains == null) {
+      return null;
+    }
     final List<ProtectionDomain> combinedWithoutIsolated = new ArrayList<>();
     for (ProtectionDomain protectionDomain : currentDomains) {
       if (protectionDomain.getClassLoader() == null || !isClassLoaderOrChild(
@@ -598,12 +675,15 @@ public abstract class CachedQueueService
   }
 
   protected static int guessInitialMaxParallel() {
-    // We generously estimate 500MB of memory usage per concurrent worker execution
+    // We generously estimate 150MB of memory usage per concurrent worker execution
     // This memory footprint includes the runtime object, as well as overhead for loading classes, the jars
     // within the classpath, etc.
     long leftOverMemory = Runtime.getRuntime().maxMemory() - Runtime.getRuntime().totalMemory();
-    // We always allow 4 parallel workers by default (use CONCURRENT_MC_PROPERTY to increase this value)
-    return (int) Math.max(4, leftOverMemory / 500000000d);
+    // But as a note: metaspace is GCed/managed by the JVM, so we actually have no idea how many classes we could load
+    final int estimated_memory_usage_in_mb = 150; // from testing, 512 MB allows ~2 parallel workers (XML DSL)
+    // We always allow 2 parallel workers by default (use CONCURRENT_MC_PROPERTY to increase/decrease this value)
+    // In the future: Move this limit to a per-workqueue basis - as in "do I have 150MB available?"
+    return (int) Math.max(2, leftOverMemory / (estimated_memory_usage_in_mb*1000*1000));
   }
 
   @Override
