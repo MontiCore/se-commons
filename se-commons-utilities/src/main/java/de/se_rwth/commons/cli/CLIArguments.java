@@ -5,7 +5,7 @@ import com.google.common.base.CharMatcher;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterators;
 
-import javax.inject.Named;
+import jakarta.inject.Named;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Iterator;

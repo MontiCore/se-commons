@@ -4,15 +4,13 @@ package de.se_rwth.commons.logging;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * This is a very basic test of the new centralized logging mechanism. The main
@@ -108,17 +106,17 @@ public class LogTest {
     Log.println("line 2");
     Log.print("line 3\n");
     List<String> r1 = LogStub.getPrints();
-    assertEquals(r1.size(),3);
-    assertEquals(r1.get(0),"line 1");
-    assertEquals(r1.get(1),"line 2" + System.lineSeparator());
-    assertEquals(r1.get(2),"line 3\n");
+    assertEquals(3, r1.size());
+    assertEquals("line 1", r1.get(0));
+    assertEquals("line 2" + System.lineSeparator(), r1.get(1));
+    assertEquals("line 3\n", r1.get(2));
     
     LogStub.clearPrints();
     Log.print("line 4");
     Log.println("line 5");
     List<String> r2 = LogStub.getPrints();
-    assertEquals(r2.size(),2);
-    assertEquals(r2.get(0),"line 4");
+    assertEquals(2, r2.size());
+    assertEquals("line 4", r2.get(0));
   }
 
   @Test

@@ -3,15 +3,17 @@ description = 'se-commons: utilities'
 
 dependencies {
     api "commons-io:commons-io:$commons_io_version"
-    implementation "jline:jline:$jline_version"
     api "org.slf4j:slf4j-api:$slf4j_version"
+    implementation "org.jline:jline:$jline_version:jdk8"
     implementation "com.google.guava:guava:$guava_version"
-    implementation "javax.inject:javax.inject:$javax_inject_version"
+    implementation "jakarta.inject:jakarta.inject-api:$jakarta_inject_version"
     implementation "commons-cli:commons-cli:$commons_cli_version"
     implementation "com.github.spotbugs:spotbugs-annotations:$spotbugs_annotation_version"
-    testImplementation "org.hamcrest:hamcrest-core:$hamcrest_version"
-    testImplementation "org.hamcrest:hamcrest-library:$hamcrest_version"
-    testImplementation "junit:junit:$junit_version"
+    testImplementation "org.hamcrest:hamcrest:$hamcrest_version"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junit_version"
+    testImplementation "org.junit.jupiter:junit-jupiter-params:$junit_version"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junit_version"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher:$junit_version"
 }
 
 publishing {

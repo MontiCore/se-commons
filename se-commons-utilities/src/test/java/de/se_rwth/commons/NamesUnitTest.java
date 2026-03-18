@@ -2,12 +2,13 @@
 package de.se_rwth.commons;
 
 import com.google.common.collect.ImmutableList;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Unit test for {@link Names}.
@@ -100,12 +101,10 @@ public class NamesUnitTest {
     
   }
   
-  @Test(expected = IllegalArgumentException.class)
+  @Test
   public void test__getQualifiedName_invalidArguments() {
-    
-    Names.getQualifiedName("", "");
-    Names.getQualifiedName("cc.blubb", "");
-    
+    assertThrows(IllegalArgumentException.class, () -> Names.getQualifiedName("", ""));
+    assertThrows(IllegalArgumentException.class, () -> Names.getQualifiedName("cc.blubb", ""));
   }
   
   @Test

@@ -1,8 +1,11 @@
 /* (c) https://github.com/MontiCore/monticore */
 package de.se_rwth.commons.groovy;
 
-import jline.console.ConsoleReader;
 import org.codehaus.groovy.GroovyException;
+import org.jline.reader.LineReader;
+import org.jline.reader.LineReaderBuilder;
+import org.jline.terminal.Terminal;
+import org.jline.terminal.TerminalBuilder;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -37,22 +40,21 @@ public class InteractiveGroovyShell {
   
   public void tryRun() throws IOException {
     
-    ConsoleReader reader = new ConsoleReader();
-    PrintWriter writer = new PrintWriter(reader.getOutput());
-    
-    reader.setPrompt(PROMPT);
-    
-    String line;
-    while ((line = reader.readLine()) != null) {
-      try {
-        groovy.tryEvaluate(line);
-      }
-      catch (GroovyException e) {
-        writer.append("[ERROR] Could not parse command.");
-        writer.flush();
+    try (Terminal terminal = TerminalBuilder.builder().build()) {
+      LineReader reader = LineReaderBuilder.builder().terminal(terminal).build();
+      PrintWriter writer = new PrintWriter(terminal.output());
+      
+      String line;
+      while ((line = reader.readLine(PROMPT)) != null) {
+        try {
+          groovy.tryEvaluate(line);
+        }
+        catch (GroovyException e) {
+          writer.append("[ERROR] Could not parse command.");
+          writer.flush();
+        }
       }
     }
-    
   }
   
 }

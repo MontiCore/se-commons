@@ -1,10 +1,11 @@
 /* (c) https://github.com/MontiCore/monticore */
 package de.se_rwth.commons;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 /**
  * Unit test for {@link StringTransformations}.
@@ -14,7 +15,7 @@ import static org.junit.Assert.assertThat;
 public class StringTransformationsUnitTest {
   
   /**
-   * Test for {@link StringMatchers.Transformations#CAPITALIZE}
+   * Test for {@link StringTransformations#CAPITALIZE}
    */
   @Test
   public void test__Transformations_CAPITALIZE() {
@@ -36,7 +37,7 @@ public class StringTransformationsUnitTest {
   }
   
   /**
-   * Test for {@link StringMatchers.Transformations#ESCAPE_JAVA}
+   * Test for {@link StringTransformations#ESCAPE_JAVA}
    */
   @Test
   public void test__Transformations_ESCAPE_JAVA() {
@@ -58,12 +59,12 @@ public class StringTransformationsUnitTest {
   }
   
   /**
-   * Test for {@link StringMatchers.Transformations#CAPITALIZE}
+   * Test for {@link StringTransformations#CAPITALIZE}
    */
-  @Test(expected = NullPointerException.class)
+  @Test
   public void test__Transformations_CAPITALIZE_null() {
     
-    StringTransformations.CAPITALIZE.apply(null);
+    assertThrows(NullPointerException.class, () -> StringTransformations.CAPITALIZE.apply(null));
     
   }
   

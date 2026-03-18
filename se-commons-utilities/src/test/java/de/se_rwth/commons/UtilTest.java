@@ -2,14 +2,15 @@
 
 package de.se_rwth.commons;
 
-import org.junit.Before;
-import org.junit.Test;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  */
@@ -50,7 +51,7 @@ public final class UtilTest {
    *
    * with the alphabetic order corresponding to a preorder traversal.
    */
-  @Before
+  @BeforeEach
   public void setupTree() {
     A = new TestNode("A");
     B = new TestNode("B");
