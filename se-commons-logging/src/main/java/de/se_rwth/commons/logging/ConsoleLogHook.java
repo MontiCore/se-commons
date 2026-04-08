@@ -1,6 +1,9 @@
 /* (c) https://github.com/MontiCore/monticore */
 package de.se_rwth.commons.logging;
 
+/**
+ * Standard log-hook printing to the stdout and stderr
+ */
 public class ConsoleLogHook implements ILogHook {
 
   @Override
