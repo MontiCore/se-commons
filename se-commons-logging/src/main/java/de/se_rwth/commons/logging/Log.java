@@ -175,7 +175,7 @@ public class Log {
   public static boolean isTraceEnabled(String logName) {
     return getLog().doIsTraceEnabled(logName);
   }
-  
+
   /**
    * Is level TRACE enabled for the given log name?
    *
@@ -195,7 +195,7 @@ public class Log {
   public static void trace(String msg, String logName) {
     getLog().doTrace(msg, logName);
   }
-  
+
   /**
    * Log to the specified log with level TRACE.
    *
@@ -376,7 +376,7 @@ public class Log {
       doDebug(msg.get(), start, end, logName);
     }
   }
-  
+
   /**
    * Log to the specified log name with level DEBUG.
    *
@@ -1041,7 +1041,7 @@ public class Log {
       System.out.printf("#%d : %s\n", i, getFindings().get(i));
     }
   }
-  
+
   /**
    * Print something to the standard output
    * @param msg the message to print
@@ -1119,8 +1119,6 @@ public class Log {
     }
     return defaultErrorHook;
   }
-  
-  //
   
   /**
    * Sets the debug flag of the current log.
