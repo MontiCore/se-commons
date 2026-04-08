@@ -122,7 +122,7 @@ public class Log {
    * @param log the new central logging to use; must not be null
    */
   // Allows to set an individually defined Log instance
-  protected static final void setLog(Log log) {
+  protected static void setLog(Log log) {
     if (Log.log != null && log != null) {
       if (!Log.log.getClass().equals(log.getClass())) {
         debug("Switching logging component from " + Log.log.getClass().getName() + " to "
@@ -169,15 +169,17 @@ public class Log {
   /**
    * Is level TRACE enabled for the given log name?
    *
+   * @param logName the log name to use
    * @return whether level TRACE is enabled for the given log name
    */
-  public static final boolean isTraceEnabled(String logName) {
+  public static boolean isTraceEnabled(String logName) {
     return getLog().doIsTraceEnabled(logName);
   }
-
+  
   /**
    * Is level TRACE enabled for the given log name?
    *
+   * @param logName the log name to use
    * @return whether level TRACE is enabled for the given log name
    */
   protected boolean doIsTraceEnabled(String logName) {
@@ -190,12 +192,15 @@ public class Log {
    * @param msg     the trace message
    * @param logName the log name to use
    */
-  public static final void trace(String msg, String logName) {
+  public static void trace(String msg, String logName) {
     getLog().doTrace(msg, logName);
   }
-
+  
   /**
    * Log to the specified log with level TRACE.
+   *
+   * @param msg the trace message
+   * @param logName the log name to use
    */
   protected void doTrace(String msg, String logName) {
     if (doIsTraceEnabled(logName)) {
@@ -209,12 +214,14 @@ public class Log {
    * @param msg     the trace message
    * @param logName the log name to use
    */
-  public static final void trace(Supplier<String> msg, String logName) {
+  public static void trace(Supplier<String> msg, String logName) {
     getLog().doTrace(msg, logName);
   }
 
   /**
    * Log to the specified log with level TRACE.
+   * @param msg the suppliers for trace messages
+   * @param logName the log name to use
    */
   protected void doTrace(Supplier<String> msg, String logName) {
     if (doIsTraceEnabled(logName)) {
@@ -229,12 +236,16 @@ public class Log {
    * @param t       the exception to log
    * @param logName the log name to use
    */
-  public static final void trace(String msg, Throwable t, String logName) {
+  public static void trace(String msg, Throwable t, String logName) {
     getLog().doTrace(msg, t, logName);
   }
 
   /**
-   * Log to the specified log with level TRACE.<br>
+   * Log to the specified log with level TRACE.
+   *
+   * @param msg     the trace message
+   * @param t       the exception to log
+   * @param logName the log name to use
    */
   protected void doTrace(String msg, Throwable t, String logName) {
     if (doIsTraceEnabled(logName)) {
@@ -250,12 +261,16 @@ public class Log {
    * @param t       the exception to log
    * @param logName the log name to use
    */
-  public static final void trace(Supplier<String> msg, Throwable t, String logName) {
+  public static void trace(Supplier<String> msg, Throwable t, String logName) {
     getLog().doTrace(msg, t, logName);
   }
 
   /**
-   * Log to the specified log with level TRACE.<br>
+   * Log to the specified log with level TRACE.
+   *
+   * @param msg     the supplier for a trace message
+   * @param t       the exception to log
+   * @param logName the log name to use
    */
   protected void doTrace(Supplier<String> msg, Throwable t, String logName) {
     if (doIsTraceEnabled(logName)) {
@@ -266,15 +281,17 @@ public class Log {
   /**
    * Is level DEBUG enabled for the given log name?
    *
+   * @param logName the log name to use
    * @return whether level DEBUG is enabled for the given log name
    */
-  public static final boolean isDebugEnabled(String logName) {
+  public static boolean isDebugEnabled(String logName) {
     return getLog().doIsDebugEnabled(logName);
   }
 
   /**
    * Is level DEBUG enabled for the given log name?
    *
+   * @param logName the log name to use
    * @return whether level DEBUG is enabled for the given log name
    */
   protected boolean doIsDebugEnabled(String logName) {
@@ -287,7 +304,7 @@ public class Log {
    * @param msg     the debug message
    * @param logName the log name to use
    */
-  public static final void debug(String msg, String logName) {
+  public static void debug(String msg, String logName) {
     getLog().doDebug(msg, logName);
   }
 
@@ -306,7 +323,7 @@ public class Log {
    * @param msg     the debug message
    * @param logName the log name to use
    */
-  public static final void debug(Supplier<String> msg, String logName) {
+  public static void debug(Supplier<String> msg, String logName) {
     getLog().doDebug(msg, logName);
   }
 
@@ -319,7 +336,7 @@ public class Log {
     }
   }
 
-  public static final void debug(String msg, SourcePosition pos, String logName) {
+  public static void debug(String msg, SourcePosition pos, String logName) {
     getLog().doDebug(msg, pos, logName);
   }
 
@@ -329,7 +346,7 @@ public class Log {
     }
   }
 
-  public static final void debug(Supplier<String> msg, SourcePosition pos, String logName) {
+  public static void debug(Supplier<String> msg, SourcePosition pos, String logName) {
     getLog().doDebug(msg, pos, logName);
   }
 
@@ -339,7 +356,7 @@ public class Log {
     }
   }
 
-  public static final void debug(String msg, SourcePosition start, SourcePosition end, String logName) {
+  public static void debug(String msg, SourcePosition start, SourcePosition end, String logName) {
     getLog().doDebug(msg, start, end, logName);
   }
 
@@ -349,7 +366,8 @@ public class Log {
     }
   }
 
-  public static final void debug(Supplier<String> msg, SourcePosition start, SourcePosition end, String logName) {
+  public static void debug(Supplier<String> msg, SourcePosition start, SourcePosition end,
+      String logName) {
     getLog().doDebug(msg, start, end, logName);
   }
 
@@ -358,15 +376,15 @@ public class Log {
       doDebug(msg.get(), start, end, logName);
     }
   }
-
+  
   /**
    * Log to the specified log name with level DEBUG.
    *
-   * @param msg     the debug message
-   * @param t       the exception to log
+   * @param msg the debug message
+   * @param t the exception to log
    * @param logName the log name to use
    */
-  public static final void debug(String msg, Throwable t, String logName) {
+  public static void debug(String msg, Throwable t, String logName) {
     getLog().doDebug(msg, t, logName);
   }
 
@@ -387,7 +405,7 @@ public class Log {
    * @param t       the exception to log
    * @param logName the log name to use
    */
-  public static final void debug(Supplier<String> msg, Throwable t, String logName) {
+  public static void debug(Supplier<String> msg, Throwable t, String logName) {
     getLog().doDebug(msg, t, logName);
   }
 
@@ -405,7 +423,7 @@ public class Log {
    *
    * @return whether level INFO is enabled for the given log name
    */
-  public static final boolean isInfoEnabled(String logName) {
+  public static boolean isInfoEnabled(String logName) {
     return getLog().doIsInfoEnabled(logName);
   }
 
@@ -424,7 +442,7 @@ public class Log {
    * @param msg     the info message
    * @param logName the log name to use
    */
-  public static final void info(String msg, String logName) {
+  public static void info(String msg, String logName) {
     getLog().doInfo(msg, logName);
   }
 
@@ -443,7 +461,7 @@ public class Log {
    * @param msg     the info message
    * @param logName the log name to use
    */
-  public static final void info(Supplier<String> msg, String logName) {
+  public static void info(Supplier<String> msg, String logName) {
     getLog().doInfo(msg, logName);
   }
 
@@ -463,7 +481,7 @@ public class Log {
    * @param t       the exception to log
    * @param logName the log name to use
    */
-  public static final void info(String msg, Throwable t, String logName) {
+  public static void info(String msg, Throwable t, String logName) {
     getLog().doInfo(msg, t, logName);
   }
 
@@ -484,7 +502,7 @@ public class Log {
    * @param t       the exception to log
    * @param logName the log name to use
    */
-  public static final void info(Supplier<String> msg, Throwable t, String logName) {
+  public static void info(Supplier<String> msg, Throwable t, String logName) {
     getLog().doInfo(msg, t, logName);
   }
 
@@ -502,7 +520,7 @@ public class Log {
    *
    * @param msg the warn message
    */
-  public static final void warn(String msg) {
+  public static void warn(String msg) {
     getLog().doWarn(msg);
   }
 
@@ -512,7 +530,7 @@ public class Log {
    *
    * @param msg the warn message
    */
-  public static final void warnUser(String msg) {
+  public static void warnUser(String msg) {
     getLog().doWarn(msg);
   }
 
@@ -531,7 +549,7 @@ public class Log {
    * @param msg the warn message
    * @param pos the source position in a model file which caused the warning
    */
-  public static final void warn(String msg, SourcePosition pos) {
+  public static void warn(String msg, SourcePosition pos) {
     getLog().doWarn(msg, pos);
   }
 
@@ -551,7 +569,7 @@ public class Log {
    * @param start the start position in a model file which caused the warning
    * @param end   the end position in a model file which caused the warning
    */
-  public static final void warn(String msg, SourcePosition start, SourcePosition end) {
+  public static void warn(String msg, SourcePosition start, SourcePosition end) {
     getLog().doWarn(msg, start, end);
   }
 
@@ -571,7 +589,7 @@ public class Log {
    * @param msg the warn message
    * @param t   the exception to log
    */
-  public static final void warn(String msg, Throwable t) {
+  public static void warn(String msg, Throwable t) {
     getLog().doWarn(msg, t);
   }
 
@@ -589,7 +607,7 @@ public class Log {
    *
    * @param msg the error message
    */
-  public static final void error(String msg) {
+  public static void error(String msg) {
     getLog().doError(msg);
   }
 
@@ -609,7 +627,7 @@ public class Log {
    * @param msg the error message
    * @param pos the source position in a model file which caused the error
    */
-  public static final void error(String msg, SourcePosition pos) {
+  public static void error(String msg, SourcePosition pos) {
     getLog().doError(msg, pos);
   }
 
@@ -630,7 +648,7 @@ public class Log {
    * @param start the start position in a model file which caused the error
    * @param end   the end position in a model file which caused the error
    */
-  public static final void error(String msg, SourcePosition start, SourcePosition end) {
+  public static void error(String msg, SourcePosition start, SourcePosition end) {
     getLog().doError(msg, start, end);
   }
 
@@ -650,7 +668,7 @@ public class Log {
    * @param msg the error message
    * @param t   the exception to log
    */
-  public static final void error(String msg, Throwable t) {
+  public static void error(String msg, Throwable t) {
     getLog().doError(msg, t);
   }
 
@@ -670,7 +688,7 @@ public class Log {
    *
    * @param msg the error message
    */
-  public static final void errorInternal(String msg) {
+  public static void errorInternal(String msg) {
     getLog().doError(msg);
   }
 
@@ -682,7 +700,7 @@ public class Log {
    * @param msg the error message
    * @param pos the source position in a model file which caused the error
    */
-  public static final void errorInternal(String msg, SourcePosition pos) {
+  public static void errorInternal(String msg, SourcePosition pos) {
     getLog().doError(msg, pos);
   }
 
@@ -695,7 +713,7 @@ public class Log {
    * @param start the start position in a model file which caused the error
    * @param end   the end position in a model file which caused the error
    */
-  public static final void errorInternal(String msg, SourcePosition start, SourcePosition end) {
+  public static void errorInternal(String msg, SourcePosition start, SourcePosition end) {
     getLog().doError(msg, start, end);
   }
 
@@ -707,7 +725,7 @@ public class Log {
    * @param msg the error message
    * @param t   the exception to log
    */
-  public static final void errorInternal(String msg, Throwable t) {
+  public static void errorInternal(String msg, Throwable t) {
     getLog().doError(msg, t);
   }
 
@@ -719,7 +737,7 @@ public class Log {
    *
    * @param msg the error message
    */
-  public static final void errorUser(String msg) {
+  public static void errorUser(String msg) {
     if (isInteractive()) {
       getLog().doErrorUser(msg);
     } else {
@@ -736,7 +754,7 @@ public class Log {
    * @param msg the error message
    * @param pos the source position in a model file which caused the error
    */
-  public static final void errorUser(String msg, SourcePosition pos) {
+  public static void errorUser(String msg, SourcePosition pos) {
     if (isInteractive()) {
       getLog().doErrorUser(msg, pos);
     } else {
@@ -754,7 +772,7 @@ public class Log {
    * @param start the start position in a model file which caused the error
    * @param end   the end position in a model file which caused the error
    */
-  public static final void errorUser(String msg, SourcePosition start, SourcePosition end) {
+  public static void errorUser(String msg, SourcePosition start, SourcePosition end) {
     if (isInteractive()) {
       getLog().doErrorUser(msg, start, end);
     } else {
@@ -771,7 +789,7 @@ public class Log {
    * @param msg the error message
    * @param t   the exception to log
    */
-  public static final void errorUser(String msg, Throwable t) {
+  public static void errorUser(String msg, Throwable t) {
     if (isInteractive()) {
       getLog().doErrorUser(msg, t);
     } else {
@@ -826,7 +844,7 @@ public class Log {
    * @deprecated to be improved discussed
    */
   @Deprecated
-  public static final <T> T errorIfNull(T reference, String message) {
+  public static <T> T errorIfNull(T reference, String message) {
     return getLog().doErrorIfNull(reference, message);
   }
 
@@ -851,7 +869,7 @@ public class Log {
    * @deprecated No error code (per reference). Provide an error code.
    */
   @Deprecated(forRemoval = true)
-  public static final <T> T errorIfNull(T reference) {
+  public static <T> T errorIfNull(T reference) {
     return errorIfNull(reference,
         "0xEECFF Internal error: an illegal null reference occurred. We don't know where and why.");
   }
@@ -867,7 +885,7 @@ public class Log {
    * @param enable or disable fail quick; the application terminates if error
    *               logs occurred during a previous disabled period
    */
-  public static final void enableFailQuick(boolean enable) {
+  public static void enableFailQuick(boolean enable) {
     getLog().doEnableFailQuick(enable);
   }
 
@@ -889,7 +907,7 @@ public class Log {
    *
    * @param enable or disable interactive mode
    */
-  public static final void enableInteractive(boolean enable) {
+  public static void enableInteractive(boolean enable) {
     getLog().doEnableInteractive(enable);
   }
 
@@ -905,7 +923,7 @@ public class Log {
    *
    * @return whether fail quick is enabled
    */
-  public static final boolean isInteractive() {
+  public static boolean isInteractive() {
     return getLog().doIsInteractive();
   }
 
@@ -921,7 +939,7 @@ public class Log {
    *
    * @return
    */
-  public static final long getErrorCount() {
+  public static long getErrorCount() {
     return getLog().doGetErrorCount();
   }
 
@@ -937,7 +955,7 @@ public class Log {
    *
    * @return No. of Findings (errors and warnings)
    */
-  public static final long getFindingsCount() {
+  public static long getFindingsCount() {
     return getLog().doGetFindingsCount();
   }
 
@@ -953,7 +971,7 @@ public class Log {
    *
    * @return whether fail quick is enabled
    */
-  public static final boolean isFailQuickEnabled() {
+  public static boolean isFailQuickEnabled() {
     return getLog().doIsFailQuickEnabled();
   }
 
@@ -1023,9 +1041,10 @@ public class Log {
       System.out.printf("#%d : %s\n", i, getFindings().get(i));
     }
   }
-
+  
   /**
-   * Print something on System.out
+   * Print something to the standard output
+   * @param msg the message to print
    */
   public static void print(String msg) {
     getLog().doPrint(msg);
@@ -1036,7 +1055,8 @@ public class Log {
   }
 
   /**
-   * Print something on System.out
+   * Print a line to the standard output
+   * @param msg the message to print
    */
   public static void println(String msg) {
     getLog().doPrintln(msg);
@@ -1099,4 +1119,40 @@ public class Log {
     }
     return defaultErrorHook;
   }
+  
+  //
+  
+  /**
+   * Sets the debug flag of the current log.
+   * This method should only be called when setting up the log,
+   * i.e., at the start of a tool's run method.
+   *
+   * @param debug whether to use log-level debug
+   */
+  public static void setLogLevelDebug(boolean debug) {
+    getLog().isDEBUG = debug;
+  }
+  
+  /**
+   * Sets the trace flag of the current log.
+   * This method should only be called when setting up the log,
+   * i.e., at the start of a tool's run method.
+   *
+   * @param trace whether to use log-level trace
+   */
+  public static void setLogLevelTrace(boolean trace) {
+    getLog().isTRACE = trace;
+  }
+  
+  /**
+   * Sets the info flag of the current log.
+   * This method should only be called when setting up the log,
+   * i.e., at the start of a tool's run method.
+   *
+   * @param info whether to use log-level info
+   */
+  public static void setLogLevelInfo(boolean info) {
+    getLog().isINFO = info;
+  }
+  
 }
