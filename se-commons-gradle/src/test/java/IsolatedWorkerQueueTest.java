@@ -122,7 +122,6 @@ public class IsolatedWorkerQueueTest {
   }
   
   @Test
-  
   public void testSharedBuildService( ) throws Exception {
     File projectDir = new File("build/functionalTest/shared_bs/");
     projectDir.mkdirs();

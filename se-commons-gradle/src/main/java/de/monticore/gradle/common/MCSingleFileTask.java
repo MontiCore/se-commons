@@ -5,10 +5,12 @@ import de.monticore.gradle.AMontiCoreConfiguration;
 import org.apache.commons.io.FileUtils;
 import org.gradle.api.file.Directory;
 import org.gradle.api.file.FileType;
+import org.gradle.api.file.ProjectLayout;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.work.ChangeType;
 import org.gradle.work.InputChanges;
 
+import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -22,13 +24,16 @@ import java.util.function.Function;
  */
 abstract public class MCSingleFileTask extends CommonMCTask {
 
+  @Inject
+  protected abstract ProjectLayout getProjectLayout();
+  
   public MCSingleFileTask(String type, String symbolPathConfigurationName) {
     super(type, symbolPathConfigurationName);
   }
 
   @Override
   protected Directory getReportDirOfFile(File f) {
-    String pathName = getProject().getProjectDir().toPath().toAbsolutePath().relativize(f.toPath()).toString();
+    String pathName = getProjectLayout().getProjectDirectory().getAsFile().toPath().toAbsolutePath().relativize(f.toPath()).toString();
     return getReportDir().dir(pathName.replace(".", "__")).get();
   }
 
@@ -51,7 +56,7 @@ abstract public class MCSingleFileTask extends CommonMCTask {
     assert f.isFile();
     assert isInputFile(f);
 
-    IncGenData lastRun = new IncGenData(getIncGenFile(f), this.getProject().getProjectDir());
+    IncGenData lastRun = new IncGenData(getIncGenFile(f), getProjectLayout().getProjectDirectory().getAsFile());
 
     if (!changedInput.isIncremental()  || !lastRun.isUpToDate(getStreamOfChanges(changedInput))) {
       getLogger().info("{} is *NOT* UP-TO-DATE, starting generation process",
@@ -65,7 +70,7 @@ abstract public class MCSingleFileTask extends CommonMCTask {
   }
 
   private void startGeneration(File f) {
-    Path cwd = getProject().getProjectDir().toPath().toAbsolutePath();
+    Path cwd = getProjectLayout().getProjectDirectory().getAsFile().toPath().toAbsolutePath();
     getLogger().debug("Starting Tool: \n{} for {}",
         String.join(" ", createArgList(f.toPath(), p -> pathToHumanReadableString(p, cwd))),
         this.getName());
@@ -104,7 +109,7 @@ abstract public class MCSingleFileTask extends CommonMCTask {
       if (ch.getChangeType() == ChangeType.REMOVED
           && isInputFile(ch.getFile())
           && ch.getFileType() == FileType.FILE) {
-        this.deletePreviousOutput(ch.getFile(), new IncGenData(getIncGenFile(ch.getFile()), getProject().getProjectDir().toPath().toAbsolutePath().toFile()));
+        this.deletePreviousOutput(ch.getFile(), new IncGenData(getIncGenFile(ch.getFile()), getProjectLayout().getProjectDirectory().getAsFile().getAbsoluteFile()));
       }
     });
 
