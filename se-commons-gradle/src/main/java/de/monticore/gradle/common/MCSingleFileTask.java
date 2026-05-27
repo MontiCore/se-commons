@@ -5,12 +5,10 @@ import de.monticore.gradle.AMontiCoreConfiguration;
 import org.apache.commons.io.FileUtils;
 import org.gradle.api.file.Directory;
 import org.gradle.api.file.FileType;
-import org.gradle.api.file.ProjectLayout;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.work.ChangeType;
 import org.gradle.work.InputChanges;
 
-import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -24,9 +22,6 @@ import java.util.function.Function;
  */
 abstract public class MCSingleFileTask extends CommonMCTask {
 
-  @Inject
-  protected abstract ProjectLayout getProjectLayout();
-  
   public MCSingleFileTask(String type, String symbolPathConfigurationName) {
     super(type, symbolPathConfigurationName);
   }
