@@ -47,11 +47,14 @@ import java.util.stream.StreamSupport;
  *  Instead, build upon {@link MCSingleFileTask} or {@link MCAllFilesTask}
  */
 public abstract class CommonMCTask extends DefaultTask {
-   final static String TASK_DEBUG = "de.monticore.gradle.debug";
+  final static String TASK_DEBUG = "de.monticore.gradle.debug";
   final static String ORG_GRADLE_PARALLEL = "org.gradle.parallel";
 
   protected final ConfigurableFileCollection input = getProject().getObjects().fileCollection();
-
+  
+  @Inject
+  protected abstract ProjectLayout getProjectLayout();
+  
   @SkipWhenEmpty    // Implies @Incremental. Do nothing if no input model exists
   @InputFiles
   @PathSensitive(PathSensitivity.RELATIVE)
@@ -202,6 +205,7 @@ public abstract class CommonMCTask extends DefaultTask {
   protected final String type;
   protected final String symbolPathConfigurationName;
   protected WorkQueue workQueue;
+  protected Provider<String> isGradleRunningParallel;
 
   @Inject
   protected abstract ProgressLoggerFactory getProgressLoggerFactory();
@@ -236,6 +240,8 @@ public abstract class CommonMCTask extends DefaultTask {
       getSymbolPathConfiguration().from(getProject().getConfigurations().getByName(this.symbolPathConfigurationName));
 
     getAddConfigurationToSymbolPath().convention(true);
+    
+    this.isGradleRunningParallel = getProject().getProviders().gradleProperty(ORG_GRADLE_PARALLEL);
   }
 
 
@@ -261,7 +267,7 @@ public abstract class CommonMCTask extends DefaultTask {
 
     if (getReportDir().isPresent()) {
       result.add("-" + AMontiCoreConfiguration.REPORT_BASE);
-      result.add(handlePath.apply(getProject().getProjectDir().toPath()));
+      result.add(handlePath.apply(getProjectLayout().getProjectDirectory().getAsFile().toPath()));
 
       // reports might differ per file
 //      result.add("-" + AMontiCoreConfiguration.REPORT);
@@ -363,7 +369,7 @@ public abstract class CommonMCTask extends DefaultTask {
     }
     if (getWorkQueueDebug().get()) {
       // The work queue debug-mode disables isolation... hence static variables are shared and errors can occur, especially in parallel execution.
-      if (getProject().hasProperty(ORG_GRADLE_PARALLEL) && "true".equals(getProject().property(ORG_GRADLE_PARALLEL))) {
+      if (isGradleRunningParallel.isPresent() && "true".equals(isGradleRunningParallel.get())) {
         getLogger().warn("Gradle Parallel Execution should be disabled in Debug Mode. \n"
             + "Otherwise static variables (e.g., Mills, SymbolTables) of one Task can influence other parallel Tasks!\n"
             + "set\n\t" + ORG_GRADLE_PARALLEL + "=false\n in your <gradle.properties>");
