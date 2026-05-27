@@ -79,7 +79,7 @@ public class SECodeStylePlugin implements Plugin<Project> {
         extension.endWithNewline();
         extension.toggleOffOn("@formatter:off", "@formatter:on");
         extension.removeUnusedImports();
-        extension.indentWithSpaces(2);
+        extension.leadingTabsToSpaces(2);
       });
     });
     
@@ -96,7 +96,7 @@ public class SECodeStylePlugin implements Plugin<Project> {
       
       String delimiter = "^(\\s*(package|grammar|component))";
       extension.licenseHeader("/* (c) https://github.com/MontiCore/monticore */", delimiter);
-      extension.indentWithSpaces(2);
+      extension.leadingTabsToSpaces(2);
       extension.endWithNewline();
     });
     
