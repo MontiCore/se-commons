@@ -407,15 +407,14 @@ public abstract class CachedQueueService
             ServiceLookup instantiationServices;
 
             try {
-              instantiationServices =
-                      isolationScheme.servicesForImplementation(params.coerce(paramTypeIsolated),
-                              info.services, Collections.emptySet(), aClass -> false);
-            } catch (NoSuchMethodError error) {
               // Gradle 9: whiteListPolicy parameter was removed
-              instantiationServices = (ServiceLookup) IsolationScheme.class.getMethod("servicesForImplementation", Object.class, ServiceLookup.class, Collection.class)
-                      .invoke(isolationScheme, params.coerce(paramTypeIsolated),
-                              info.services, Collections.emptySet());
+              instantiationServices = (ServiceLookup) IsolationScheme.class.getMethod("servicesForImplementation", Object.class, ServiceLookup.class)
+                  .invoke(isolationScheme, params.coerce(paramTypeIsolated), info.services);
               // we could consider compiling different classes against different gradle api versions?
+            } catch (NoSuchMethodException error) {
+              // Gradle 9: removed shorthand notation without required additionalAllowedServices collection
+              instantiationServices = (ServiceLookup) IsolationScheme.class.getMethod("servicesForImplementation", Object.class, ServiceLookup.class, Collection.class)
+                  .invoke(isolationScheme, params.coerce(paramTypeIsolated), info.services, Collections.emptyList());
             }
             
             Instantiator instantiator = info.instantiatorFactory.inject(instantiationServices);
