@@ -7,6 +7,7 @@ import org.gradle.api.file.Directory;
 import org.gradle.api.file.FileType;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.work.ChangeType;
+import org.gradle.work.DisableCachingByDefault;
 import org.gradle.work.InputChanges;
 
 import java.io.File;
@@ -20,6 +21,7 @@ import java.util.function.Function;
  *  inputs (and their dependants).
  * A new TaskAction is launched for every new generation
  */
+@DisableCachingByDefault(because = "Abstract super-class, not to be instantiated directly")
 abstract public class MCSingleFileTask extends CommonMCTask {
 
   public MCSingleFileTask(String type, String symbolPathConfigurationName) {

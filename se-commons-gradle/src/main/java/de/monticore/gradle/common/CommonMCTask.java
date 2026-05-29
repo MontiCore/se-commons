@@ -12,6 +12,7 @@ import org.gradle.api.provider.Property;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.*;
 import org.gradle.internal.logging.progress.ProgressLoggerFactory;
+import org.gradle.work.DisableCachingByDefault;
 import org.gradle.work.FileChange;
 import org.gradle.work.Incremental;
 import org.gradle.work.InputChanges;
@@ -46,6 +47,7 @@ import java.util.stream.StreamSupport;
  *  Do NOT implement this class directly.
  *  Instead, build upon {@link MCSingleFileTask} or {@link MCAllFilesTask}
  */
+@DisableCachingByDefault(because = "Abstract super-class, not to be instantiated directly")
 public abstract class CommonMCTask extends DefaultTask {
   final static String TASK_DEBUG = "de.monticore.gradle.debug";
   final static String ORG_GRADLE_PARALLEL = "org.gradle.parallel";

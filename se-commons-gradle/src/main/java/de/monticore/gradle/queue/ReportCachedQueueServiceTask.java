@@ -7,6 +7,7 @@ import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.OutputFile;
 import org.gradle.api.tasks.TaskAction;
+import org.gradle.work.DisableCachingByDefault;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -15,6 +16,7 @@ import java.util.Collections;
 /**
  * Reports the (current) state of the cachedQueueService stats in json format
  */
+@DisableCachingByDefault
 public abstract class ReportCachedQueueServiceTask extends DefaultTask {
 
   @OutputFile

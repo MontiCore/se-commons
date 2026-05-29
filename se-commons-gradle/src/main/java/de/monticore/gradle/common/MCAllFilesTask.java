@@ -5,6 +5,7 @@ import org.apache.commons.io.FileUtils;
 import org.gradle.api.file.Directory;
 import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.TaskAction;
+import org.gradle.work.DisableCachingByDefault;
 import org.gradle.work.InputChanges;
 
 import java.io.File;
@@ -20,6 +21,7 @@ import java.util.stream.Stream;
  * and add each input file via {@link MCAllFilesTask#getInputFilesAsStream()}
  * to the arguments
  */
+@DisableCachingByDefault(because = "Abstract super-class, not to be instantiated directly")
 public abstract class MCAllFilesTask extends CommonMCTask {
   public MCAllFilesTask(String type, String symbolPathConfigurationName) {
     super(type, symbolPathConfigurationName);
