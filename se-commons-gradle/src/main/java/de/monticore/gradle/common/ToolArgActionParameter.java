@@ -31,4 +31,9 @@ public interface ToolArgActionParameter extends CachedIsolatedWorkQueue.WorkQueu
      * See {@link ProgressLoggerService}
      */
     Property<ProgressLoggerService> getProgressLogger();
+
+    /**
+     * @return MainClass that should be called
+     */
+    Property<String> getMainClass();
 }
