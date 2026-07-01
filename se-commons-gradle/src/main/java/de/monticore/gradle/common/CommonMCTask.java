@@ -390,6 +390,7 @@ public abstract class CommonMCTask extends DefaultTask {
       // In normal mode, run in a workQue. This ensures isolation & parallelization
       workQueue.submit(getToolAction(), param -> {
         param.getArgs().set(args);
+        param.getMainClass().set(getMainClass());
         param.getProgressName().set(progressName);
         param.getPrefix().set("[" + progressName + "]");
         // A unique name for the stats reporter, etc.
@@ -420,8 +421,22 @@ public abstract class CommonMCTask extends DefaultTask {
     throw new IllegalStateException("No tool invoker present, workQueueDebug is not supported!");
   }
 
+  /**
+   * @return the main class (to be called by the SharedToolAction)
+   */
+  @Input
+  @Optional
+  public abstract Property<String> getMainClass();
+
+  /**
+   * By default, the SharedToolAction is used.
+   * It uses the getMainClass property
+   * @return the tool action to pass to the workqueue
+   */
   @Internal
-  protected abstract Class<? extends AToolAction> getToolAction();
+  protected Class<? extends AToolAction> getToolAction() {
+    return SharedToolAction.class;
+  }
 
   /**
    * Set of additional input directories which are used during the inc check
