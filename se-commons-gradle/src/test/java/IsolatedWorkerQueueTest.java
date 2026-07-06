@@ -93,7 +93,7 @@ public class IsolatedWorkerQueueTest {
 
 
   @ParameterizedTest
-  @ValueSource(strings = {"8.5", "8.7", "8.14", "9.3.1","9.5.1"})
+  @ValueSource(strings = {"8.5", "8.7", "8.14", "9.3.1","9.5.1", "9.6.1"})
   public void testSharedIsolation(String version) throws Exception {
     File projectDir = new File("build/functionalTest/shared/" + version);
     projectDir.mkdirs();
