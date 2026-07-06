@@ -155,7 +155,7 @@ public class IsolatedWorkerQueueTest {
     
     assertThrows(UnexpectedBuildFailure.class, () -> {
       BuildResult result = GradleRunner.create()
-          .withGradleVersion("7.6.4")
+          .withGradleVersion("8.14.5")
           .withProjectDir(projectDir).withPluginClasspath()
           .withArguments("A", "B", "--stacktrace").build();
     });
