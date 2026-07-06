@@ -12,6 +12,7 @@ import org.gradle.api.invocation.Gradle;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 import org.gradle.api.provider.Provider;
+import org.gradle.api.provider.ValueSourceParameters;
 import org.gradle.api.services.BuildService;
 import org.gradle.api.services.BuildServiceParameters;
 import org.gradle.api.services.BuildServiceRegistry;
@@ -41,7 +42,9 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.IOException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -135,14 +138,13 @@ public abstract class CachedQueueService
    */
   protected Map<UUID, ActualTaskInfo<?>> taskInfoMap = new ConcurrentHashMap<>();
 
-  protected final IsolationScheme<WorkAction<?>, WorkParameters> isolationScheme =
-          new IsolationScheme<>(Cast.uncheckedCast(WorkAction.class), WorkParameters.class,
-                  WorkParameters.None.class);
+  protected final IsolationScheme<WorkAction<?>, WorkParameters> isolationScheme;
 
   public CachedQueueService() {
     this.maximumLoadersFromConfig = guessInitialMaxParallel();
     logger.debug("Starting with a maximum count of {}", maximumLoadersFromConfig);
     this.semaphore = new Semaphore(maximumLoadersFromConfig);
+    this.isolationScheme = createNewIsolationScheme();
   }
 
   public synchronized void setMaxConcurrentMC(int maxParallelMC) {
@@ -693,6 +695,32 @@ public abstract class CachedQueueService
     // We always allow 2 parallel workers by default (use CONCURRENT_MC_PROPERTY to increase/decrease this value)
     // In the future: Move this limit to a per-workqueue basis - as in "do I have 150MB available?"
     return (int) Math.max(2, leftOverMemory / (estimated_memory_usage_in_mb*1000*1000));
+  }
+  
+  protected static IsolationScheme<WorkAction<?>, WorkParameters> createNewIsolationScheme() {
+    // Gradle 9.6.0 and 9.6.1 use a modified constructor signature with an additional parameter.
+    // However, it is reverted for 9.7.0.
+    try {
+      try {
+        Constructor<?> constructor =
+            IsolationScheme.class.getConstructor(Class.class, Class.class, Class.class);
+        return Cast.uncheckedCast(constructor.newInstance(WorkAction.class, WorkParameters.class,
+            WorkParameters.None.class));
+      }
+      catch (NoSuchMethodException ex) {
+        Constructor<?> constructor =
+            IsolationScheme.class.getConstructor(Class.class, Class.class, Class.class,
+                Object.class);
+        return Cast.uncheckedCast(constructor.newInstance(WorkAction.class, WorkParameters.class,
+            WorkParameters.None.class, ValueSourceParameters.None.class));
+      }
+    }
+    catch (NoSuchMethodException ex) {
+      throw new RuntimeException("Gradle version currently unsupported", ex);
+    }
+    catch (InstantiationException | IllegalAccessException | InvocationTargetException ex) {
+      throw new RuntimeException("Failed to create IsolationScheme", ex);
+    }
   }
 
   @Override
