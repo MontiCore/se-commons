@@ -4,7 +4,6 @@ import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.TaskOutcome;
 import org.gradle.testkit.runner.UnexpectedBuildFailure;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -16,7 +15,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * This test checks the various kinds of isolations between workers:
@@ -32,12 +31,17 @@ public class IsolatedWorkerQueueTest {
     projectDir.mkdirs();
     new File(projectDir, "settings.gradle").createNewFile();
     write(new File(projectDir, "build.gradle"),
-            "    plugins {\n" + "        id 'se.rwth.example' \n" + "    } \n"
-                    + "    import se.rwth.example.ExampleTask \n"
-                    + "    import se.rwth.example.ExampleTask.WorkerKind \n"
-                    + "    tasks.register('A', ExampleTask.class, t -> {t.taskNames.add('A1'); t.taskNames.add('A2'); t.workerKind = WorkerKind.NO_ISOLATION} ) \n"
-                    + "    tasks.register('B', ExampleTask.class, t -> {t.taskNames.add('B1'); t.taskNames.add('B2'); t.waitSeconds = 1; t.workerKind = WorkerKind.NO_ISOLATION} ) \n"
-                    + "    B.dependsOn(A)\n" + "    \n");
+            """
+            plugins {
+              id 'se.rwth.example'
+            }
+            import se.rwth.example.ExampleTask
+            import se.rwth.example.ExampleTask.WorkerKind
+            tasks.register('A', ExampleTask.class, t -> {t.taskNames.add('A1'); t.taskNames.add('A2'); t.workerKind = WorkerKind.NO_ISOLATION} )
+            tasks.register('B', ExampleTask.class, t -> {t.taskNames.add('B1'); t.taskNames.add('B2'); t.waitSeconds = 1; t.workerKind = WorkerKind.NO_ISOLATION} )
+            B.dependsOn(A)
+            """
+    );
 
     BuildResult result = GradleRunner.create().withProjectDir(projectDir).withPluginClasspath()
             .withArguments("A", "B").build();
@@ -60,12 +64,17 @@ public class IsolatedWorkerQueueTest {
     projectDir.mkdirs();
     new File(projectDir, "settings.gradle").createNewFile();
     write(new File(projectDir, "build.gradle"),
-            "    plugins {\n" + "        id 'se.rwth.example' \n" + "    } \n"
-                    + "    import se.rwth.example.ExampleTask \n"
-                    + "    import se.rwth.example.ExampleTask.WorkerKind \n"
-                    + "    tasks.register('A', ExampleTask.class, t -> {t.taskNames.add('A1'); t.taskNames.add('A2'); t.workerKind = WorkerKind.CL} ) \n"
-                    + "    tasks.register('B', ExampleTask.class, t -> {t.taskNames.add('B1'); t.taskNames.add('B2'); t.waitSeconds = 1; t.workerKind = WorkerKind.CL} ) \n"
-                    + "    B.dependsOn(A)\n" + "    \n");
+            """
+            plugins {
+              id 'se.rwth.example'
+            }
+            import se.rwth.example.ExampleTask
+            import se.rwth.example.ExampleTask.WorkerKind
+            tasks.register('A', ExampleTask.class, t -> {t.taskNames.add('A1'); t.taskNames.add('A2'); t.workerKind = WorkerKind.CL} )
+            tasks.register('B', ExampleTask.class, t -> {t.taskNames.add('B1'); t.taskNames.add('B2'); t.waitSeconds = 1; t.workerKind = WorkerKind.CL} )
+            B.dependsOn(A)
+            """
+    );
 
     BuildResult result = GradleRunner.create().withProjectDir(projectDir).withPluginClasspath()
             .withArguments("A", "B").build();
@@ -90,12 +99,17 @@ public class IsolatedWorkerQueueTest {
     projectDir.mkdirs();
     new File(projectDir, "settings.gradle").createNewFile();
     write(new File(projectDir, "build.gradle"),
-            "    plugins {\n" + "        id 'se.rwth.example' \n" + "    } \n"
-                    + "    import se.rwth.example.ExampleTask \n"
-                    + "    import se.rwth.example.ExampleTask.WorkerKind \n"
-                    + "    tasks.register('A', ExampleTask.class, t -> {t.taskNames.add('A1'); t.taskNames.add('A2'); t.workerKind = WorkerKind.SHARED} ) \n"
-                    + "    tasks.register('B', ExampleTask.class, t -> {t.taskNames.add('B1'); t.taskNames.add('B2'); t.waitSeconds = 1; t.workerKind = WorkerKind.SHARED} ) \n"
-                    + "    B.dependsOn(A)\n" + "    \n");
+            """
+            plugins {
+              id 'se.rwth.example'
+            }
+            import se.rwth.example.ExampleTask
+            import se.rwth.example.ExampleTask.WorkerKind
+            tasks.register('A', ExampleTask.class, t -> {t.taskNames.add('A1'); t.taskNames.add('A2'); t.workerKind = WorkerKind.SHARED} )
+            tasks.register('B', ExampleTask.class, t -> {t.taskNames.add('B1'); t.taskNames.add('B2'); t.waitSeconds = 1; t.workerKind = WorkerKind.SHARED} )
+            B.dependsOn(A)
+            """
+    );
 
     BuildResult result = GradleRunner.create()
             .withGradleVersion(version)
@@ -110,15 +124,15 @@ public class IsolatedWorkerQueueTest {
     assertEquals("[A1]pre:  -+-+> A1", o.get(0));
     assertEquals("[A2]pre:  -+-+> A2", o.get(1));
     // assert that B1 and B2 use re-used
-    Assertions.assertTrue(o.get(2).matches("\\[B.]pre: A. -\\+-\\+> B1"), o.get(2));
-    Assertions.assertTrue(o.get(3).matches("\\[B.]pre: A. -\\+-\\+> B2"), o.get(3));
+    assertTrue(o.get(2).matches("\\[B.]pre: A. -\\+-\\+> B1"), o.get(2));
+    assertTrue(o.get(3).matches("\\[B.]pre: A. -\\+-\\+> B2"), o.get(3));
 
     String json = result.getOutput().substring(result.getOutput().indexOf("Stats[[") + "Stats[[".length(), result.getOutput().indexOf("]]Stats"));
 
-    Assertions.assertEquals(2, StringUtils.countMatches(json, "\"REUSE\""));
-    Assertions.assertEquals(2, StringUtils.countMatches(json, "\"CREATE\""));
-    Assertions.assertEquals(4, StringUtils.countMatches(json, "\"START\""));
-    Assertions.assertEquals(4, StringUtils.countMatches(json, "\"DONE\""));
+    assertEquals(2, StringUtils.countMatches(json, "\"REUSE\""));
+    assertEquals(2, StringUtils.countMatches(json, "\"CREATE\""));
+    assertEquals(4, StringUtils.countMatches(json, "\"START\""));
+    assertEquals(4, StringUtils.countMatches(json, "\"DONE\""));
   }
   
   @Test
@@ -127,14 +141,19 @@ public class IsolatedWorkerQueueTest {
     projectDir.mkdirs();
     new File(projectDir, "settings.gradle").createNewFile();
     write(new File(projectDir, "build.gradle"),
-        "    plugins {\n" + "        id 'se.rwth.example' \n" + "    } \n"
-            + "    import se.rwth.example.ExampleTask \n"
-            + "    import se.rwth.example.ExampleTask.WorkerKind \n"
-            + "    tasks.register('A', ExampleTask.class, t -> {t.taskNames.add('A1'); t.taskNames.add('A2'); t.workerKind = WorkerKind.SHARED; t.withTestService = true;} ) \n"
-            + "    tasks.register('B', ExampleTask.class, t -> {t.taskNames.add('B1'); t.taskNames.add('B2'); t.waitSeconds = 1; t.workerKind = WorkerKind.SHARED; t.withTestService = true;} ) \n"
-            + "    B.dependsOn(A)\n" + "    \n");
+            """
+            plugins {
+              id 'se.rwth.example'
+            }
+            import se.rwth.example.ExampleTask
+            import se.rwth.example.ExampleTask.WorkerKind
+            tasks.register('A', ExampleTask.class, t -> {t.taskNames.add('A1'); t.taskNames.add('A2'); t.workerKind = WorkerKind.SHARED; t.withTestService = true;} )
+            tasks.register('B', ExampleTask.class, t -> {t.taskNames.add('B1'); t.taskNames.add('B2'); t.waitSeconds = 1; t.workerKind = WorkerKind.SHARED; t.withTestService = true;} )
+            B.dependsOn(A)
+            """
+    );
     
-    Assertions.assertThrows(UnexpectedBuildFailure.class, () -> {
+    assertThrows(UnexpectedBuildFailure.class, () -> {
       BuildResult result = GradleRunner.create()
           .withGradleVersion("7.6.4")
           .withProjectDir(projectDir).withPluginClasspath()
