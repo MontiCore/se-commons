@@ -47,6 +47,12 @@ tasks.named('test', Test) {
 
 gradlePlugin {
   testSourceSet sourceSets.test
+  plugins {
+    cachedQueue {
+      id = "se.rwth.gradle.cached-queue"
+      implementationClass = "de.monticore.gradle.queue.CachedQueueServicePlugin"
+    }
+  }
 }
 
 tasks.register('testPluginJar', Jar) {
