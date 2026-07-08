@@ -12,6 +12,7 @@ import org.gradle.api.provider.Property;
 import org.gradle.api.provider.Provider;
 import org.gradle.api.tasks.*;
 import org.gradle.internal.logging.progress.ProgressLoggerFactory;
+import org.gradle.work.DisableCachingByDefault;
 import org.gradle.work.FileChange;
 import org.gradle.work.Incremental;
 import org.gradle.work.InputChanges;
@@ -46,12 +47,16 @@ import java.util.stream.StreamSupport;
  *  Do NOT implement this class directly.
  *  Instead, build upon {@link MCSingleFileTask} or {@link MCAllFilesTask}
  */
+@DisableCachingByDefault(because = "Abstract super-class, not to be instantiated directly")
 public abstract class CommonMCTask extends DefaultTask {
-   final static String TASK_DEBUG = "de.monticore.gradle.debug";
+  final static String TASK_DEBUG = "de.monticore.gradle.debug";
   final static String ORG_GRADLE_PARALLEL = "org.gradle.parallel";
 
   protected final ConfigurableFileCollection input = getProject().getObjects().fileCollection();
-
+  
+  @Inject
+  protected abstract ProjectLayout getProjectLayout();
+  
   @SkipWhenEmpty    // Implies @Incremental. Do nothing if no input model exists
   @InputFiles
   @PathSensitive(PathSensitivity.RELATIVE)
@@ -202,6 +207,7 @@ public abstract class CommonMCTask extends DefaultTask {
   protected final String type;
   protected final String symbolPathConfigurationName;
   protected WorkQueue workQueue;
+  protected Provider<String> isGradleRunningParallel;
 
   @Inject
   protected abstract ProgressLoggerFactory getProgressLoggerFactory();
@@ -236,6 +242,8 @@ public abstract class CommonMCTask extends DefaultTask {
       getSymbolPathConfiguration().from(getProject().getConfigurations().getByName(this.symbolPathConfigurationName));
 
     getAddConfigurationToSymbolPath().convention(true);
+    
+    this.isGradleRunningParallel = getProject().getProviders().gradleProperty(ORG_GRADLE_PARALLEL);
   }
 
 
@@ -261,7 +269,7 @@ public abstract class CommonMCTask extends DefaultTask {
 
     if (getReportDir().isPresent()) {
       result.add("-" + AMontiCoreConfiguration.REPORT_BASE);
-      result.add(handlePath.apply(getProject().getProjectDir().toPath()));
+      result.add(handlePath.apply(getProjectLayout().getProjectDirectory().getAsFile().toPath()));
 
       // reports might differ per file
 //      result.add("-" + AMontiCoreConfiguration.REPORT);
@@ -363,7 +371,7 @@ public abstract class CommonMCTask extends DefaultTask {
     }
     if (getWorkQueueDebug().get()) {
       // The work queue debug-mode disables isolation... hence static variables are shared and errors can occur, especially in parallel execution.
-      if (getProject().hasProperty(ORG_GRADLE_PARALLEL) && "true".equals(getProject().property(ORG_GRADLE_PARALLEL))) {
+      if (isGradleRunningParallel.isPresent() && "true".equals(isGradleRunningParallel.get())) {
         getLogger().warn("Gradle Parallel Execution should be disabled in Debug Mode. \n"
             + "Otherwise static variables (e.g., Mills, SymbolTables) of one Task can influence other parallel Tasks!\n"
             + "set\n\t" + ORG_GRADLE_PARALLEL + "=false\n in your <gradle.properties>");
@@ -382,6 +390,7 @@ public abstract class CommonMCTask extends DefaultTask {
       // In normal mode, run in a workQue. This ensures isolation & parallelization
       workQueue.submit(getToolAction(), param -> {
         param.getArgs().set(args);
+        param.getMainClass().set(getMainClass());
         param.getProgressName().set(progressName);
         param.getPrefix().set("[" + progressName + "]");
         // A unique name for the stats reporter, etc.
@@ -412,8 +421,22 @@ public abstract class CommonMCTask extends DefaultTask {
     throw new IllegalStateException("No tool invoker present, workQueueDebug is not supported!");
   }
 
+  /**
+   * @return the main class (to be called by the SharedToolAction)
+   */
+  @Input
+  @Optional
+  public abstract Property<String> getMainClass();
+
+  /**
+   * By default, the SharedToolAction is used.
+   * It uses the getMainClass property
+   * @return the tool action to pass to the workqueue
+   */
   @Internal
-  protected abstract Class<? extends AToolAction> getToolAction();
+  protected Class<? extends AToolAction> getToolAction() {
+    return SharedToolAction.class;
+  }
 
   /**
    * Set of additional input directories which are used during the inc check

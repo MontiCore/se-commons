@@ -9,11 +9,13 @@ import de.se_rwth.commons.groovy.GroovyRunner
 import de.se_rwth.commons.groovy.GroovyRunnerMapConfiguration
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.*
+import org.gradle.work.DisableCachingByDefault
 import org.gradle.work.InputChanges
 
 import java.lang.reflect.InvocationTargetException
 import java.util.stream.Collectors
 
+@DisableCachingByDefault
 public class SEGroovyTask extends DefaultTask {
 
   SEGroovyTask() {
@@ -43,12 +45,16 @@ public class SEGroovyTask extends DefaultTask {
 
   boolean help = false
 
-  @InputFiles @Optional
+  @Optional
+  @InputFiles
+  @PathSensitive(PathSensitivity.RELATIVE)
   Iterable<File> getClasspath() {
     return classpath
   }
 
-  @Optional @InputFile
+  @Optional
+  @InputFile
+  @PathSensitive(PathSensitivity.RELATIVE)
   File getModel() {
     return model
   }
@@ -68,7 +74,8 @@ public class SEGroovyTask extends DefaultTask {
     return baseClass
   }
 
-  @Input @Optional
+  @Optional
+  @Input
   Map<String, String> getArguments() {
     return arguments
   }
@@ -89,22 +96,30 @@ public class SEGroovyTask extends DefaultTask {
     includeConfigs.addAll(configurations)
   }
 
-  @InputFiles @Optional
+  @Optional
+  @InputFiles
+  @PathSensitive(PathSensitivity.RELATIVE)
   List<File> getHandcodedPath() {
     return handcodedPath
   }
 
-  @InputFiles @Optional
+  @Optional
+  @InputFiles
+  @PathSensitive(PathSensitivity.RELATIVE)
   List<File> getModelPath() {
     return modelPath
   }
 
-  @InputFiles @Optional
+  @Optional
+  @InputFiles
+  @PathSensitive(PathSensitivity.RELATIVE)
   List<File> getTemplatePath() {
     return templatePath
   }
 
-  @InputFiles @Optional
+  @Optional
+  @InputFiles
+  @PathSensitive(PathSensitivity.RELATIVE)
   List<String> getIncludeConfigs() {
     return includeConfigs
   }

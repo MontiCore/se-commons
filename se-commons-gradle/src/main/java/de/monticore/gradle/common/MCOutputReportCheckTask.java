@@ -8,9 +8,8 @@ import org.gradle.api.file.ConfigurableFileCollection;
 import org.gradle.api.file.DirectoryProperty;
 import org.gradle.api.file.FileSystemLocation;
 import org.gradle.api.provider.Provider;
-import org.gradle.api.tasks.InputDirectory;
-import org.gradle.api.tasks.InputFiles;
-import org.gradle.api.tasks.TaskAction;
+import org.gradle.api.tasks.*;
+import org.gradle.work.DisableCachingByDefault;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,14 +20,18 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@DisableCachingByDefault
 public abstract class MCOutputReportCheckTask extends DefaultTask {
   @InputFiles
+  @PathSensitive(PathSensitivity.RELATIVE)
   abstract ConfigurableFileCollection getInput();
 
   @InputDirectory // Nothing is written, only read!
+  @PathSensitive(PathSensitivity.RELATIVE)
   abstract DirectoryProperty getOutputDir();
 
   @InputDirectory // Nothing is written, only read!
+  @PathSensitive(PathSensitivity.RELATIVE)
   abstract DirectoryProperty getReportDir();
 
   private CommonMCTask originalTask;
