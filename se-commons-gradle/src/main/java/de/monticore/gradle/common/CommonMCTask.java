@@ -93,13 +93,6 @@ public abstract class CommonMCTask extends DefaultTask {
   @IgnoreEmptyDirectories
   public abstract ConfigurableFileCollection getHandWrittenCodeDir();
 
-  @InputFiles
-  @Optional
-  @PathSensitive(PathSensitivity.RELATIVE)
-  @Incremental  // No full rebuild, when only HWG-Directory is changed. Requires logic in Task Execution!
-  @IgnoreEmptyDirectories
-  public abstract ConfigurableFileCollection getHandWrittenGrammarDir();
-
 
   @Deprecated // old-school hwcDir = ..
   public void setHwcDir(File f){
@@ -117,21 +110,6 @@ public abstract class CommonMCTask extends DefaultTask {
     return this.getHandWrittenCodeDir();
   }
 
-  @Deprecated
-  public void setHwgDir(File f){
-    this.getHandWrittenGrammarDir().setFrom(f);
-  }
-
-  @Deprecated
-  public void setHwgDir(Iterable<File> f){
-    this.getHandWrittenGrammarDir().setFrom(f);
-  }
-
-  @Deprecated
-  @Internal
-  public ConfigurableFileCollection getHwgDir(){
-    return this.getHandWrittenGrammarDir();
-  }
 
   @InputDirectory
   @Optional
@@ -143,11 +121,6 @@ public abstract class CommonMCTask extends DefaultTask {
   @Input
   @Optional
   public abstract Property<String> getConfigTemplate();
-
-  @Input
-  @Optional
-  public abstract Property<String> getScript();
-
 
   @InputFiles     // Not Incremental. Any change should trigger full rebuild
   @PathSensitive(PathSensitivity.NAME_ONLY)
@@ -293,19 +266,12 @@ public abstract class CommonMCTask extends DefaultTask {
       symbolPath.forEach(p -> result.add(handlePath.apply(p)));
     }
 
-
-
     // hcp
     if(!getHandWrittenCodeDir().isEmpty()) {
       result.add("-" + getHandWrittenCodeOptionString());
       getHandWrittenCodeDir().forEach(x -> result.add(handlePath.apply(x.toPath())));
     }
 
-    // hcg  handcodedModelPath
-    if(!getHandWrittenGrammarDir().isEmpty()) {
-      result.add("-" + AMontiCoreConfiguration.HANDCODEDMODELPATH);
-      getHandWrittenGrammarDir().forEach(x -> result.add(handlePath.apply(x.toPath())));
-    }
 
     // configTemplate
     if(this.getConfigTemplate().isPresent()){
@@ -453,7 +419,7 @@ public abstract class CommonMCTask extends DefaultTask {
    */
   @Internal
   public Set<FileCollection> getOtherInputFileCollections() {
-    return Set.of(getHandWrittenCodeDir(), getHandWrittenGrammarDir(), getIncrementalSymbolPath());
+    return Set.of(getHandWrittenCodeDir(), getIncrementalSymbolPath());
   }
 
   protected Stream<FileChange> getStreamOfChanges(InputChanges inputChanges) {
