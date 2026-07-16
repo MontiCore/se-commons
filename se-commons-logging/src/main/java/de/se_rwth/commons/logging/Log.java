@@ -1089,8 +1089,28 @@ public class Log {
     getLog().logHooks.add(hook);
   }
 
+  /**
+   * Removes a log hook.
+   * This method should only be called when setting up the log,
+   * * i.e., at the start of a tool's run method.
+   *
+   * @param hook the log hook
+   * @return {@link List#remove(Object)}
+   */
   public static boolean removeLogHook(ILogHook hook) {
     return getLog().logHooks.remove(hook);
+  }
+
+  /**
+   * Removes all log hooks of a given class.
+   * This method should only be called when setting up the log,
+   * * i.e., at the start of a tool's run method.
+   *
+   * @param hookClass the class of hooks to remove
+   * @return {@link List#remove(Object)}
+   */
+  public static boolean removeLogHook(Class<? extends ILogHook> hookClass) {
+    return getLog().logHooks.removeIf(hookClass::isInstance);
   }
 
   public static void clearLogHooks() {
