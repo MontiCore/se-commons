@@ -6,10 +6,11 @@ import ch.qos.logback.classic.joran.JoranConfigurator;
 import ch.qos.logback.core.joran.spi.JoranException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -21,8 +22,9 @@ import static org.junit.jupiter.api.Assertions.*;
  * logback or the used test configuration).
  *
  */
+@Execution(ExecutionMode.SAME_THREAD)
 public class LogTest {
-  
+
   @Test
   public void demonstrateLogging() {
     LogStub.init();
@@ -40,30 +42,29 @@ public class LogTest {
     Log.error("An internal error occurred", t);
 
     // switch and demonstrate user logging
-    
+
     demonstrateLogbackConfigurationForUser();
-    
+
     // switch and demonstrate developer logging
-    
+
     demonstrateLogbackConfigurationForDeveloper();
   }
-  
-  
+
+
   public void demonstrateLogbackConfigurationForUser() {
     LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-    
+
     try {
       JoranConfigurator configurator = new JoranConfigurator();
       configurator.setContext(context);
-      
+
       context.reset();
       configurator.doConfigure(getClass().getClassLoader().getResourceAsStream("user.logging.xml"));
-    }
-    catch (JoranException e) {
+    } catch (JoranException e) {
       e.printStackTrace();
       fail();
     }
-    
+
     Log.trace("The application has started.", "the.start.component");
     Log.debug("An internal result is 'true'.", "an.internal.component");
     Throwable t = new RuntimeException("Oops!");
@@ -72,26 +73,25 @@ public class LogTest {
     Log.warn("Something went wrong.");
     Log.error("An internal error occured", t);
   }
-  
+
   public void demonstrateLogbackConfigurationForDeveloper() {
     // use slf4j logging
     Slf4jLog.init();
-    
+
     LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
-    
+
     try {
       JoranConfigurator configurator = new JoranConfigurator();
       configurator.setContext(context);
-      
+
       context.reset();
       configurator.doConfigure(getClass().getClassLoader().getResourceAsStream(
-          "developer.logging.xml"));
-    }
-    catch (JoranException e) {
+              "developer.logging.xml"));
+    } catch (JoranException e) {
       e.printStackTrace();
       fail();
     }
-    
+
     Log.trace("The application has started.", "the.start.component");
     Log.debug("An internal result is 'true'.", "an.internal.component");
     Throwable t = new RuntimeException("Oops!");
@@ -99,12 +99,12 @@ public class LogTest {
     Log.info("Something went wrong.", "an.internal.component");
     Log.warn("Something went wrong.");
   }
-  
+
   @Test
   public void testAndDemonstrateLogStubForDeveloper() {
     // use stub (that stores the prints and the errors/warnings)
     LogStub.init();
-    
+
     Log.print("line 1");
     Log.println("line 2");
     Log.print("line 3\n");
@@ -113,7 +113,7 @@ public class LogTest {
     assertEquals("line 1", r1.get(0));
     assertEquals("line 2" + System.lineSeparator(), r1.get(1));
     assertEquals("line 3\n", r1.get(2));
-    
+
     LogStub.clearPrints();
     Log.print("line 4");
     Log.println("line 5");
@@ -139,53 +139,45 @@ public class LogTest {
 
   @Test
   public void testErrorWithoutQF() {
+    // Test without quick fail -> exactly two errors are printed to stdout, nothing else
     Log.init();
-    Log.enableFailQuick(false);
-    LinePosition e1 = new LinePosition(), e2 = new LinePosition();
-
+    LinePosition e1 = new LinePosition(), e2 = new LinePosition(), e3 = new LinePosition();
     this.withLogSetup(() -> {
-      Log.error("First error in line " + e1.getCurrentLine(), new RuntimeException("E1"));
-      Log.error("Second error in line " + e2.getCurrentLine(), new RuntimeException("E2"));
+      Log.enableFailQuick(false);
+      Log.error("First error in line " + e1.trackCurrentLine(), new RuntimeException("E1"));
+      Log.error("Second error in line " + e2.trackCurrentLine(), new RuntimeException("E2"));
+      Log.error("Third error in line " + e3.trackCurrentLine());
     }, setup -> {
       Assertions.assertFalse(setup.exitCalled);
-      // First: Check calls
-      Assertions.assertArrayEquals(new String[]{
-                      "<println>[ERROR]  First error in line " + e1.getCurrentLine(),
-                      "<println>[ERROR]  Second error in line " + e2.getCurrentLine()},
-              setup.std.toString().split("\n"));
       // Then check actual output
       Assertions.assertEquals(
-              "[ERROR]  First error in line " + e1.getCurrentLine() + System.lineSeparator() +
-                      "[ERROR]  Second error in line " + e2.getCurrentLine() + System.lineSeparator()
+              "[ERROR]  First error in line " + e1.getLine() + System.lineSeparator() +
+                      "[ERROR]  Second error in line " + e2.getLine() + System.lineSeparator() +
+                      "[ERROR]  Third error in line " + e3.getLine() + System.lineSeparator()
               , setup.real_std.toString());
-      Assertions.assertEquals("", setup.ste.toString());
+      Assertions.assertEquals("", setup.real_ste.toString());
     });
   }
 
 
   @Test
   public void testErrorStacktraceWithoutQF() {
+    // Test without quick fail and with exceptions =>
     Log.init();
-    Log.enableFailQuick(false);
-    Log.addLogHook(new ErrorStacktraceConsoleLogHook(System.out));
-
-
-    LinePosition e1 = new LinePosition(), e2 = new LinePosition();
-
+    LinePosition e1 = new LinePosition(), e2 = new LinePosition(), e3 = new LinePosition();
     this.withLogSetup(() -> {
-      Log.error("First error in line " + e1.getCurrentLine(), new RuntimeException("E1"));
-      Log.error("Second error in line " + e2.getCurrentLine(), new RuntimeException("E2"));
+      Log.enableFailQuick(false);
+      Log.addLogHook(new ErrorStacktraceConsoleLogHook(System.out));
+      Log.error("First error in line " + e1.trackCurrentLine(), new RuntimeException("E1"));
+      Log.error("Second error in line " + e2.trackCurrentLine(), new RuntimeException("E2"));
+      Log.error("Third error in line " + e3.trackCurrentLine());
     }, setup -> {
       Assertions.assertFalse(setup.exitCalled);
-      // First: Check calls
-      Assertions.assertArrayEquals(new String[]{
-                      "<println>[ERROR]  First error in line " + e1.getCurrentLine(),
-                      "<println>[ERROR]  Second error in line " + e2.getCurrentLine()},
-              setup.std.toString().split("\n"));
       // Then check actual output
       String[] real_std = setup.real_std.toString().split(System.lineSeparator());
-      Assertions.assertEquals("[ERROR]  First error in line " + e1.getCurrentLine(), real_std[0]);
+      Assertions.assertEquals("[ERROR]  First error in line " + e1.getLine(), real_std[0]);
       Assertions.assertTrue(real_std[1].startsWith("\tat de.se_rwth.commons.logging.Log.error(Log.java:"), real_std[1]);
+      // We now skip over the stacktrace until we find the exception
       int lineCounter = 1;
       while (!real_std[lineCounter].startsWith("Caused by ")) {
         assertFalse(real_std[lineCounter].startsWith("[ERROR]"));
@@ -193,7 +185,7 @@ public class LogTest {
       }
       Assertions.assertEquals("Caused by java.lang.RuntimeException: E1", real_std[lineCounter]);
       lineCounter++;
-      while (!real_std[lineCounter].startsWith("[ERROR]  Second error in line " + e2.getCurrentLine())) {
+      while (!real_std[lineCounter].startsWith("[ERROR]  Second error in line " + e2.getLine())) {
         assertFalse(real_std[lineCounter].startsWith("Caused by"));
         lineCounter++;
       }
@@ -204,7 +196,7 @@ public class LogTest {
       }
       Assertions.assertEquals("Caused by java.lang.RuntimeException: E2", real_std[lineCounter]);
 
-      Assertions.assertEquals("", setup.ste.toString());
+      Assertions.assertEquals("", setup.real_ste.toString());
     });
   }
 
@@ -216,27 +208,24 @@ public class LogTest {
     LinePosition e1 = new LinePosition(), e2 = new LinePosition();
 
     this.withLogSetup(() -> {
-      Log.error("First error in line " + e1.getCurrentLine());
-      Log.error("Second error in line " + e2.getCurrentLine());
+      Log.error("First error in line " + e1.trackCurrentLine());
+      Log.error("Second error in line " + e2.trackCurrentLine());
     }, setup -> {
       Assertions.assertTrue(setup.exitCalled);
-      String[] info = setup.std.toString().split("\n");
-      Assertions.assertEquals(1,info.length, Arrays.toString(info));
-      Assertions.assertEquals("<println>[ERROR]  First error in line " + e1.getCurrentLine(), info[0]);
-      Assertions.assertEquals("", setup.ste.toString());
+      Assertions.assertEquals(
+              "[ERROR]  First error in line " + e1.getLine() + System.lineSeparator()
+              , setup.real_std.toString());
+      Assertions.assertEquals("", setup.real_ste.toString());
     });
   }
-
 
 
   LogTestSetup withLogSetup(Runnable runnable, Consumer<LogTestSetup> consumer) {
     LogTestSetup setup = new LogTestSetup();
     Log.setErrorHook(() -> {
       setup.exitCalled = true;
-      throw new  SystemExitMocking();
+      throw new SystemExitMocking();
     });
-    Log.addLogHook(new ErrorCollector(new PrintStream(setup.std),
-            new PrintStream(setup.ste)));
 
     var originalOut = System.out;
     var originalErr = System.err;
@@ -244,10 +233,9 @@ public class LogTest {
       System.setOut(new PrintStream(tee(originalOut, setup.real_std), true));
       System.setErr(new PrintStream(tee(originalErr, setup.real_ste), true));
       runnable.run();
-    }catch (SystemExitMocking e) {
+    } catch (SystemExitMocking e) {
       // do not pass upwards
-    }
-    finally {
+    } finally {
       System.setOut(originalOut);
       System.setErr(originalErr);
     }
@@ -291,18 +279,24 @@ public class LogTest {
     };
   }
 
-  class LinePosition {
+  static class LinePosition {
     int currentLine = -42;
-    public int getCurrentLine() {
+
+    public int trackCurrentLine() {
+      if (currentLine != -42)
+        throw new IllegalStateException("Line already tracked in line " + currentLine);
+      currentLine = new Throwable().getStackTrace()[1].getLineNumber();
+      return currentLine;
+    }
+
+    public int getLine() {
       if (currentLine == -42)
-        currentLine = new Throwable().getStackTrace()[1].getLineNumber();
+        throw new IllegalStateException("Line was not tracked");
       return currentLine;
     }
   }
 
-  class LogTestSetup   {
-    ByteArrayOutputStream std = new ByteArrayOutputStream();
-    ByteArrayOutputStream ste = new ByteArrayOutputStream();
+  static class LogTestSetup {
 
     ByteArrayOutputStream real_std = new ByteArrayOutputStream();
     ByteArrayOutputStream real_ste = new ByteArrayOutputStream();
@@ -310,43 +304,8 @@ public class LogTest {
     boolean exitCalled = false;
   }
 
-  class SystemExitMocking extends RuntimeException {
+  static class SystemExitMocking extends RuntimeException {
 
   }
 
-  static class ErrorCollector implements ILogHook {
-    PrintStream std,ste;
-
-    public ErrorCollector(PrintStream  std, PrintStream  ste) {
-      this.std = std;
-      this.ste = ste;
-    }
-
-    @Override
-    public void doPrintln(String msg) {
-      std.append("<println>").append(msg).append("\n");
-    }
-
-    @Override
-    public void doErrPrint(String msg) {
-      ste.append("<print>").append(msg).append("\n");
-    }
-
-    @Override
-    public void doPrintStackTrace(Throwable t) {
-      std.append("<printstacktrace>");
-      t.printStackTrace(std);
-    }
-
-    @Override
-    public void doErrPrintStackTrace(Throwable t) {
-      std.append("<printstacktrace>");
-      t.printStackTrace(ste);
-    }
-
-    @Override
-    public void doPrint(String msg) {
-      std.append("<print>").append(msg);
-    }
-  }
 }
