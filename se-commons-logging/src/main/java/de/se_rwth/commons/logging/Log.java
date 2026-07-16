@@ -1078,12 +1078,19 @@ public class Log {
     logHooks.forEach(hook -> hook.doErrPrintStackTrace(t));
   }
 
+  /**
+   * Add a new log hook.
+   * This method should only be called when setting up the log,
+   * * i.e., at the start of a tool's run method.
+   *
+   * @param hook the log hook
+   */
   public static void addLogHook(ILogHook hook) {
     getLog().logHooks.add(hook);
   }
 
-  public static void removeLogHook(ILogHook hook) {
-    getLog().logHooks.remove(hook);
+  public static boolean removeLogHook(ILogHook hook) {
+    return getLog().logHooks.remove(hook);
   }
 
   public static void clearLogHooks() {

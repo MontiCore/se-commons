@@ -19,7 +19,6 @@ public interface ILogHook {
 
   default void doTrace(String msg, Throwable t, String logName) {
     doTrace(msg, logName);
-    doPrintStackTrace(t);
   }
 
   default void doDebug(String msg, String logName) {
@@ -41,7 +40,6 @@ public interface ILogHook {
 
   default void doDebug(String msg, Throwable t, String logName) {
     doDebug(msg, logName);
-    doPrintStackTrace(t);
   }
 
   default void doInfo(String msg, String logName) {
@@ -50,7 +48,6 @@ public interface ILogHook {
 
   default void doInfo(String msg, Throwable t, String logName) {
     doInfo(msg, logName);
-    doPrintStackTrace(t);
   }
 
   default String formatInfo(String msg, String logName) {
@@ -63,7 +60,6 @@ public interface ILogHook {
 
   default void doWarn(Finding warn, Throwable t) {
     doPrintln(formatWarn(warn));
-    doPrintStackTrace(t);
   }
 
   default String formatWarn(Finding warn) {
@@ -76,7 +72,6 @@ public interface ILogHook {
 
   default void doError(Finding error, Throwable t) {
     doPrintln(formatError(error));
-    doErrPrintStackTrace(t);
   }
 
   default String formatError(Finding error) {
@@ -89,7 +84,6 @@ public interface ILogHook {
 
   default void doErrorUser(Finding error, Throwable t) {
     doPrintln(formatErrorUser(error));
-    doErrPrintStackTrace(t);
   }
 
   default String formatErrorUser(Finding error) {
