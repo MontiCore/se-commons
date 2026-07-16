@@ -1,0 +1,19 @@
+/* (c) https://github.com/MontiCore/monticore */
+description = 'se-commons: logging-slf4j'
+
+dependencies {
+    implementation project(":se-commons-logging")
+    implementation "org.slf4j:slf4j-api:2.0.18"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:$junit_version"
+    testImplementation "org.junit.jupiter:junit-jupiter-params:$junit_version"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junit_version"
+    testRuntimeOnly "org.junit.platform:junit-platform-launcher:$junit_version"
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from(components.java)
+        }
+    }
+}

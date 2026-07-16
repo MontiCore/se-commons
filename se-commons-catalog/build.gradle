@@ -8,6 +8,7 @@ catalog {
   // declare the aliases, bundles and versions in this block
   versionCatalog {
     library("se-commons-logging", "de.se_rwth.commons", "se-commons-logging").version(version)
+    library("se-commons-logging-slf4j", "de.se_rwth.commons", "se-commons-logging").version(version)
     library("se-commons-utilities", "de.se_rwth.commons", "se-commons-utilities").version(version)
     library("se-commons-gradle", "de.se_rwth.commons", "se-commons-gradle").version(version)
     library("mc-lsp", "de.monticore.language-server", "monticore-language-server-runtime").version(version)
