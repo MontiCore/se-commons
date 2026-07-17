@@ -26,6 +26,36 @@ import static org.junit.jupiter.api.Assertions.*;
 public class LogTest {
 
   @Test
+  public void testLogHooksSetters() {
+    Log.init();
+    // Test default setup
+    Assertions.assertEquals(1, Log.getLog().logHooks.size());
+    Assertions.assertInstanceOf(ConsoleLogHook.class, Log.getLog().logHooks.get(0));
+
+    // Test adding a new loghook
+    ILogHook logHook = new FileLogHook("target/test/placeholder.txt");
+    Log.addLogHook(logHook);
+    Assertions.assertEquals(2, Log.getLog().logHooks.size());
+    Assertions.assertInstanceOf(ConsoleLogHook.class, Log.getLog().logHooks.get(0));
+    Assertions.assertEquals(logHook, Log.getLog().logHooks.get(1));
+
+    // Test removing
+    Assertions.assertTrue(Log.removeLogHook(logHook));
+    Assertions.assertEquals(1, Log.getLog().logHooks.size());
+    Assertions.assertInstanceOf(ConsoleLogHook.class, Log.getLog().logHooks.get(0));
+
+    // Test removing twice -> nothing to remove
+    Assertions.assertFalse(Log.removeLogHook(logHook));
+
+    // Test remove via class
+    Assertions.assertTrue(Log.removeLogHook(ConsoleLogHook.class));
+    Assertions.assertEquals(0, Log.getLog().logHooks.size());
+
+    // Test removing twice -> nothing to remove
+    Assertions.assertFalse(Log.removeLogHook(ConsoleLogHook.class));
+  }
+
+  @Test
   public void demonstrateLogging() {
     LogStub.init();
     Log.enableFailQuick(false);
