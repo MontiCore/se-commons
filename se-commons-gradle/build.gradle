@@ -8,8 +8,7 @@ description = 'se-commons: gradle'
 
 dependencies {
   implementation gradleApi()
-  implementation project(":se-commons-utilities")
-  implementation project(":se-commons-logging")
+  compileOnly project(":se-commons-logging") // CompileOnly to avoid dependency version pollution
   implementation "com.google.code.gson:gson:$gson_version"
 
   implementation "org.apache.commons:commons-lang3:$commons_lang3_version"
