@@ -14,11 +14,11 @@ public class InfoStacktraceConsoleLogHook extends AStacktraceConsoleLogHook {
 
   @Override
   public void doInfo(String msg, String logName) {
-    printStackTrace(this.getPrintStream(), null);
+    printCurrentStackTrace(this.getPrintStream(), null);
   }
 
   @Override
   public void doInfo(String msg, Throwable t, String logName) {
-    printStackTrace(this.getPrintStream(), t);
+    printCurrentStackTrace(this.getPrintStream(), t);
   }
 }
