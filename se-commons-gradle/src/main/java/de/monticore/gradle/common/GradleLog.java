@@ -1,8 +1,8 @@
 /* (c) https://github.com/MontiCore/monticore */
 package de.monticore.gradle.common;
 
-import de.se_rwth.commons.logging.ConsoleLogHook;
 import de.se_rwth.commons.logging.Log;
+import de.se_rwth.commons.logging.RichConsoleLogHook;
 
 import java.util.ArrayList;
 
@@ -17,7 +17,7 @@ public class GradleLog extends Log {
     l.isDEBUG = false;
     l.isINFO = true;
     l.logHooks = new ArrayList<>();
-    l.logHooks.add(new ConsoleLogHook());
+    l.logHooks.add(new RichConsoleLogHook());
     l.errorHook = new GradleErrorHook();
     GradleLog.setLog(l);
   }
@@ -31,7 +31,7 @@ public class GradleLog extends Log {
     l.isTRACE = true;
     l.isINFO = true;
     l.logHooks = new ArrayList<>();
-    l.logHooks.add(new ConsoleLogHook());
+    l.logHooks.add(new RichConsoleLogHook());
     l.errorHook = new GradleErrorHook();
     GradleLog.setLog(l);
   }
@@ -45,7 +45,7 @@ public class GradleLog extends Log {
     l.isDEBUG = false;
     l.isINFO = false;
     l.logHooks = new ArrayList<>();
-    l.logHooks.add(new ConsoleLogHook());
+    l.logHooks.add(new RichConsoleLogHook());
     l.errorHook = new GradleErrorHook();
     GradleLog.setLog(l);
   }
@@ -59,7 +59,7 @@ public class GradleLog extends Log {
     l.isDEBUG = false;
     l.isINFO = false;
     l.logHooks = new ArrayList<>();
-    l.logHooks.add(new ConsoleLogHook());
+    l.logHooks.add(new RichConsoleLogHook());
     l.errorHook = new GradleErrorHook();
     GradleLog.setLog(l);
   }
