@@ -181,9 +181,9 @@ public class LogTest {
       Assertions.assertFalse(setup.exitCalled);
       // Then check actual output
       Assertions.assertEquals(
-              "[ERROR]  First error in line " + e1.getLine() + System.lineSeparator() +
-                      "[ERROR]  Second error in line " + e2.getLine() + System.lineSeparator() +
-                      "[ERROR]  Third error in line " + e3.getLine() + System.lineSeparator()
+          RichConsoleLogHook.RED_BOLD + "[ERROR]"  + RichConsoleLogHook.RESET + "  First error in line " + e1.getLine() + System.lineSeparator() +
+              RichConsoleLogHook.RED_BOLD + "[ERROR]"  + RichConsoleLogHook.RESET + "  Second error in line " + e2.getLine() + System.lineSeparator() +
+              RichConsoleLogHook.RED_BOLD + "[ERROR]"  + RichConsoleLogHook.RESET + "  Third error in line " + e3.getLine() + System.lineSeparator()
               , setup.real_std.toString());
       Assertions.assertEquals("", setup.real_ste.toString());
     });
@@ -205,23 +205,23 @@ public class LogTest {
       Assertions.assertFalse(setup.exitCalled);
       // Then check actual output
       String[] real_std = setup.real_std.toString().split(System.lineSeparator());
-      Assertions.assertEquals("[ERROR]  First error in line " + e1.getLine(), real_std[0]);
+      Assertions.assertEquals(RichConsoleLogHook.RED_BOLD + "[ERROR]"  + RichConsoleLogHook.RESET + "  First error in line " + e1.getLine(), real_std[0]);
       Assertions.assertTrue(real_std[1].startsWith("\tat de.se_rwth.commons.logging.Log.error(Log.java:"), real_std[1]);
       // We now skip over the stacktrace until we find the exception
       int lineCounter = 1;
       while (!real_std[lineCounter].startsWith("Caused by ")) {
-        assertFalse(real_std[lineCounter].startsWith("[ERROR]"));
+        assertFalse(real_std[lineCounter].startsWith(RichConsoleLogHook.RED_BOLD + "[ERROR]"  + RichConsoleLogHook.RESET));
         lineCounter++;
       }
       Assertions.assertEquals("Caused by java.lang.RuntimeException: E1", real_std[lineCounter]);
       lineCounter++;
-      while (!real_std[lineCounter].startsWith("[ERROR]  Second error in line " + e2.getLine())) {
+      while (!real_std[lineCounter].startsWith(RichConsoleLogHook.RED_BOLD + "[ERROR]"  + RichConsoleLogHook.RESET + "  Second error in line " + e2.getLine())) {
         assertFalse(real_std[lineCounter].startsWith("Caused by"));
         lineCounter++;
       }
       lineCounter++;
       while (!real_std[lineCounter].startsWith("Caused by ")) {
-        assertFalse(real_std[lineCounter].startsWith("[ERROR]"));
+        assertFalse(real_std[lineCounter].startsWith(RichConsoleLogHook.RED_BOLD + "[ERROR]"  + RichConsoleLogHook.RESET));
         lineCounter++;
       }
       Assertions.assertEquals("Caused by java.lang.RuntimeException: E2", real_std[lineCounter]);
@@ -243,7 +243,7 @@ public class LogTest {
     }, setup -> {
       Assertions.assertTrue(setup.exitCalled);
       Assertions.assertEquals(
-              "[ERROR]  First error in line " + e1.getLine() + System.lineSeparator()
+          RichConsoleLogHook.RED_BOLD + "[ERROR]"  + RichConsoleLogHook.RESET + "  First error in line " + e1.getLine() + System.lineSeparator()
               , setup.real_std.toString());
       Assertions.assertEquals("", setup.real_ste.toString());
     });
