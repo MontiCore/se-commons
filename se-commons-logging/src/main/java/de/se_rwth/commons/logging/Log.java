@@ -52,7 +52,7 @@ public class Log {
     l.isDEBUG = false;
     l.isINFO = true;
     l.logHooks = new ArrayList<>();
-    l.logHooks.add(new ConsoleLogHook());
+    l.logHooks.add(new RichConsoleLogHook());
     l.errorHook = getDefaultErrorHook();
     Log.setLog(l);
   }
@@ -112,7 +112,7 @@ public class Log {
     l.isINFO = true;
     l.isInteractive = true;
     l.logHooks = new ArrayList<>();
-    l.logHooks.add(new ConsoleLogHook());
+    l.logHooks.add(new RichConsoleLogHook());
     Log.setLog(l);
   }
 
@@ -161,7 +161,7 @@ public class Log {
   protected Log() {
     // TODO: Workaround by ALU to fix the NPE
     this.logHooks = new ArrayList<>();
-    this.logHooks.add(new ConsoleLogHook());
+    this.logHooks.add(new RichConsoleLogHook());
     this.errorHook = getDefaultErrorHook();
     // TODO: END Workaround by ALU to fix the NPE
   }

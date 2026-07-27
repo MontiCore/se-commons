@@ -65,7 +65,7 @@ public class LogStub extends Log {
    */
   public static void initPlusLog() {
     init();
-    Log.getLog().logHooks.add(new ConsoleLogHook());
+    Log.getLog().logHooks.add(new RichConsoleLogHook());
   }
 
   /**
