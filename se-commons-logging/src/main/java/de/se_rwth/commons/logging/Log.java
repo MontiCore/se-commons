@@ -6,6 +6,7 @@ import de.se_rwth.commons.SourcePosition;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Supplier;
 
 /**
@@ -51,7 +52,7 @@ public class Log {
     l.isTRACE = false;
     l.isDEBUG = false;
     l.isINFO = true;
-    l.logHooks = new ArrayList<>();
+    l.logHooks = new CopyOnWriteArrayList<>();
     l.logHooks.add(new RichConsoleLogHook());
     l.errorHook = getDefaultErrorHook();
     Log.setLog(l);
@@ -111,7 +112,7 @@ public class Log {
     l.isDEBUG = false;
     l.isINFO = true;
     l.isInteractive = true;
-    l.logHooks = new ArrayList<>();
+    l.logHooks = new CopyOnWriteArrayList<>();
     l.logHooks.add(new RichConsoleLogHook());
     Log.setLog(l);
   }
@@ -160,7 +161,7 @@ public class Log {
   /* Utility class. */
   protected Log() {
     // TODO: Workaround by ALU to fix the NPE
-    this.logHooks = new ArrayList<>();
+    this.logHooks = new CopyOnWriteArrayList<>();
     this.logHooks.add(new RichConsoleLogHook());
     this.errorHook = getDefaultErrorHook();
     // TODO: END Workaround by ALU to fix the NPE
