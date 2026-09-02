@@ -82,14 +82,36 @@ public abstract class CachedQueueService
       logger.warn("Possibly overriding the CachedQueueService instance");
       INSTANCE = this;
     }
-    this.serviceRegistry = Objects.requireNonNull(serviceRegistry);
+    doInit(Objects.requireNonNull(serviceRegistry));
+  }
+
+  /**
+   * Performs the (re-)initialization of the {@link #serviceRegistry}.
+   */
+  protected synchronized void doInit(ServiceRegistry serviceRegistry) {
+    this.serviceRegistry = serviceRegistry;
     this.providerSelf = (Provider<CachedQueueService>) serviceRegistry.get(BuildServiceRegistry.class).getRegistrations().getByName(NAME).getService();
     Objects.requireNonNull(serviceRegistry.get(ActionExecutionSpecFactory.class), "ActionExecutionSpecFactory");
     Objects.requireNonNull(serviceRegistry.get(IsolatableFactory.class), "isolatableFactory");
 
-    serviceRegistry.get(BuildEventListenerRegistryInternal.class)
-            .onOperationCompletion(this.providerSelf);
+    serviceRegistry.get(BuildEventListenerRegistryInternal.class).onOperationCompletion(this.providerSelf);
+  }
 
+  /**
+   * Ensures that the {@link #serviceRegistry} is set, (re-)initializing it
+   * lazily from {@code currentServiceRegistry} if it is not. This may be,
+   * for example, because {@link #init(Gradle)} never ran for this build
+   * (configuration cache reuse).
+   */
+  protected void ensureInitialized(ServiceRegistry currentServiceRegistry) {
+    if (this.serviceRegistry != null) {
+      return;
+    }
+    synchronized (this) {
+      if (this.serviceRegistry == null) {
+        doInit(Objects.requireNonNull(currentServiceRegistry, "serviceRegistry must not be null"));
+      }
+    }
   }
 
   /**
@@ -160,7 +182,7 @@ public abstract class CachedQueueService
   }
 
 
-  protected ServiceRegistry serviceRegistry;
+  protected volatile ServiceRegistry serviceRegistry;
   protected Provider<CachedQueueService> providerSelf;
 
   @Override
@@ -759,15 +781,18 @@ public abstract class CachedQueueService
    * Construct a new WorkQueue
    *
    * @param workerExecutor        the worker executor to use
+   * @param currentServiceRegistry a {@link ServiceRegistry} freshly injected into the calling
+   *                              task, used to lazily (re-)initialize this service if it was
+   *                              never initialized for this build (see {@link #ensureInitialized})
    * @param extraClasspathElement the classpath elements to use
    * @return a new {@link WorkQueue}
    */
-  public WorkQueue newWorkQueue(WorkerExecutor workerExecutor, FileCollection extraClasspathElement) {
+  public WorkQueue newWorkQueue(WorkerExecutor workerExecutor, ServiceRegistry currentServiceRegistry, FileCollection extraClasspathElement) {
     Objects.requireNonNull(workerExecutor, "worker executor must not be null");
-    Objects.requireNonNull(serviceRegistry, "serviceRegistry must not be null");
+    ensureInitialized(currentServiceRegistry);
     return new CachedIsolatedWorkQueue(workerExecutor.noIsolation(),
             serviceRegistry.get(InstantiatorFactory.class),
-            Objects.requireNonNull(serviceRegistry, "serviceRegistry"),
+            serviceRegistry,
             this.providerSelf,
             extraClasspathElement);
   }

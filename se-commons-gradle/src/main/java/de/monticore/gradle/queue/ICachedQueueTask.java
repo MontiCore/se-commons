@@ -4,7 +4,9 @@ package de.monticore.gradle.queue;
 import org.gradle.api.Task;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Internal;
+import org.gradle.internal.service.ServiceRegistry;
 
+import javax.inject.Inject;
 import java.lang.reflect.Proxy;
 
 /**
@@ -12,10 +14,13 @@ import java.lang.reflect.Proxy;
  * Automatically managed via the {@link CachedQueueServicePlugin}
  */
 public interface ICachedQueueTask extends Task {
-  
+
   // Type must be object due to https://github.com/gradle/gradle/issues/17559
   @Internal
   Property<Object> getSharedQueueServiceProperty();
+
+  @Inject
+  ServiceRegistry getServiceRegistry();
   
   @Internal
   @Deprecated(forRemoval = true)
