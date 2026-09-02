@@ -778,6 +778,22 @@ public abstract class CachedQueueService
 
 
   /**
+   * @deprecated does not lazily (re-)initialize this service - see
+   * {@link ICachedQueueService#newWorkQueue(WorkerExecutor, ServiceRegistry, FileCollection)}.
+   */
+  @Deprecated
+  @Override
+  public WorkQueue newWorkQueue(WorkerExecutor workerExecutor, FileCollection extraClasspathElement) {
+    Objects.requireNonNull(workerExecutor, "worker executor must not be null");
+    Objects.requireNonNull(serviceRegistry, "serviceRegistry must not be null");
+    return new CachedIsolatedWorkQueue(workerExecutor.noIsolation(),
+            serviceRegistry.get(InstantiatorFactory.class),
+            serviceRegistry,
+            this.providerSelf,
+            extraClasspathElement);
+  }
+
+  /**
    * Construct a new WorkQueue
    *
    * @param workerExecutor        the worker executor to use
@@ -787,6 +803,7 @@ public abstract class CachedQueueService
    * @param extraClasspathElement the classpath elements to use
    * @return a new {@link WorkQueue}
    */
+  @Override
   public WorkQueue newWorkQueue(WorkerExecutor workerExecutor, ServiceRegistry currentServiceRegistry, FileCollection extraClasspathElement) {
     Objects.requireNonNull(workerExecutor, "worker executor must not be null");
     ensureInitialized(currentServiceRegistry);

@@ -13,7 +13,22 @@ import java.lang.reflect.Proxy;
 public interface ICachedQueueService {
 
   /**
-   * Construct a new WorkQueue
+   * Construct a new WorkQueue.
+   *
+   * @param workerExecutor the worker executor to use
+   * @param extraClasspathElement the classpath elements to use
+   * @return a new {@link WorkQueue}
+   * @deprecated May break with configuration-cache reuse. Prefer
+   * {@link #newWorkQueue(WorkerExecutor, ServiceRegistry, FileCollection)},
+   * which can (re-)initialize the service registry.
+   */
+  @Deprecated
+  WorkQueue newWorkQueue(WorkerExecutor workerExecutor, FileCollection extraClasspathElement);
+
+  /**
+   * Construct a new WorkQueue, (re-)initializing this service from {@code serviceRegistry} first
+   * if it was not already initialized - e.g. because the configuration cache was reused and the
+   * one-time settings-plugin initialization did not run for this build.
    *
    * @param workerExecutor the worker executor to use
    * @param serviceRegistry a {@link ServiceRegistry} injected fresh into the calling task
@@ -21,7 +36,7 @@ public interface ICachedQueueService {
    * @return a new {@link WorkQueue}
    */
   WorkQueue newWorkQueue(WorkerExecutor workerExecutor, ServiceRegistry serviceRegistry, FileCollection extraClasspathElement);
-  
+
   /**
    * Returns the tracked stats as a serialized JSON string.
    *
