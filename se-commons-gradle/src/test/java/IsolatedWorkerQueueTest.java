@@ -1,10 +1,13 @@
 /* (c) https://github.com/MontiCore/monticore */
+import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.StringUtils;
 import org.gradle.testkit.runner.BuildResult;
 import org.gradle.testkit.runner.GradleRunner;
 import org.gradle.testkit.runner.TaskOutcome;
 import org.gradle.testkit.runner.UnexpectedBuildFailure;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.api.parallel.ResourceLock;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -15,6 +18,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
@@ -25,7 +30,10 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public class IsolatedWorkerQueueTest {
 
+  private static final String GRADLE = "gradle";
+
   @Test
+  @ResourceLock(GRADLE)
   public void testNoIsolation() throws Exception {
     File projectDir = new File("build/functionalTest/noi");
     projectDir.mkdirs();
@@ -59,6 +67,7 @@ public class IsolatedWorkerQueueTest {
 
 
   @Test
+  @ResourceLock(GRADLE)
   public void testCLIsolation() throws Exception {
     File projectDir = new File("build/functionalTest/cl");
     projectDir.mkdirs();
@@ -94,6 +103,7 @@ public class IsolatedWorkerQueueTest {
 
   @ParameterizedTest
   @ValueSource(strings = {"8.5", "8.7", "8.14", "9.3.1","9.5.1", "9.6.1"})
+  @ResourceLock(GRADLE)
   public void testSharedIsolation(String version) throws Exception {
     File projectDir = new File("build/functionalTest/shared/" + version);
     projectDir.mkdirs();
@@ -134,8 +144,40 @@ public class IsolatedWorkerQueueTest {
     assertEquals(4, StringUtils.countMatches(json, "\"START\""));
     assertEquals(4, StringUtils.countMatches(json, "\"DONE\""));
   }
-  
+
   @Test
+  @ResourceLock(GRADLE)
+  public void testSharedIsolationWithConfigurationCacheReuse(@TempDir File projectDir) throws Exception {
+    checkState(new File(projectDir, "settings.gradle").createNewFile());
+    write(new File(projectDir, "gradle.properties"), "org.gradle.configuration-cache=true\n");
+    write(new File(projectDir, "build.gradle"),
+            """
+            plugins {
+              id 'se.rwth.example'
+            }
+            import se.rwth.example.ExampleTask
+            tasks.register('A', ExampleTask.class)
+            """
+    );
+
+    // First run: cold configuration cache, i.e. Settings/plugin apply() are run
+    BuildResult first = GradleRunner.create()
+            .withProjectDir(projectDir).withPluginClasspath()
+            .withArguments("A", "--stacktrace").build();
+    assertEquals(TaskOutcome.SUCCESS, checkNotNull(first.task(":A")).getOutcome());
+    assertTrue(first.getOutput().contains("Configuration cache entry stored."), first.getOutput());
+
+    // Second run: force task A to re-execute (as if an input changed) while the configuration
+    // cache is reused, i.e. Settings/plugin apply() does NOT run again.
+    BuildResult second = GradleRunner.create()
+            .withProjectDir(projectDir).withPluginClasspath()
+            .withArguments("A", "--rerun-tasks", "--stacktrace").build();
+    assertTrue(second.getOutput().contains("Reusing configuration cache."), second.getOutput());
+    assertEquals(TaskOutcome.SUCCESS, checkNotNull(second.task(":A")).getOutcome());
+  }
+
+  @Test
+  @ResourceLock(GRADLE)
   public void testSharedBuildService( ) throws Exception {
     File projectDir = new File("build/functionalTest/shared_bs/");
     projectDir.mkdirs();

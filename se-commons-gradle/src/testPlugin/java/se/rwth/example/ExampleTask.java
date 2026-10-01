@@ -49,7 +49,7 @@ public abstract class ExampleTask extends DefaultTask implements ICachedQueueTas
         queue = getWorkerExecutor().classLoaderIsolation();
         break;
       case SHARED:
-        queue = doGetSharedQueueService().newWorkQueue(getWorkerExecutor(), getProject().getObjects().fileCollection());
+        queue = doGetSharedQueueService().newWorkQueue(getWorkerExecutor(), getServiceRegistry(), getProject().getObjects().fileCollection());
         break;
       default:
         throw new IllegalStateException("Unknown worker kind: " + getWorkerKind().get());

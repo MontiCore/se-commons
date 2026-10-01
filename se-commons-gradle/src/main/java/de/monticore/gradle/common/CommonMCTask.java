@@ -130,7 +130,6 @@ public abstract class CommonMCTask extends DefaultTask {
   @InputFiles
   @Incremental  // Incremental symbol path (such as MC generation the modelpath)
   @Optional
-  // Absolute, since this can contain elements from the gradle jar cache, outside the project
   @Classpath // The content of the jar file is normalized so that time stamps and order of the zip entries in the jar file do not matter
   public abstract ConfigurableFileCollection getIncrementalSymbolPath();
 
@@ -166,8 +165,7 @@ public abstract class CommonMCTask extends DefaultTask {
 
   @InputFiles
   @Optional
-  // Absolute, since this can contain elements from the gradle jar cache, outside the project
-  @PathSensitive(PathSensitivity.ABSOLUTE)
+  @Classpath // content and order matter, not the location (e.g. the gradle jar cache or another checkout)
   public abstract ConfigurableFileCollection getExtraClasspathElements();
   // TODO: The MCGen Task adds the grammar dependency via -mp,
   //  but we might also want to do this via a classloader
