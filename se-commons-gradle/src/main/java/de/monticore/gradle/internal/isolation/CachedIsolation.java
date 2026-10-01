@@ -173,7 +173,10 @@ public class CachedIsolation<T> {
    * (and thus are not isolated)
    */
   protected Set<String> getPassThroughPackages() {
-    return Sets.newHashSet("org.gradle");
+    return Sets.newHashSet(
+            "org.gradle", // anything from gradle (to pack/unpack data)
+            "java.net.http" // the java.net.http module (not provided as an ClassLoader#URL)
+    );
   }
 
   protected ClassLoader getClassLoader(URLClassLoader contextClassLoader, Supplier<T> supplier) {
