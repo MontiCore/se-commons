@@ -1,6 +1,7 @@
 /* (c) https://github.com/MontiCore/monticore */
 package de.monticore.gradle.queue;
 
+import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import de.monticore.gradle.internal.io.PrefixStream;
 import de.monticore.gradle.internal.io.PrintStreamThreadProxy;
@@ -353,7 +354,10 @@ public abstract class CachedQueueService
    * (and thus are not isolated)
    */
   protected Set<String> getPassThroughPackages() {
-    return Set.of("org.gradle");
+    return Sets.newHashSet(
+            "org.gradle", // anything from gradle (to pack/unpack data)
+            "java.net.http" // the java.net.http module (not provided as an ClassLoader#URL)
+    );
   }
 
   public void doExecuteWorkAction(UUID actionUUID) {
