@@ -53,7 +53,7 @@ abstract public class MCSingleFileTask extends CommonMCTask {
     assert f.isFile();
     assert isInputFile(f);
 
-    IncGenData lastRun = new IncGenData(getIncGenFile(f), getProjectLayout().getProjectDirectory().getAsFile());
+    IncGenData lastRun = loadIncGenData(f);
 
     if (!changedInput.isIncremental()  || !lastRun.isUpToDate(getStreamOfChanges(changedInput))) {
       getLogger().info("{} is *NOT* UP-TO-DATE, starting generation process",
@@ -106,7 +106,7 @@ abstract public class MCSingleFileTask extends CommonMCTask {
       if (ch.getChangeType() == ChangeType.REMOVED
           && isInputFile(ch.getFile())
           && ch.getFileType() == FileType.FILE) {
-        this.deletePreviousOutput(ch.getFile(), new IncGenData(getIncGenFile(ch.getFile()), getProjectLayout().getProjectDirectory().getAsFile().getAbsoluteFile()));
+        this.deletePreviousOutput(ch.getFile(), loadIncGenData(ch.getFile()));
       }
     });
 

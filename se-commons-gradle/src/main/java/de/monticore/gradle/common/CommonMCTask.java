@@ -471,6 +471,29 @@ public abstract class CommonMCTask extends DefaultTask {
     ).file("IncGenGradleCheck.txt").getAsFile();
   }
 
+  /**
+   * File extensions of read (model) files listed in the 'IncGenGradleCheck' report
+   * (e.g., "mc4" for grammars or "mtr" for transformation rules).
+   * A content change of such a file causes a re-generation.
+   * Override this, if the tool reports its inputs using a different extension.
+   *
+   * @return the line prefixes (without colon) of read files in the report
+   */
+  @Internal
+  protected Set<String> getIncGenModelFileExtensions() {
+    return IncGenData.DEFAULT_MODEL_FILE_EXTENSIONS;
+  }
+
+  /**
+   * @param inputFile File, which is used as tool-input
+   * @return Parsed 'IncGenGradleCheck' report from previous run
+   */
+  protected IncGenData loadIncGenData(File inputFile) {
+    return new IncGenData(getIncGenFile(inputFile),
+        getProjectLayout().getProjectDirectory().getAsFile().getAbsoluteFile(),
+        getIncGenModelFileExtensions());
+  }
+
   protected static void setIfPathExists(Consumer<File> add, Path path) {
     File f = path.toFile();
     if (f.exists()) {
