@@ -50,8 +50,7 @@ public abstract class MCAllFilesTask extends CommonMCTask {
 
   protected boolean shouldRunAgain(InputChanges inputChanges){
     return getInputFilesAsStream()
-            .map(this::getIncGenFile)
-            .map(incGenFile -> new IncGenData(incGenFile, this.getProject().getProjectDir()))
+            .map(this::loadIncGenData)
             .map(incGenData -> incGenData.isUpToDate(getStreamOfChanges(inputChanges)))
             .anyMatch(upToDate -> !upToDate);
   }
