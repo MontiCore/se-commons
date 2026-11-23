@@ -55,19 +55,14 @@ public class CrossClassLoaderServiceHandler implements InvocationHandler {
     }
 
     try {
-      Method targetMethod = methodCache.get(method);
-      if (targetMethod == null) {
-        targetMethod = findTargetMethod(method);
-        if (targetMethod != null) {
-          methodCache.put(method, targetMethod);
-        }
-      }
+      Method targetMethod = methodCache.computeIfAbsent(method, this::findTargetMethod);
       if (targetMethod != null) {
         return targetMethod.invoke(target, args);
       }
-      if (isNewWorkQueueWithServiceRegistry(method)) {
+      if (isNewWorkQueueMethodWithServiceRegistry(method)) {
         // The other classloader contains an older version of this library, which does not
         // yet support the lazy initialization => fall back to the old variant
+        // noinspection JavaReflectionInvocation - old API
         return target.getClass()
             .getMethod("newWorkQueue", WorkerExecutor.class, FileCollection.class)
             .invoke(target, args[0], args[2]);
@@ -91,7 +86,7 @@ public class CrossClassLoaderServiceHandler implements InvocationHandler {
     }
   }
 
-  protected static boolean isNewWorkQueueWithServiceRegistry(Method method) {
+  protected static boolean isNewWorkQueueMethodWithServiceRegistry(Method method) {
     Class<?>[] p = method.getParameterTypes();
     return method.getName().equals("newWorkQueue") && p.length == 3
         && p[0] == WorkerExecutor.class && p[1] == ServiceRegistry.class
