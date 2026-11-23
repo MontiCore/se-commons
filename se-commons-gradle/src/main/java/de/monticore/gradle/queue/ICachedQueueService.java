@@ -1,11 +1,13 @@
 package de.monticore.gradle.queue;
 
+import de.monticore.gradle.internal.CrossClassLoaderServiceHandler;
 import org.gradle.api.file.FileCollection;
 import org.gradle.internal.service.ServiceRegistry;
 import org.gradle.workers.WorkQueue;
 import org.gradle.workers.WorkerExecutor;
 
 import java.lang.reflect.Proxy;
+import java.util.Objects;
 
 /**
  * @since 7.9.0
@@ -48,19 +50,24 @@ public interface ICachedQueueService {
   void setMaxConcurrentMC(int maxParallelMC);
   
   void setCloseThreshold(long closeThreshold);
-  
+
+    /**
+     * Provides the shared queue service as an implementation of this classloader's ICachedQueueService.
+     * In case the service is of another classloader, we proxy it.
+     * @param sharedQueueService the sharedQueueService
+     * @return the sharedQueueService cast or proxied
+     */
   static ICachedQueueService asICachedQueueService(Object sharedQueueService) {
+    Objects.requireNonNull(sharedQueueService, "sharedQueueService must not be null");
     if (sharedQueueService instanceof ICachedQueueService) {
       return (ICachedQueueService) sharedQueueService;
     }
     // Gradle might load the plugin into multiple classloaders (once per subproject where it is applied)
     // If that is the case, ICachedQueueService (from CL 1) is not castable to ICachedQueueService (from CL 2)
     // As we only expose the ICachedQueueService, we can create a proxy between both classloaders
-    return (ICachedQueueService) Proxy.newProxyInstance(CachedQueueService.class.getClassLoader(),
+    return (ICachedQueueService) Proxy.newProxyInstance(ICachedQueueService.class.getClassLoader(),
         new Class[] { ICachedQueueService.class },
-        (proxy, method, args) -> sharedQueueService.getClass()
-            .getMethod(method.getName(), method.getParameterTypes())
-            .invoke(sharedQueueService, args));
+        new CrossClassLoaderServiceHandler(sharedQueueService));
   }
   
 }

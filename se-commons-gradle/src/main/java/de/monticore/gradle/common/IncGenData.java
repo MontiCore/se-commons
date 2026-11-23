@@ -1,7 +1,8 @@
 /* (c) https://github.com/MontiCore/monticore */
 package de.monticore.gradle.common;
 
-import de.se_rwth.commons.logging.Log;
+import org.gradle.api.logging.Logger;
+import org.gradle.api.logging.Logging;
 import org.gradle.work.ChangeType;
 import org.gradle.work.FileChange;
 
@@ -15,7 +16,13 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Stream;
 
+/**
+ * The data of an incremental generation report (IncGenGradleCheck.txt) of a previous run.
+ * Logs via the Gradle logging (the se-commons Log might terminate the Gradle daemon on errors).
+ */
 public class IncGenData {
+  protected final Logger logger = Logging.getLogger(IncGenData.class);
+
   protected Set<File> generatedFiles = new TreeSet<>();
   protected Set<File> readFiles = new TreeSet<>();
   protected Set<File> existenceCheckedFiles = new TreeSet<>();
@@ -48,12 +55,12 @@ public class IncGenData {
             // TODO: Better
         });
       } catch (Exception e) {
-        Log.error("0xdf60e Error parsing report from previous run. Incremental check not working. \n" +
-            e.getMessage());
+        logger.warn("0xdf60e Error parsing report {} from previous run. Incremental check not working: {}",
+            file.getAbsolutePath(), e.getMessage());
         reportExists = false;
       }
     } else {
-      Log.info("Report " + file.getAbsolutePath() + " from previous run not found. No incremental build.", this.getClass().getName());
+      logger.info("Report {} from previous run not found. No incremental build.", file.getAbsolutePath());
       reportExists = false;
     }
   }
@@ -71,7 +78,7 @@ public class IncGenData {
 
   public void deleteGeneratedFiles() {
     generatedFiles.forEach(toDelete -> {
-      Log.debug("\t Delete " + toDelete.getPath(), this.getClass().getName());
+      logger.debug("\t Delete {}", toDelete.getPath());
       toDelete.delete();
     });
   }
@@ -104,9 +111,8 @@ public class IncGenData {
           .filter(this::isRelevantChange)
           .findAny();
       if(change.isPresent()){
-        Log.info("Not UP-TO-DATE! Changed: " + change.get().getChangeType()
-                + " on " + change.get().getFile().getAbsolutePath(),
-            this.getClass().getName());;
+        logger.info("Not UP-TO-DATE! Changed: {} on {}", change.get().getChangeType(),
+            change.get().getFile().getAbsolutePath());
       }
       return change.isEmpty();
     }

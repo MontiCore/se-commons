@@ -54,6 +54,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Semaphore;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -63,8 +64,6 @@ import java.util.stream.Stream;
  */
 public abstract class CachedQueueService
         implements ICachedQueueService, BuildService<BuildServiceParameters.None>, AutoCloseable, BuildOperationListener {
-
-  static CachedQueueService INSTANCE;
 
   protected Logger logger = Logging.getLogger(CachedQueueService.class);
 
@@ -77,17 +76,18 @@ public abstract class CachedQueueService
 
   protected void init(ServiceRegistry serviceRegistry) {
     logger.debug("Initializing CachedQueueService");
-    if (INSTANCE == null) {
-      INSTANCE = this;
-    } else if (INSTANCE != this) {
-      logger.warn("Possibly overriding the CachedQueueService instance");
-      INSTANCE = this;
-    }
     doInit(Objects.requireNonNull(serviceRegistry));
   }
 
   /**
+   * Whether this service was already registered as a build operation listener
+   * (we must only register it once per build)
+   */
+  protected boolean listenerRegistered = false;
+
+  /**
    * Performs the (re-)initialization of the {@link #serviceRegistry}.
+   * May be called multiple times (e.g., when multiple projects apply the plugin).
    */
   protected synchronized void doInit(ServiceRegistry serviceRegistry) {
     this.serviceRegistry = serviceRegistry;
@@ -95,7 +95,16 @@ public abstract class CachedQueueService
     Objects.requireNonNull(serviceRegistry.get(ActionExecutionSpecFactory.class), "ActionExecutionSpecFactory");
     Objects.requireNonNull(serviceRegistry.get(IsolatableFactory.class), "isolatableFactory");
 
-    serviceRegistry.get(BuildEventListenerRegistryInternal.class).onOperationCompletion(this.providerSelf);
+    if (!this.listenerRegistered) {
+      try {
+        serviceRegistry.get(BuildEventListenerRegistryInternal.class).onOperationCompletion(this.providerSelf);
+        this.listenerRegistered = true;
+      } catch (RuntimeException e) {
+        // Not being notified about the end of the build is not critical:
+        // The classloaders are still freed after the closeThreshold or when this service is closed
+        logger.debug("Unable to register the CachedQueueService as a build operation listener", e);
+      }
+    }
   }
 
   /**
@@ -198,10 +207,26 @@ public abstract class CachedQueueService
    * In case no available class loaders are present,
    * a new instance may be created.
    */
-  protected synchronized IIsolationData getLoader(Predicate<FileCollection> predicate,
+  protected IIsolationData getLoader(Predicate<FileCollection> predicate,
+                                     Supplier<FileCollection> supplier,
+                                     String uniqueId) {
+    return getLoader(Thread.currentThread().getContextClassLoader(), predicate, supplier, uniqueId);
+  }
+
+  /**
+   * Get a new (auto-closing) isolated class loader.
+   * In case no available class loaders are present,
+   * a new instance may be created.
+   *
+   * @param parent the classloader to base the isolated classloader on (i.e., its classpath is used).
+   *               Isolated classloaders are only re-used for the same parent.
+   */
+  protected synchronized IIsolationData getLoader(ClassLoader parent,
+                                                  Predicate<FileCollection> predicate,
                                                   Supplier<FileCollection> supplier,
                                                   String uniqueId) {
     Optional<IIsolationData> d = this.internalRunners.stream().filter(x -> !x.isRunning())
+            .filter(x -> x.getParentClassLoader() == parent)
             .filter(x -> predicate.test(x.getExtraData())).findAny();
     if (d.isPresent()) {
       logger.debug("Reusing existing runner " + d.get().getUUID());
@@ -213,9 +238,13 @@ public abstract class CachedQueueService
     // TODO/Future work: Check, if we have enough memory to warrant starting a new loader or should better wait a bit
 
     this.cleanupOld(closeThreshold);
+    if (!(parent instanceof URLClassLoader)) {
+      throw new IllegalStateException("Unable to create an isolated classloader based on " + parent
+          + ": Not an URLClassLoader");
+    }
     IsolationData data = new IsolationData();
-    data.classLoader =
-            getClassLoader((URLClassLoader) Thread.currentThread().getContextClassLoader(), supplier);
+    data.parentClassLoader = parent;
+    data.classLoader = getClassLoader((URLClassLoader) parent, supplier);
     data.running = true;
     data.extraData = supplier.get();
     stats.track(CachedIsolationStats.EventKind.CREATE, data.getUUID(), maximumLoadersFromConfig, this.internalRunners, uniqueId);
@@ -229,7 +258,8 @@ public abstract class CachedQueueService
     if (cleanupTimer != null) {
       return;
     }
-    cleanupTimer = new Timer();
+    // Use a daemon thread, as the timer must not prevent the JVM from shutting down
+    cleanupTimer = new Timer("se-commons-cached-queue-cleanup", true);
     cleanupTimer.schedule(new TimerTask() {
 
       @Override
@@ -350,6 +380,21 @@ public abstract class CachedQueueService
   }
 
   /**
+   * The isolated classloader for a work action is based on the classloader of the work action class:
+   * The plugin providing the work action might have been loaded by a different classloader than
+   * this service (e.g., when different plugins are applied to different subprojects).
+   *
+   * @return the classloader to base the isolated classloader for the given work action on
+   */
+  protected ClassLoader getParentClassLoaderFor(Class<?> workActionClass) {
+    ClassLoader loader = workActionClass.getClassLoader();
+    if (loader instanceof URLClassLoader) {
+      return loader;
+    }
+    return Thread.currentThread().getContextClassLoader();
+  }
+
+  /**
    * @return a set of packages which may be loaded from the context classloader
    * (and thus are not isolated)
    */
@@ -406,14 +451,13 @@ public abstract class CachedQueueService
       throw new RuntimeException("Failed to serialize " + info.workActionClass.getName() + " " + parameterTypeNotIsolated.getName() + " with " + parametersUnsafe.getClass(), e);
     }
 
-    String prefix = parametersUnsafe instanceof CachedIsolatedWorkQueue.WorkQueueParameters ? ((CachedIsolatedWorkQueue.WorkQueueParameters) parametersUnsafe)
-            .getPrefix().getOrElse("[WA]") : "[WA]";
+    String prefix = getWorkQueueParameter(parametersUnsafe, "getPrefix").orElse("[WA]");
 
-    String uniqueId = parametersUnsafe instanceof CachedIsolatedWorkQueue.WorkQueueParameters ? ((CachedIsolatedWorkQueue.WorkQueueParameters) parametersUnsafe).getStatsUniqueName().getOrElse("?") : "?";
-    
+    String uniqueId = getWorkQueueParameter(parametersUnsafe, "getStatsUniqueName").orElse("?");
+
     uniqueId += "," + timeWaitedForSemaphore + "ms";
     
-    executeInClassloader(() -> {
+    executeInClassloader(getParentClassLoaderFor(info.workActionClass), () -> {
           
           final ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
           try {
@@ -469,6 +513,52 @@ public abstract class CachedQueueService
   }
 
   /**
+   * Reads a property of the {@link CachedIsolatedWorkQueue.WorkQueueParameters}.
+   * The parameters might implement the {@link CachedIsolatedWorkQueue.WorkQueueParameters} interface
+   * of another classloader (in case the plugin is loaded by multiple classloaders),
+   * which is why the interface is matched by its name.
+   *
+   * @param parameters the parameters of a work action
+   * @param getter     the name of the (property) getter within {@link CachedIsolatedWorkQueue.WorkQueueParameters}
+   * @return the value of the property, if present
+   */
+  protected Optional<String> getWorkQueueParameter(@Nullable WorkParameters parameters, String getter) {
+    if (parameters == null) {
+      return Optional.empty();
+    }
+    Class<?> wqpInterface = findInterfaceByName(parameters.getClass(),
+        CachedIsolatedWorkQueue.WorkQueueParameters.class.getName());
+    if (wqpInterface == null) {
+      return Optional.empty();
+    }
+    try {
+      Object property = wqpInterface.getMethod(getter).invoke(parameters);
+      if (property instanceof Provider) {
+        return Optional.ofNullable(((Provider<?>) property).getOrNull()).map(Object::toString);
+      }
+    } catch (ReflectiveOperationException | RuntimeException e) {
+      logger.debug("Unable to read {} of the work parameters {}", getter, parameters.getClass(), e);
+    }
+    return Optional.empty();
+  }
+
+  @Nullable
+  protected static Class<?> findInterfaceByName(Class<?> type, String name) {
+    for (Class<?> c = type; c != null; c = c.getSuperclass()) {
+      for (Class<?> i : c.getInterfaces()) {
+        if (i.getName().equals(name)) {
+          return i;
+        }
+        Class<?> r = findInterfaceByName(i, name);
+        if (r != null) {
+          return r;
+        }
+      }
+    }
+    return null;
+  }
+
+  /**
    * Loads a class and runs a given method in an isolated class loader
    * Requires the class and method name as Strings,
    * such that we do not load them from an existing parent classloader
@@ -481,17 +571,37 @@ public abstract class CachedQueueService
   protected void executeInClassloader(Runnable runnable, @Nullable String prefix,
                                       @Nullable String uniqueId,
                                       Predicate<FileCollection> predicate, Supplier<FileCollection> supplier) {
+    executeInClassloader(Thread.currentThread().getContextClassLoader(), runnable, prefix, uniqueId,
+        predicate, supplier);
+  }
+
+  /**
+   * Runs a given runnable in an isolated class loader
+   *
+   * @param parent    the classloader the isolated classloader is based on
+   * @param prefix    Prefixes this string via a {@link PrefixStream}
+   * @param uniqueId  Uniqueid for tracking via the stats
+   * @param predicate allows to check for additional elements, such as classpath
+   * @param supplier  allows to set the additional arguments for a new loader
+   */
+  protected void executeInClassloader(ClassLoader parent, Runnable runnable, @Nullable String prefix,
+                                      @Nullable String uniqueId,
+                                      Predicate<FileCollection> predicate, Supplier<FileCollection> supplier) {
     final Thread currentThread = Thread.currentThread();
     ClassLoader originalClassLoader = currentThread.getContextClassLoader();
     UUID uuid = null;
-    try (IIsolationData isolationData = getLoader(predicate, supplier, uniqueId)) {
+    try (IIsolationData isolationData = getLoader(parent, predicate, supplier, uniqueId)) {
       uuid = isolationData.getUUID();
       currentThread.setContextClassLoader(isolationData.getClassLoader());
 
       // set the prefix for the printing
       if (prefix != null) {
-        redirectStream(getOrReplaceErr(), prefix);
-        redirectStream(getOrReplaceOut(), prefix);
+        // The prefix is stored per thread (and shared between all proxies):
+        // System.err/out might be replaced (by Gradle) while this action is running,
+        // in which case we re-install a new proxy (see #finished)
+        PrintStreamThreadProxy.setThreadPrefix(prefix);
+        this.activePrefixedActions.incrementAndGet();
+        ensureStreamProxiesInstalled();
       }
       stats.track(CachedIsolationStats.EventKind.START, uuid, maximumLoadersFromConfig, this.internalRunners, uniqueId);
 
@@ -517,9 +627,9 @@ public abstract class CachedQueueService
       }, new AccessControlContext(NO_DOMAINS_ACCESS_CONTROL_CONTEXT, combiner));
     } finally {
       if (prefix != null) {
-        // Reset this threads prefix printers
-        getOrReplaceErr().reset();
-        getOrReplaceOut().reset();
+        // Reset this threads prefix
+        PrintStreamThreadProxy.resetThreadPrefix();
+        this.activePrefixedActions.decrementAndGet();
       }
       currentThread.setContextClassLoader(originalClassLoader);
       stats.track(CachedIsolationStats.EventKind.DONE, uuid, maximumLoadersFromConfig, this.internalRunners);
@@ -566,6 +676,20 @@ public abstract class CachedQueueService
   @SuppressWarnings("unchecked")
   protected <E extends Throwable> void passThrowableAlong(Throwable e) throws E {
     throw (E) e;
+  }
+
+  /**
+   * The number of currently running work actions with an output prefix
+   */
+  protected final AtomicInteger activePrefixedActions = new AtomicInteger();
+
+  /**
+   * Ensures that System.err and System.out are {@link PrintStreamThreadProxy}s
+   * (such that the per-thread prefixes are applied)
+   */
+  protected void ensureStreamProxiesInstalled() {
+    getOrReplaceErr();
+    getOrReplaceOut();
   }
 
   /**
@@ -640,6 +764,8 @@ public abstract class CachedQueueService
 
     protected ClassLoader classLoader;
 
+    protected ClassLoader parentClassLoader;
+
     protected boolean running;
 
     protected long lastRun = System.currentTimeMillis();
@@ -679,8 +805,14 @@ public abstract class CachedQueueService
     }
 
     @Override
+    public ClassLoader getParentClassLoader() {
+      return parentClassLoader;
+    }
+
+    @Override
     public void cleanUp() {
       this.classLoader = null;
+      this.parentClassLoader = null;
       this.extraData = null;
     }
 
@@ -694,6 +826,13 @@ public abstract class CachedQueueService
   protected interface IIsolationData extends AutoCloseable {
 
     ClassLoader getClassLoader();
+
+    /**
+     * @return the classloader the isolated classloader is based on
+     */
+    default ClassLoader getParentClassLoader() {
+      return null;
+    }
 
     boolean isRunning();
 
@@ -761,6 +900,11 @@ public abstract class CachedQueueService
 
   @Override
   public void finished(BuildOperationDescriptor buildOperationDescriptor, OperationFinishEvent operationFinishEvent) {
+    if (this.activePrefixedActions.get() > 0) {
+      // Gradle might have restored System.err/out (e.g., after a task has finished),
+      // while some work actions (of other tasks) are still running => re-install our proxies
+      ensureStreamProxiesInstalled();
+    }
     if (buildOperationDescriptor.getDetails() instanceof RunRootBuildWorkBuildOperationType.Details) {
       stats.track(CachedIsolationStats.EventKind.BUILT_DONE, null, maximumLoadersFromConfig, this.internalRunners);
       this.markForErasure();

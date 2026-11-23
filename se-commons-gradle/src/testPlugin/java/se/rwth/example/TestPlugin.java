@@ -14,10 +14,14 @@ public class TestPlugin implements Plugin<Project> {
 
   @Override
   public void apply(@NonNull Project project) {
+    // Report the plugin classloader (used by tests to check for multiple plugin classloaders)
+    System.out.println("TestPlugin-CL " + System.identityHashCode(TestPlugin.class.getClassLoader()));
     
     // ServiceProvider to pass a ProgressLogger instance to the workers
     Provider<ProgressLoggerService> serviceProvider = project.getGradle().getSharedServices()
-        .registerIfAbsent(ProgressLoggerService.class.getSimpleName(),
+        // A name per classloader, as the plugin might be loaded by multiple classloaders
+        .registerIfAbsent(ProgressLoggerService.class.getSimpleName() + "@"
+                + System.identityHashCode(ProgressLoggerService.class.getClassLoader()),
             ProgressLoggerService.class, spec -> {});
     
     // Register the service

@@ -26,12 +26,16 @@ public abstract class ReportCachedQueueServiceTask extends DefaultTask {
     getOutputFile().convention(() -> getProject().getLayout().getBuildDirectory().file("cachedqueuestats.json").get().getAsFile());
   }
 
+  /**
+   * The type must be `Object`, as the service might have been registered by a different classloader
+   * (see {@link ICachedQueueTask#getSharedQueueServiceProperty()})
+   */
   @Internal
-  public abstract Property<CachedQueueService> getSharedQueueService();
+  public abstract Property<Object> getSharedQueueService();
 
   @TaskAction
   public void execute() throws IOException {
     Files.write(getOutputFile().get().getAsFile().toPath(),
-            Collections.singletonList(getSharedQueueService().get().getStats()));
+            Collections.singletonList(ICachedQueueService.asICachedQueueService(getSharedQueueService().get()).getStats()));
   }
 }
