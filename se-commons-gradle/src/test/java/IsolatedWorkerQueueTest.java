@@ -13,9 +13,11 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -176,6 +178,73 @@ public class IsolatedWorkerQueueTest {
     assertEquals(TaskOutcome.SUCCESS, checkNotNull(second.task(":A")).getOutcome());
   }
 
+  /**
+   * Two subprojects apply the plugin independently (and the root project does not),
+   * i.e., Gradle loads the plugin into two separate classloaders. The CachedQueueService is then
+   * registered from one classloader and used from the other one.
+   */
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
+  @ResourceLock(GRADLE)
+  public void testMultiProjectSeparateClassloaders(boolean configurationCache, @TempDir File projectDir) throws Exception {
+    write(new File(projectDir, "settings.gradle"), "include 'sub1', 'sub2'\n");
+    write(new File(projectDir, "gradle.properties"), "org.gradle.configuration-cache=" + configurationCache + "\n");
+    write(new File(projectDir, "build.gradle"), "");
+    for (String sub : List.of("sub1", "sub2")) {
+      File subDir = new File(projectDir, sub);
+      checkState(subDir.mkdirs());
+      // Gradle TestKit's withPluginClasspath() injects the plugin into a single, shared classloader.
+      // Instead, put the plugin onto each subproject's own buildscript classpath, with an extra
+      // (distinct) entry, which forces Gradle to use separate plugin classloaders.
+      checkState(new File(subDir, "extra-cp").mkdirs());
+      write(new File(subDir, "build.gradle"),
+              """
+              import se.rwth.example.ExampleTask
+              import se.rwth.example.ExampleTask.WorkerKind
+              buildscript {
+                dependencies {
+                  classpath files(%2$s, 'extra-cp')
+                }
+              }
+              apply plugin: 'se.rwth.example'
+              tasks.register('A', ExampleTask.class, t -> {t.taskNames.add('%1$s_1'); t.workerKind = WorkerKind.SHARED} )
+              """.formatted(sub, getPluginUnderTestClasspath()));
+    }
+
+    for (int run = 0; run < 2; run++) {
+      BuildResult result = GradleRunner.create()
+              .withProjectDir(projectDir)
+              .withArguments("A", "--rerun-tasks", "--stacktrace").build();
+      System.out.println(result.getOutput());
+      assertEquals(TaskOutcome.SUCCESS, checkNotNull(result.task(":sub1:A")).getOutcome());
+      assertEquals(TaskOutcome.SUCCESS, checkNotNull(result.task(":sub2:A")).getOutcome());
+      if (configurationCache && run == 1) {
+        assertTrue(result.getOutput().contains("Reusing configuration cache."), result.getOutput());
+      }
+      if (run == 0) {
+        // Ensure that the test setup actually results in two plugin classloaders
+        assertEquals(2, Arrays.stream(result.getOutput().split("\\R"))
+                .filter(l -> l.startsWith("TestPlugin-CL ")).distinct().count(), result.getOutput());
+      }
+      // The prefix is applied to the output of both subprojects
+      List<String> o = getActionOutputs(result);
+      assertTrue(o.stream().anyMatch(l -> l.startsWith("[sub1_1]pre:")), o.toString());
+      assertTrue(o.stream().anyMatch(l -> l.startsWith("[sub2_1]pre:")), o.toString());
+      // (even after the other task has finished)
+      assertTrue(result.getOutput().contains("[sub1_1]done sub1_1"), result.getOutput());
+      assertTrue(result.getOutput().contains("[sub2_1]done sub2_1"), result.getOutput());
+      // and both subprojects report the stats of the same (single) service
+      String out = result.getOutput();
+      int first = out.indexOf("Stats[[");
+      assertTrue(first >= 0, out);
+      String json = out.substring(first + "Stats[[".length(), out.indexOf("]]Stats", first));
+      assertEquals(2, StringUtils.countMatches(json, "\"START\""), json);
+      // No warnings about multiple setups
+      assertFalse(out.contains("setup multiple times"), out);
+      assertFalse(out.contains("Possibly overriding"), out);
+    }
+  }
+
   @Test
   @ResourceLock(GRADLE)
   public void testSharedBuildService( ) throws Exception {
@@ -208,6 +277,20 @@ public class IsolatedWorkerQueueTest {
   }
   
   
+  /**
+   * @return the plugin-under-test classpath as a (groovy) list of quoted paths
+   */
+  protected String getPluginUnderTestClasspath() throws IOException {
+    Properties properties = new Properties();
+    try (InputStream in = checkNotNull(getClass().getClassLoader()
+            .getResourceAsStream("plugin-under-test-metadata.properties"))) {
+      properties.load(in);
+    }
+    return Arrays.stream(properties.getProperty("implementation-classpath").split(File.pathSeparator))
+            .map(p -> "'" + p.replace("\\", "/") + "'")
+            .collect(Collectors.joining(", "));
+  }
+
   protected void write(File file, String content) throws IOException {
     Files.write(file.toPath(), content.getBytes());
   }

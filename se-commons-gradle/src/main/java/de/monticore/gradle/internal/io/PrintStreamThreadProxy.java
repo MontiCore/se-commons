@@ -2,26 +2,62 @@
 package de.monticore.gradle.internal.io;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Locale;
 
 /**
  * A PrintStream which can be set as the System.err/System.out PrintStream.
- * It allows a different redirection target per thread
+ * It allows a different redirection target per thread.
+ * <p>
+ * In addition, a per-thread prefix can be set via {@link #setThreadPrefix(String)}.
+ * This prefix is shared between all instances of this proxy (of the same classloader), i.e.,
+ * it is still applied in case System.err/System.out is replaced (e.g., by Gradle) and a new proxy is
+ * installed while the thread is running.
  */
 public class PrintStreamThreadProxy extends PrintStream {
 
   /**
-   * The per-thread PrintStream
+   * The per-thread prefix, shared between all proxy instances
    */
-  protected final ThreadLocal<PrintStream> redirectTarget;
+  protected static final ThreadLocal<String> THREAD_PREFIX = new ThreadLocal<>();
+
+  /**
+   * The per-thread PrintStream (explicitly set via {@link #setRedirect(PrintStream)})
+   */
+  protected final ThreadLocal<PrintStream> redirectTarget = new ThreadLocal<>();
+
+  /**
+   * The per-thread {@link PrefixStream} for the {@link #THREAD_PREFIX} (cached)
+   */
+  protected final ThreadLocal<PrefixStream> prefixStream = new ThreadLocal<>();
+
   protected final PrintStream original;
 
   public PrintStreamThreadProxy(PrintStream original) {
     super(original);
-    redirectTarget = ThreadLocal.withInitial(this::getOriginal);
     this.original = original;
+  }
+
+  /**
+   * Set the prefix for all outputs of the current thread (for all proxies)
+   *
+   * @param prefix the prefix, or null to remove it
+   */
+  public static void setThreadPrefix(@Nullable String prefix) {
+    if (prefix == null) {
+      THREAD_PREFIX.remove();
+    } else {
+      THREAD_PREFIX.set(prefix);
+    }
+  }
+
+  /**
+   * Removes the prefix of the current thread (for all proxies)
+   */
+  public static void resetThreadPrefix() {
+    THREAD_PREFIX.remove();
   }
 
   public void setRedirect(PrintStream stream) {
@@ -29,15 +65,32 @@ public class PrintStreamThreadProxy extends PrintStream {
   }
 
   protected PrintStream getReal() {
-    return this.redirectTarget.get();
+    PrintStream redirect = this.redirectTarget.get();
+    if (redirect != null) {
+      return redirect;
+    }
+    String prefix = THREAD_PREFIX.get();
+    if (prefix == null) {
+      return this.original;
+    }
+    PrefixStream stream = this.prefixStream.get();
+    if (stream == null || !prefix.equals(stream.getPrefix())) {
+      stream = new PrefixStream(this.original, prefix);
+      this.prefixStream.set(stream);
+    }
+    return stream;
   }
 
   public PrintStream getOriginal() {
     return original;
   }
 
+  /**
+   * Resets the redirection of the current thread (for this proxy)
+   */
   public void reset() {
     this.redirectTarget.remove();
+    this.prefixStream.remove();
   }
 
   @Override

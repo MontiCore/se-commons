@@ -16,6 +16,10 @@ public class PrefixStream extends PrintStream {
     this.prefix = prefix;
   }
 
+  public String getPrefix() {
+    return prefix;
+  }
+
   @Override
   public void println(String x) {
     super.println(prefix + x);

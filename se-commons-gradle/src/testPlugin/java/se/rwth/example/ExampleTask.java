@@ -4,6 +4,7 @@ package se.rwth.example;
 import de.monticore.gradle.internal.ProgressLoggerService;
 import de.monticore.gradle.queue.ICachedQueueTask;
 import org.gradle.api.DefaultTask;
+import org.gradle.api.model.ObjectFactory;
 import org.gradle.api.provider.ListProperty;
 import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
@@ -22,6 +23,9 @@ public abstract class ExampleTask extends DefaultTask implements ICachedQueueTas
 
   @Inject
   abstract public WorkerExecutor getWorkerExecutor();
+
+  @Inject
+  abstract public ObjectFactory getObjects();
 
   @Input
   abstract public ListProperty<String> getTaskNames();
@@ -49,7 +53,7 @@ public abstract class ExampleTask extends DefaultTask implements ICachedQueueTas
         queue = getWorkerExecutor().classLoaderIsolation();
         break;
       case SHARED:
-        queue = doGetSharedQueueService().newWorkQueue(getWorkerExecutor(), getServiceRegistry(), getProject().getObjects().fileCollection());
+        queue = doGetSharedQueueService().newWorkQueue(getWorkerExecutor(), getServiceRegistry(), getObjects().fileCollection());
         break;
       default:
         throw new IllegalStateException("Unknown worker kind: " + getWorkerKind().get());
