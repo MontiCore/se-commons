@@ -207,8 +207,12 @@ public class IsolatedWorkerQueueTest {
                 }
               }
               apply plugin: 'se.rwth.example'
-              tasks.register('A', ExampleTask.class, t -> {t.taskNames.add('%1$s_1'); t.workerKind = WorkerKind.SHARED} )
-              """.formatted(sub, getPluginUnderTestClasspath()));
+              tasks.register('A', ExampleTask.class, t -> {t.taskNames.add('%1$s_1'); t.workerKind = WorkerKind.SHARED; t.waitSeconds = %3$s} )
+              """.formatted(sub, getPluginUnderTestClasspath(),
+              // sub2's action outlives sub1:A by 2s, so it also prints after sub1:A has finished.
+              // (With equal wait times, sub2 might print in the short window after Gradle
+              // restored System.out/err on completion of sub1:A, but before our proxies are re-installed)
+              sub.equals("sub1") ? 1 : 3));
     }
 
     for (int run = 0; run < 2; run++) {
