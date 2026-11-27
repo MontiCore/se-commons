@@ -1,0 +1,15 @@
+/* (c) https://github.com/MontiCore/monticore */
+description = 'se-commons: mcp'
+
+dependencies {
+    api "com.google.code.gson:gson:$gson_version" // JSON handling of the MCP server
+    implementation "com.github.spotbugs:spotbugs-annotations:$spotbugs_annotation_version"
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from(components.java)
+        }
+    }
+}
